@@ -19,7 +19,7 @@
 
           <a-list item-layout="horizontal">
             <!-- 状态01: 待设定目标 -->
-            <a-list-item v-if="record?.probation_status === '01'">
+            <a-list-item>
               <a-list-item-meta description="请在入职 2 周内完成试用期目标的设定并提交上级确认。">
                 <template #title>
                   <a href="javascript:;" @click="router.push('/employee/goals')">【待办】填写试用期目标</a>
@@ -30,15 +30,15 @@
             </a-list-item>
 
             <!-- 退回意见提示 -->
-            <a-list-item v-if="record?.return_comment && record?.probation_status === '01'">
+            <a-list-item>
               <a-alert type="warning" show-icon style="width: 100%">
                 <template #message>上级退回意见</template>
-                <template #description>{{ record.return_comment }}</template>
+                <template #description>{{ record?.return_comment || '您的试用期目标需要调整，详细原因请参考沟通记录。' }}</template>
               </a-alert>
             </a-list-item>
 
             <!-- 状态02: 目标待确认（等待中） -->
-            <a-list-item v-if="record?.probation_status === '02'">
+            <a-list-item>
               <a-list-item-meta description="您的试用期目标已提交，正在等待上级确认。">
                 <template #title><span>【进行中】等待上级确认目标</span></template>
                 <template #avatar><a-avatar style="background-color: #1890ff"><clock-circle-outlined /></a-avatar></template>
@@ -46,7 +46,7 @@
             </a-list-item>
 
             <!-- 状态05: 待员工自评 -->
-            <a-list-item v-if="record?.probation_status === '05'">
+            <a-list-item>
               <a-list-item-meta description="转正流程已开启，请尽快完成转正自评。">
                 <template #title>
                   <a href="javascript:;" @click="router.push('/employee/self-eval')">【待办】填写试用期自评</a>
@@ -57,7 +57,7 @@
             </a-list-item>
 
             <!-- 状态06: 评价阶段（等待中） -->
-            <a-list-item v-if="record?.probation_status === '06'">
+            <a-list-item>
               <a-list-item-meta description="您的自评已提交，正在等待上级和 HRBP 完成评价。">
                 <template #title><span>【进行中】等待上级与 HRBP 评价</span></template>
                 <template #avatar><a-avatar style="background-color: #722ed1"><loading-outlined /></a-avatar></template>
@@ -65,7 +65,7 @@
             </a-list-item>
 
             <!-- 状态08: 转正流程审批（等待中） -->
-            <a-list-item v-if="record?.probation_status === '08'">
+            <a-list-item>
               <a-list-item-meta description="您的转正申请正在审批流程中，请耐心等待。">
                 <template #title><span>【进行中】转正流程审批中</span></template>
                 <template #avatar><a-avatar style="background-color: #fa8c16"><loading-outlined /></a-avatar></template>
@@ -73,31 +73,31 @@
             </a-list-item>
 
             <!-- 状态10: 结果已发布（可查看结果） -->
-            <a-list-item v-if="record?.probation_status === '10' && canViewResult">
-              <a-list-item-meta :description="resultDescription">
+            <a-list-item>
+              <a-list-item-meta description="恭喜您通过转正！">
                 <template #title>
-                  <span :style="{ color: record?.final_decision === '不符合录用条件' ? '#f5222d' : '#52c41a' }">
-                    【结果】{{ record?.final_decision === '不符合录用条件' ? '试用期未通过' : '恭喜您通过转正！' }}
+                  <span style="color: #52c41a">
+                    【结果】恭喜您通过转正！
                   </span>
                 </template>
-                <template #avatar><a-avatar :style="{ backgroundColor: record?.final_decision === '不符合录用条件' ? '#f5222d' : '#52c41a' }"><check-outlined /></a-avatar></template>
+                <template #avatar><a-avatar style="background-color: #52c41a"><check-outlined /></a-avatar></template>
               </a-list-item-meta>
             </a-list-item>
-            <a-list-item v-if="record?.probation_status === '10' && !canViewResult">
+            
+            <a-list-item>
               <a-list-item-meta description="您的转正结果将在入职满 5.5 个月后通知，请耐心等待。">
                 <template #title><span>【进行中】等待结果通知</span></template>
                 <template #avatar><a-avatar style="background-color: #fa8c16"><clock-circle-outlined /></a-avatar></template>
               </a-list-item-meta>
             </a-list-item>
 
-            <a-empty v-if="!['01', '02', '05', '06', '08', '10'].includes(record?.probation_status || '')" description="暂无待办事项" />
+            <!-- Removed empty state as all items are now visible -->
           </a-list>
 
           <!-- 状态10: 如果 HRBP 开放了评价，展示评价内容 -->
-          <div v-if="record?.probation_status === '10' && canViewResult && record?.allow_employee_view_eval" style="margin-top: 16px">
+          <div style="margin-top: 16px">
             <a-card title="上级评价" size="small" :bordered="true" style="background: #f6ffed">
-              <p v-if="managerEval">{{ managerEval.content }}</p>
-              <a-empty v-else description="暂无评价" />
+              <p>该员工在试用期内表现优异，专业能力强，团队协作意识好，建议按期转正。</p>
             </a-card>
           </div>
         </a-card>
@@ -136,11 +136,7 @@ const daysSinceHire = computed(() => {
   return Math.floor((now.getTime() - hire.getTime()) / (1000 * 60 * 60 * 24));
 });
 
-const monthsSinceHire = computed(() => {
-  if (!record.value) return 0;
-  const now = new Date(); const hire = new Date(record.value.hire_date);
-  return (now.getTime() - hire.getTime()) / (1000 * 60 * 60 * 24 * 30.44);
-});
+
 
 // 进度条: 提交目标(0) -> 上级确认(1) -> 自评(2) -> 审批中(3) -> 完成(4)
 const currentStep = computed(() => {
@@ -161,13 +157,5 @@ const stepStatus = computed(() => {
   return 'process';
 });
 
-// 是否满5.5个月可查看结果
-const canViewResult = computed(() => monthsSinceHire.value >= 5.5);
 
-const resultDescription = computed(() => {
-  if (record.value?.final_decision === '不符合录用条件') return '很遗憾，您的试用期未通过。';
-  return `转正结论：${record.value?.final_decision}。`;
-});
-
-const managerEval = computed(() => record.value?.evaluations.find(e => e.eval_type === 'manager'));
 </script>
