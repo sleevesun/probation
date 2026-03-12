@@ -112,6 +112,36 @@ export function getMonthsSinceHire(hireDate: string): string {
     return months.toFixed(1);
 }
 
+/**
+ * 获取当前处理人
+ */
+export function getCurrentHandler(record: ProbationMaster): string {
+    switch (record.probation_status) {
+        case '01':
+        case '05':
+            return record.emp_name; // 员工处理
+        case '02':
+            return record.manager_name; // 上级确认
+        case '04':
+        case '09':
+            return record.hrbp_name; // HRBP操作
+        case '06': {
+            // 评价阶段，可能是上级或 HRBP 之一，也可能都没评
+            const pending: string[] = [];
+            if (!record.manager_eval_done) pending.push(record.manager_name);
+            if (!record.hrbp_eval_done) pending.push(record.hrbp_name);
+            return pending.length > 0 ? pending.join(' / ') : '审批中'; // 若已全评完，理应流转到 08
+        }
+        case '08':
+            return '审批人A'; // 模拟转正审批流的当前审批人
+        case '03':
+        case '10':
+        case '99':
+        default:
+            return '-'; // 无明确当前处理人
+    }
+}
+
 // ====== Store ======
 export const useProbationStore = defineStore('probation', () => {
 

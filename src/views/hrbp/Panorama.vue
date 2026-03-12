@@ -54,6 +54,9 @@
               <template v-if="column.dataIndex === 'probation_status'">
                 <a-tag :color="STATUS_COLOR[record.probation_status]">{{ getDetailedStatusText(record) }}</a-tag>
               </template>
+              <template v-if="column.dataIndex === 'current_handler'">
+                {{ getCurrentHandler(record) }}
+              </template>
               <template v-if="column.key === 'action'">
                 <a-space>
                   <a-button v-if="record.probation_status === '04'" type="primary" size="small" @click="handleTrigger(record.master_id)">开启转正流程</a-button>
@@ -68,7 +71,7 @@
           </a-table>
         </a-tab-pane>
 
-        <a-tab-pane key="finished" tab="已转正">
+        <a-tab-pane key="finished" tab="已完成">
           <a-table :dataSource="finishedList" :columns="finishedColumns" rowKey="master_id" bordered size="middle">
             <template #bodyCell="{ column, record }">
               <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
@@ -162,7 +165,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useProbationStore, ProbationMaster, STATUS_COLOR, getDetailedStatusText, getMonthsSinceHire } from '@/store/probation';
+import { useProbationStore, ProbationMaster, STATUS_COLOR, getDetailedStatusText, getMonthsSinceHire, getCurrentHandler } from '@/store/probation';
 import { message } from 'ant-design-vue';
 
 const store = useProbationStore();
@@ -235,6 +238,7 @@ const columns = [
   { title: '直属主管', dataIndex: 'manager_name', width: 80 },
   { title: '入职日期', dataIndex: 'hire_date', width: 110 },
   { title: '入职时长', dataIndex: 'tenure', width: 100 },
+  { title: '当前处理人', dataIndex: 'current_handler', width: 120 },
   { title: '当前状态', dataIndex: 'probation_status', width: 150 },
   { title: '操作', key: 'action', width: 240 }
 ];
