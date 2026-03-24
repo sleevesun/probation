@@ -2,34 +2,58 @@
   <div>
     <a-page-header title="试用期全景看板" sub-title="管辖范围内新员工试用期全域数据监控" />
 
-    <!-- 统计卡片 -->
-    <a-row :gutter="16" style="margin-top: 16px">
-      <a-col :span="6">
-        <a-card hoverable @click="onStatClick('')" :class="{ 'stat-active': activeStatFilter === '' }">
-          <a-statistic title="全部试用期人数" :value="allUnfinishedCount" :value-style="{ color: '#1890ff', cursor: 'pointer' }" />
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card hoverable @click="onStatClick('04')" :class="{ 'stat-active': activeStatFilter === '04' }">
-          <a-statistic title="待发起转正流程" :value="pendingTriggerCount" :value-style="{ color: '#fa8c16', cursor: 'pointer' }" />
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card hoverable @click="onStatClick('hrbp_eval')" :class="{ 'stat-active': activeStatFilter === 'hrbp_eval' }">
-          <a-statistic title="待HRBP评价" :value="pendingHRBPEvalCount" :value-style="{ color: '#f5222d', cursor: 'pointer' }" />
-        </a-card>
-      </a-col>
-      <a-col :span="6">
-        <a-card hoverable @click="onStatClick('09')" :class="{ 'stat-active': activeStatFilter === '09' }">
-          <a-statistic title="待发布结果" :value="pendingPublishCount" :value-style="{ color: '#722ed1', cursor: 'pointer' }" />
-        </a-card>
-      </a-col>
-    </a-row>
+    <!-- 待办摘要区 -->
+    <a-card style="margin-top: 16px" :bodyStyle="{ padding: '16px 20px' }">
+      <div class="todo-summary">
+        <div class="todo-summary__header">
+          <div class="todo-summary__title">你的待办</div>
+        </div>
+        <div class="todo-summary__tags">
+          <button type="button" 
+                  class="todo-tag todo-tag--warning" 
+                  :class="{'todo-tag--active': activeTodoFilter === '04'}"
+                  @click="onTodoClick('04')">
+            <span class="todo-tag__label">待发起流程</span>
+            <span class="todo-tag__count">{{ hrbpTodoTriggerCount }}</span>
+          </button>
+          
+          <button type="button" 
+                  class="todo-tag todo-tag--danger" 
+                  :class="{'todo-tag--active': activeTodoFilter === '06'}"
+                  @click="onTodoClick('06')">
+            <span class="todo-tag__label">待HRBP评价</span>
+            <span class="todo-tag__count">{{ hrbpTodoEvalCount }}</span>
+          </button>
+
+          <button type="button" 
+                  class="todo-tag todo-tag--primary" 
+                  :class="{'todo-tag--active': activeTodoFilter === '09'}"
+                  @click="onTodoClick('09')">
+            <span class="todo-tag__label">待发布结果</span>
+            <span class="todo-tag__count">{{ hrbpTodoPublishCount }}</span>
+          </button>
+        </div>
+      </div>
+    </a-card>
 
     <!-- Tabs -->
     <a-card style="margin-top: 16px">
       <a-tabs v-model:activeKey="activeTab">
         <a-tab-pane key="unfinished" tab="未转正">
+          <!-- 流程轴过滤 -->
+          <div style="margin-bottom: 24px; padding: 16px; background: #fafafa; border-radius: 8px;">
+            <a-steps :current="currentStepIndex" @change="onStepChange" type="navigation" size="small" class="custom-steps">
+              <a-step :title="`全部(${stepCounts.all})`" />
+              <a-step :title="`待设定目标(${stepCounts.s01})`" />
+              <a-step :title="`已设定目标(${stepCounts.s02_03})`" />
+              <a-step :title="`待发起流程(${stepCounts.s04})`" />
+              <a-step :title="`待员工自评(${stepCounts.s05})`" />
+              <a-step :title="`待评价(${stepCounts.s06})`" />
+              <a-step :title="`审批中(${stepCounts.s08})`" />
+              <a-step :title="`待发布(${stepCounts.s09})`" />
+            </a-steps>
+          </div>
+
           <a-form layout="inline" style="margin-bottom: 16px; flex-wrap: wrap; gap: 8px">
             <a-form-item label="搜索">
               <a-input v-model:value="searchText" placeholder="姓名 / 工号" allow-clear style="width: 180px" />
@@ -37,11 +61,6 @@
             <a-form-item label="部门">
               <a-select v-model:value="filterDept" placeholder="全部部门" allow-clear style="width: 180px">
                 <a-select-option v-for="d in deptOptions" :key="d" :value="d">{{ d }}</a-select-option>
-              </a-select>
-            </a-form-item>
-            <a-form-item label="状态">
-              <a-select v-model:value="filterStatus" placeholder="全部状态" allow-clear style="width: 200px">
-                <a-select-option v-for="(label, key) in unfinishedStatusOptions" :key="key" :value="key">{{ label }}</a-select-option>
               </a-select>
             </a-form-item>
             <a-form-item><a-button @click="resetFilters">重置</a-button></a-form-item>
@@ -64,7 +83,7 @@
                   <a-button v-if="record.probation_status === '06' && !record.hrbp_eval_done" type="primary" size="small" @click="openEvalModal(record)">HRBP评价</a-button>
                   <a-button v-if="record.probation_status === '06' && record.hrbp_eval_done" type="text" size="small">已完成评价</a-button>
                   <a-button v-if="record.probation_status === '09'" type="primary" size="small" @click="openPublishModal(record)">发布结果</a-button>
-                  <a-button type="link" size="small">查看档案</a-button>
+                  <a-button type="link" size="small" @click="router.push('/manager/evaluation/' + record.master_id)">查看详情</a-button>
                 </a-space>
               </template>
             </template>
@@ -165,29 +184,58 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useProbationStore, ProbationMaster, STATUS_COLOR, getDetailedStatusText, getMonthsSinceHire, getCurrentHandler } from '@/store/probation';
 import { message } from 'ant-design-vue';
 
+const router = useRouter();
 const store = useProbationStore();
 const activeTab = ref('unfinished');
 const searchText = ref('');
 const filterDept = ref<string | undefined>(undefined);
-const filterStatus = ref<string | undefined>(undefined);
-const activeStatFilter = ref<string>('');
+const activeTodoFilter = ref<string>('');
+
+const currentStepIndex = ref<number>(0);
+const activeStepFilter = ref<string>('all');
 
 const unfinishedRecords = computed(() => store.records.filter(r => r.probation_status !== '10'));
 const finishedList = computed(() => store.records.filter(r => r.probation_status === '10'));
 
-const allUnfinishedCount = computed(() => unfinishedRecords.value.length);
-const pendingTriggerCount = computed(() => store.records.filter(r => r.probation_status === '04').length);
-const pendingHRBPEvalCount = computed(() => store.records.filter(r => r.probation_status === '06' && !r.hrbp_eval_done).length);
-const pendingPublishCount = computed(() => store.records.filter(r => r.probation_status === '09').length);
+const formatCount = (count: number) => count > 0 ? count : '-';
 
-const onStatClick = (status: string) => {
-  activeStatFilter.value = status;
+const stepCounts = computed(() => {
+  const records = store.records;
+  return {
+    all: formatCount(unfinishedRecords.value.length),
+    s01: formatCount(records.filter(r => r.probation_status === '01').length),
+    s02_03: formatCount(records.filter(r => ['02', '03'].includes(r.probation_status)).length),
+    s04: formatCount(records.filter(r => r.probation_status === '04').length),
+    s05: formatCount(records.filter(r => r.probation_status === '05').length),
+    s06: formatCount(records.filter(r => r.probation_status === '06').length),
+    s08: formatCount(records.filter(r => r.probation_status === '08').length),
+    s09: formatCount(records.filter(r => r.probation_status === '09').length)
+  };
+});
+
+const onStepChange = (current: number) => {
+  currentStepIndex.value = current;
+  const stepMap = ['all', '01', '02_03', '04', '05', '06', '08', '09'];
+  const filterVal = stepMap[current];
+  
   activeTab.value = 'unfinished';
-  if (status === 'hrbp_eval') filterStatus.value = '06';
-  else filterStatus.value = status || undefined;
+  activeStepFilter.value = filterVal;
+  activeTodoFilter.value = '';
+};
+
+const hrbpTodoTriggerCount = computed(() => store.records.filter(r => r.probation_status === '04').length);
+const hrbpTodoEvalCount = computed(() => store.records.filter(r => r.probation_status === '06' && !r.hrbp_eval_done).length);
+const hrbpTodoPublishCount = computed(() => store.records.filter(r => r.probation_status === '09').length);
+
+const onTodoClick = (filterKey: string) => {
+  activeTodoFilter.value = activeTodoFilter.value === filterKey ? '' : filterKey;
+  activeTab.value = 'unfinished';
+  activeStepFilter.value = 'all';
+  currentStepIndex.value = 0;
 };
 
 const deptOptions = computed(() => {
@@ -195,22 +243,38 @@ const deptOptions = computed(() => {
   return Array.from(depts);
 });
 
-const unfinishedStatusOptions: Record<string, string> = {
-  '01': '待设定目标', '02': '目标待确认', '03': '目标已确认',
-  '04': '待发起转正流程', '05': '待员工自评', '06': '评价阶段',
-  '08': '转正流程审批', '09': '待发布结果', '99': '已挂起'
+const resetFilters = () => { 
+  searchText.value = ''; 
+  filterDept.value = undefined; 
+  activeTodoFilter.value = '';
+  activeStepFilter.value = 'all';
+  currentStepIndex.value = 0;
 };
-
-const resetFilters = () => { searchText.value = ''; filterDept.value = undefined; filterStatus.value = undefined; activeStatFilter.value = ''; };
 
 const filteredUnfinished = computed(() => {
   let list = unfinishedRecords.value;
+  
+  // 1. 流程轴过滤
+  if (activeStepFilter.value !== 'all') {
+    if (activeStepFilter.value === '02_03') {
+      list = list.filter(r => ['02', '03'].includes(r.probation_status));
+    } else {
+      list = list.filter(r => r.probation_status === activeStepFilter.value);
+    }
+  }
+
+  if (activeTodoFilter.value) {
+    if (activeTodoFilter.value === '04') list = list.filter(r => r.probation_status === '04');
+    if (activeTodoFilter.value === '06') list = list.filter(r => r.probation_status === '06' && !r.hrbp_eval_done);
+    if (activeTodoFilter.value === '09') list = list.filter(r => r.probation_status === '09');
+  }
+
+  // 2. 表单过滤
   if (searchText.value) {
     const kw = searchText.value.toLowerCase();
     list = list.filter(r => r.emp_name.toLowerCase().includes(kw) || r.emp_id.toLowerCase().includes(kw));
   }
   if (filterDept.value) list = list.filter(r => `${r.parent_dept}\\${r.dept_name}` === filterDept.value);
-  if (filterStatus.value) list = list.filter(r => r.probation_status === filterStatus.value);
   return list;
 });
 
@@ -300,5 +364,123 @@ const handleHold = (id: string) => { store.holdProbation(id); message.warning('�
 </script>
 
 <style scoped>
-.stat-active { border-color: #1890ff; box-shadow: 0 0 0 2px rgba(24,144,255,.2); }
+.todo-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.todo-summary__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.todo-summary__title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1f1f1f;
+}
+
+.todo-summary__hint {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.todo-summary__total {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  color: #1f1f1f;
+}
+
+.todo-summary__total-value {
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 700;
+  color: #1677ff;
+}
+
+.todo-summary__total-label,
+.todo-summary__meta {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.todo-summary__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.todo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: #f5f5f5;
+  color: #595959;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.todo-tag__label {
+  font-size: 13px;
+}
+
+.todo-tag__count {
+  min-width: 18px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.todo-tag--warning {
+  background: #fff7e6;
+  color: #ad6800;
+}
+
+.todo-tag--danger {
+  background: #fff1f0;
+  color: #cf1322;
+}
+
+.todo-tag--primary {
+  background: #f9f0ff;
+  color: #531dab;
+}
+
+.todo-tag--danger-soft {
+  background: #fff2f0;
+  color: #a8071a;
+}
+
+.todo-tag--active {
+  border-color: #1677ff;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.12);
+}
+
+/* 自定义步骤条样式，使其更适合作为过滤栏 */
+.custom-steps {
+  cursor: pointer;
+}
+.custom-steps :deep(.ant-steps-item) {
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+.custom-steps :deep(.ant-steps-item:hover) {
+  opacity: 0.8;
+}
+.custom-steps :deep(.ant-steps-item-description) {
+  font-weight: bold;
+  color: #1890ff;
+}
+/* 隐藏默认序号圆圈 */
+.custom-steps :deep(.ant-steps-item-icon) {
+  display: none;
+}
 </style>

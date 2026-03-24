@@ -37,15 +37,26 @@
             </template>
           </a-list>
         </a-card>
-
-        <!-- 受邀人评价 -->
-        <a-card title="受邀人评价" style="margin-top: 16px">
-          <a-button type="dashed" style="margin-bottom: 16px">邀请他人评估</a-button>
-          <a-empty description="暂无他人评价" />
-        </a-card>
       </a-col>
 
       <a-col :span="8">
+        <!-- 员工信息 -->
+        <a-card title="员工信息" style="margin-bottom: 16px" size="small">
+          <template #extra>
+            <a-button type="link" size="small">查看员工档案</a-button>
+          </template>
+          <a-descriptions :column="1" size="small">
+            <a-descriptions-item label="直属部门">{{ record?.parent_dept }}\{{ record?.dept_name }}</a-descriptions-item>
+            <a-descriptions-item label="岗位">{{ record?.position }}</a-descriptions-item>
+            <a-descriptions-item label="职级">P6</a-descriptions-item>
+            <a-descriptions-item label="M/P">专业</a-descriptions-item>
+            <a-descriptions-item label="入职日期">{{ record?.hire_date }}</a-descriptions-item>
+            <a-descriptions-item label="入职时长">{{ getMonthsSinceHire(record?.hire_date || '') }} 个月</a-descriptions-item>
+            <a-descriptions-item label="直属上级">{{ record?.manager_name }}</a-descriptions-item>
+            <a-descriptions-item label="HRBP">{{ record?.hrbp_name }}</a-descriptions-item>
+          </a-descriptions>
+        </a-card>
+
         <!-- 主管决策 -->
         <a-card title="主管评价" :bordered="false" style="background-color: #f0f5ff">
           <a-alert
@@ -89,16 +100,6 @@
               </div>
             </div>
           </a-form>
-        </a-card>
-
-        <!-- 员工信息 -->
-        <a-card title="员工信息" style="margin-top: 16px" size="small">
-          <a-descriptions :column="1" size="small">
-            <a-descriptions-item label="入职日期">{{ record?.hire_date }}</a-descriptions-item>
-            <a-descriptions-item label="入职时长">{{ getMonthsSinceHire(record?.hire_date || '') }} 个月</a-descriptions-item>
-            <a-descriptions-item label="直属主管">{{ record?.manager_name }}</a-descriptions-item>
-            <a-descriptions-item label="HRBP">{{ record?.hrbp_name }}</a-descriptions-item>
-          </a-descriptions>
         </a-card>
       </a-col>
     </a-row>

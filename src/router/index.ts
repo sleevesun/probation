@@ -66,6 +66,20 @@ const routes: Array<RouteRecordRaw> = [
                 meta: { title: '审批中心' }
             }
         ]
+    },
+    // Email Demo Route (Outside MainLayout)
+    {
+        path: '/email-demo',
+        name: 'EmailDemo',
+        component: () => import('@/views/email/EmailDemo.vue'),
+        meta: { title: '邮件通知预览台' }
+    },
+    // Token Interceptor Route
+    {
+        path: '/auth/token',
+        name: 'TokenAuth',
+        component: () => import('@/views/email/TokenAuth.vue'),
+        meta: { title: 'Token 验证中...' }
     }
 ]
 
