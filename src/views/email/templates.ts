@@ -6,6 +6,12 @@ export interface EmailTemplate {
   renderBody: (vars: Record<string, string>) => string;
 }
 
+// 获取当前环境的域名
+const getBaseUrl = () => {
+  return typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+};
+const baseUrl = getBaseUrl();
+
 // 统一的官方邮件皮肤
 export const renderEmailSkin = (bodyHtml: string, subject: string) => `
 <!DOCTYPE html>
@@ -96,7 +102,7 @@ export const emailTemplates: EmailTemplate[] = [
     defaultVars: {
       employee_name: '张三',
       hire_date: '2025-02-01',
-      login_url: 'http://localhost:3000/auth/token?token=mock_token_emp&redirect=/employee/goals'
+      login_url: `${baseUrl}/auth/token?token=mock_token_emp&redirect=/employee/goals`
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.employee_name}</strong>，</p>
@@ -115,7 +121,7 @@ export const emailTemplates: EmailTemplate[] = [
       employee_name: '张三',
       manager_name: '李四',
       reject_reason: '业绩目标权重偏低，请调整。',
-      login_url: 'http://localhost:3000/auth/token?token=mock_token_emp&redirect=/employee/goals'
+      login_url: `${baseUrl}/auth/token?token=mock_token_emp&redirect=/employee/goals`
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.employee_name}</strong>，</p>
@@ -137,7 +143,7 @@ export const emailTemplates: EmailTemplate[] = [
     defaultVars: {
       manager_name: '李四',
       employee_name: '张三',
-      login_url: 'http://localhost:3000/auth/token?token=mock_token_mgr&redirect=/manager/dashboard'
+      login_url: `${baseUrl}/auth/token?token=mock_token_mgr&redirect=/manager/dashboard`
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.manager_name}</strong>，</p>
@@ -156,7 +162,7 @@ export const emailTemplates: EmailTemplate[] = [
       hrbp_name: '王五',
       employee_name: '张三',
       manager_name: '李四',
-      login_url: 'http://localhost:3000/auth/token?token=mock_token_hr&redirect=/hrbp/panorama'
+      login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
@@ -177,7 +183,7 @@ export const emailTemplates: EmailTemplate[] = [
       hrbp_name: '王五',
       employee_name: '张三',
       hire_date: '2025-02-01',
-      login_url: 'http://localhost:3000/auth/token?token=mock_token_hr&redirect=/hrbp/panorama'
+      login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
@@ -195,7 +201,7 @@ export const emailTemplates: EmailTemplate[] = [
     defaultVars: {
       employee_name: '张三',
       deadline_date: '2025-07-01',
-      login_url: 'http://localhost:3000/auth/token?token=mock_token_emp&redirect=/employee/self-eval'
+      login_url: `${baseUrl}/auth/token?token=mock_token_emp&redirect=/employee/self-eval`
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.employee_name}</strong>，</p>
@@ -214,7 +220,7 @@ export const emailTemplates: EmailTemplate[] = [
       manager_name: '李四',
       employee_name: '张三',
       hire_date: '2025-02-01',
-      login_url: 'http://localhost:3000/auth/token?token=mock_token_mgr&redirect=/manager/dashboard'
+      login_url: `${baseUrl}/auth/token?token=mock_token_mgr&redirect=/manager/dashboard`
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.manager_name}</strong>，</p>
@@ -234,7 +240,7 @@ export const emailTemplates: EmailTemplate[] = [
     defaultVars: {
       manager_name: '李四',
       employee_name: '张三',
-      login_url: 'http://localhost:3000/auth/token?token=mock_token_mgr&redirect=/manager/evaluation/M001'
+      login_url: `${baseUrl}/auth/token?token=mock_token_mgr&redirect=/manager/evaluation/M001`
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.manager_name}</strong>，</p>
@@ -252,7 +258,7 @@ export const emailTemplates: EmailTemplate[] = [
     defaultVars: {
       hrbp_name: '王五',
       employee_name: '张三',
-      login_url: 'http://localhost:3000/auth/token?token=mock_token_hr&redirect=/manager/evaluation/M001'
+      login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/manager/evaluation/M001`
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
@@ -271,7 +277,7 @@ export const emailTemplates: EmailTemplate[] = [
       manager_name: '李四',
       employee_name: '张三',
       hire_date: '2025-02-01',
-      login_url: 'http://localhost:3000/auth/token?token=mock_token_mgr&redirect=/manager/evaluation/M001'
+      login_url: `${baseUrl}/auth/token?token=mock_token_mgr&redirect=/manager/evaluation/M001`
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.manager_name}</strong>，</p>
@@ -291,7 +297,7 @@ export const emailTemplates: EmailTemplate[] = [
       employee_name: '张三',
       manager_name: '李四',
       hire_date: '2025-02-01',
-      login_url: 'http://localhost:3000/auth/token?token=mock_token_hr&redirect=/hrbp/panorama'
+      login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
