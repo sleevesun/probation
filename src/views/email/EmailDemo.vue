@@ -29,13 +29,28 @@
       </a-menu>
     </div>
 
-    <!-- 中间操作区 -->
-    <div class="operation-panel">
+    <!-- 中间预览区 (原右侧) -->
+    <div class="preview-panel">
+      <div class="preview-header">
+        <div class="header-left">
+          <strong>主题：</strong> {{ currentTemplate?.title }}
+        </div>
+        <div class="header-right">
+          <a-button type="primary" @click="handleSendTestEmail" style="margin-right: 8px;">发送测试邮件</a-button>
+          <a-button @click="showConfig = !showConfig">
+            {{ showConfig ? '隐藏配置' : '显示配置' }}
+          </a-button>
+        </div>
+      </div>
+      <div class="preview-content">
+        <!-- 使用 iframe 隔离邮件样式，防止与外部 Vue 组件样式冲突 -->
+        <iframe :srcdoc="renderedHtml" frameborder="0" width="100%" height="100%"></iframe>
+      </div>
+    </div>
+
+    <!-- 右侧操作区 (默认折叠) -->
+    <div class="operation-panel" :class="{ 'panel-hidden': !showConfig }">
       <a-card title="变量配置" :bordered="false" style="margin-bottom: 16px;">
-        <template #extra>
-          <a-button type="primary" @click="handleSendTestEmail">发送测试邮件</a-button>
-        </template>
-        
         <a-form layout="vertical">
           <a-form-item v-for="key in Object.keys(currentVars)" :key="key" :label="key">
             <a-input v-model:value="currentVars[key]" />
@@ -55,17 +70,6 @@
         />
       </a-card>
     </div>
-
-    <!-- 右侧预览区 -->
-    <div class="preview-panel">
-      <div class="preview-header">
-        <strong>主题：</strong> {{ currentTemplate?.title }}
-      </div>
-      <div class="preview-content">
-        <!-- 使用 iframe 隔离邮件样式，防止与外部 Vue 组件样式冲突 -->
-        <iframe :srcdoc="renderedHtml" frameborder="0" width="100%" height="100%"></iframe>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -77,6 +81,7 @@ import { message } from 'ant-design-vue';
 const templates = ref(emailTemplates);
 const selectedKeys = ref<string[]>([]);
 const currentVars = ref<Record<string, string>>({});
+const showConfig = ref(false);
 
 // 初始化选中第一个
 onMounted(() => {
@@ -153,6 +158,16 @@ const copyToClipboard = (val: string) => {
   padding: 24px;
   flex-shrink: 0;
   overflow-y: auto;
+  transition: all 0.3s ease;
+  border-left: 1px solid #e8e8e8;
+  background: #f0f2f5;
+}
+
+.panel-hidden {
+  width: 0;
+  padding: 0;
+  border-left: none;
+  overflow: hidden;
 }
 
 .preview-panel {
@@ -169,6 +184,9 @@ const copyToClipboard = (val: string) => {
   border-radius: 8px 8px 0 0;
   border-bottom: 1px solid #e8e8e8;
   font-size: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .preview-content {

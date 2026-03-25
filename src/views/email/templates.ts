@@ -103,7 +103,7 @@ export const emailTemplates: EmailTemplate[] = [
       <p>您已入职满 1 个月（入职日期：${vars.hire_date}），请及时登录试用期管理系统制定并提交您的试用期目标。</p>
       <p>明确的目标有助于您更好地融入团队并在试用期内取得优异表现。</p>
       <div style="text-align: center;">
-        <a href="${vars.login_url}" class="email-button">前往提交试用期目标</a>
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往提交试用期目标</a>
       </div>
     `
   },
@@ -126,7 +126,7 @@ export const emailTemplates: EmailTemplate[] = [
       </p>
       <p>请及时登录试用期管理系统进行修订并再次提交。</p>
       <div style="text-align: center;">
-        <a href="${vars.login_url}" class="email-button">前往修订目标</a>
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往修订目标</a>
       </div>
     `
   },
@@ -144,7 +144,7 @@ export const emailTemplates: EmailTemplate[] = [
       <p>您的团队成员 <strong>${vars.employee_name}</strong> 已提交了试用期目标。</p>
       <p>请及时登录试用期管理系统，进行确认或退回操作。</p>
       <div style="text-align: center;">
-        <a href="${vars.login_url}" class="email-button">前往处理</a>
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往处理</a>
       </div>
     `
   },
@@ -163,7 +163,7 @@ export const emailTemplates: EmailTemplate[] = [
       <p>员工 <strong>${vars.employee_name}</strong> 已提交了试用期目标。</p>
       <p>请登录系统查看，并提醒其上级（<strong>${vars.manager_name}</strong>）进行确认操作。</p>
       <div style="text-align: center;">
-        <a href="${vars.login_url}" class="email-button">前往系统查看</a>
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往系统查看</a>
       </div>
     `
   },
@@ -184,7 +184,7 @@ export const emailTemplates: EmailTemplate[] = [
       <p>员工 <strong>${vars.employee_name}</strong> 入职已满 4.5 个月（入职日期：${vars.hire_date}）。</p>
       <p>请及时登录试用期管理系统，开启其试用期评估流程。</p>
       <div style="text-align: center;">
-        <a href="${vars.login_url}" class="email-button">前往开启评估</a>
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往开启评估</a>
       </div>
     `
   },
@@ -202,7 +202,7 @@ export const emailTemplates: EmailTemplate[] = [
       <p>您的试用期评估流程已开启。</p>
       <p>请及时登录试用期管理系统，进行试用期自评。为了不影响您的转正进度，请不要晚于 <strong>${vars.deadline_date}</strong> 提交。</p>
       <div style="text-align: center;">
-        <a href="${vars.login_url}" class="email-button">前往填写自评</a>
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往填写自评</a>
       </div>
     `
   },
@@ -221,7 +221,7 @@ export const emailTemplates: EmailTemplate[] = [
       <p>您的团队成员 <strong>${vars.employee_name}</strong> 入职已满 4.5 个月（入职日期：${vars.hire_date}），TA 的转正评估流程现已开启。</p>
       <p>目前 TA 正在进行试用期自评。完成自评后，系统将再次通知您进行试用期评估。</p>
       <div style="text-align: center;">
-        <a href="${vars.login_url}" class="email-button">登录系统查看</a>
+        <a href="${vars.login_url}" target="_blank" class="email-button">登录系统查看</a>
       </div>
     `
   },
@@ -241,7 +241,7 @@ export const emailTemplates: EmailTemplate[] = [
       <p>员工 <strong>${vars.employee_name}</strong> 已完成试用期自评。</p>
       <p>请及时登录试用期管理系统，进行 ${vars.employee_name} 的试用期评估。</p>
       <div style="text-align: center;">
-        <a href="${vars.login_url}" class="email-button">前往评估</a>
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往评估</a>
       </div>
     `
   },
@@ -278,7 +278,7 @@ export const emailTemplates: EmailTemplate[] = [
       <p>员工 <strong>${vars.employee_name}</strong> 入职已满 5.5 个月（入职日期：${vars.hire_date}）。</p>
       <p>为了保证转正流程顺利完成，请及时登录试用期管理系统进行试用期评价。</p>
       <div style="text-align: center;">
-        <a href="${vars.login_url}" class="email-button">立即处理</a>
+        <a href="${vars.login_url}" target="_blank" class="email-button">立即处理</a>
       </div>
     `
   },
