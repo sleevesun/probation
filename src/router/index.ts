@@ -1,91 +1,127 @@
-import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import MainLayout from '@/layouts/MainLayout.vue'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import ThemeLayout from '@/layouts/ThemeLayout.vue'
+import ThemePicker from '@/views/ThemePicker.vue'
 
-const routes: Array<RouteRecordRaw> = [
-    {
-        path: '/',
-        component: MainLayout,
-        redirect: '/dashboard',
-        children: [
-            {
-                path: 'dashboard',
-                name: 'Dashboard',
-                component: () => import('@/views/Dashboard.vue'),
-                meta: { title: '首页' }
-            },
-            // Employee routes
-            {
-                path: 'employee/dashboard',
-                name: 'EmployeeDashboard',
-                component: () => import('@/views/employee/Dashboard.vue'),
-                meta: { title: '我的试用期' }
-            },
-            {
-                path: 'employee/goals',
-                name: 'GoalSetting',
-                component: () => import('@/views/employee/GoalSetting.vue'),
-                meta: { title: '目标设定' }
-            },
-            {
-                path: 'employee/self-eval',
-                name: 'SelfEvaluation',
-                component: () => import('@/views/employee/SelfEvaluation.vue'),
-                meta: { title: '试用期自评' }
-            },
-            // Manager routes
-            {
-                path: 'manager/team',
-                name: 'ManagerDashboard',
-                component: () => import('@/views/manager/Dashboard.vue'),
-                meta: { title: '团队管理' }
-            },
-            {
-                path: 'manager/evaluation/:id',
-                name: 'ManagerEvaluation',
-                component: () => import('@/views/manager/Evaluation.vue'),
-                meta: { title: '转正评价' }
-            },
-            // HRBP routes
-            {
-                path: 'hrbp/panorama',
-                name: 'HRBPPanorama',
-                component: () => import('@/views/hrbp/Panorama.vue'),
-                meta: { title: '试用期全景' }
-            },
-            {
-                path: 'hrbp/console',
-                name: 'HRBPConsole',
-                component: () => import('@/views/hrbp/TriggerConsole.vue'),
-                meta: { title: '转正触发控制台' }
-            },
-            // Approver routes
-            {
-                path: 'approver/center',
-                name: 'ApprovalCenter',
-                component: () => import('@/views/approver/ApprovalCenter.vue'),
-                meta: { title: '审批中心' }
-            }
-        ]
-    },
-    // Email Demo Route (Outside MainLayout)
-    {
-        path: '/email-demo',
-        name: 'EmailDemo',
-        component: () => import('@/views/email/EmailDemo.vue'),
-        meta: { title: '邮件通知预览台' }
-    },
-    // Token Interceptor Route
-    {
-        path: '/auth/token',
-        name: 'TokenAuth',
-        component: () => import('@/views/email/TokenAuth.vue'),
-        meta: { title: 'Token 验证中...' }
-    }
+const routes: RouteRecordRaw[] = [
+  {
+    path: '/',
+    name: 'ThemePicker',
+    component: ThemePicker
+  },
+  {
+    path: '/dashboard',
+    component: ThemeLayout,
+    children: [
+      {
+        path: '',
+        name: 'Dashboard',
+        component: () => import('@/views/routes/DashboardRoute.vue')
+      }
+    ]
+  },
+  {
+    path: '/employee/dashboard',
+    component: ThemeLayout,
+    children: [
+      {
+        path: '',
+        name: 'EmployeeDashboard',
+        component: () => import('@/views/routes/EmployeeDashboardRoute.vue')
+      }
+    ]
+  },
+  {
+    path: '/employee/goals',
+    component: ThemeLayout,
+    children: [
+      {
+        path: '',
+        name: 'GoalSetting',
+        component: () => import('@/views/routes/GoalSettingRoute.vue')
+      }
+    ]
+  },
+  {
+    path: '/employee/self-eval',
+    component: ThemeLayout,
+    children: [
+      {
+        path: '',
+        name: 'SelfEvaluation',
+        component: () => import('@/views/routes/SelfEvaluationRoute.vue')
+      }
+    ]
+  },
+  {
+    path: '/manager/team',
+    component: ThemeLayout,
+    children: [
+      {
+        path: '',
+        name: 'ManagerDashboard',
+        component: () => import('@/views/routes/ManagerDashboardRoute.vue')
+      }
+    ]
+  },
+  {
+    path: '/manager/evaluation/:id',
+    component: ThemeLayout,
+    children: [
+      {
+        path: '',
+        name: 'ManagerEvaluation',
+        component: () => import('@/views/routes/ManagerEvaluationRoute.vue')
+      }
+    ]
+  },
+  {
+    path: '/hrbp/panorama',
+    component: ThemeLayout,
+    children: [
+      {
+        path: '',
+        name: 'HRBPPanorama',
+        component: () => import('@/views/routes/HRBPPanoramaRoute.vue')
+      }
+    ]
+  },
+  {
+    path: '/hrbp/console',
+    component: ThemeLayout,
+    children: [
+      {
+        path: '',
+        name: 'HRBPConsole',
+        component: () => import('@/views/routes/HRBPConsoleRoute.vue')
+      }
+    ]
+  },
+  {
+    path: '/approver/center',
+    component: ThemeLayout,
+    children: [
+      {
+        path: '',
+        name: 'ApprovalCenter',
+        component: () => import('@/views/routes/ApprovalCenterRoute.vue')
+      }
+    ]
+  },
+  {
+    path: '/email-demo',
+    name: 'EmailDemo',
+    component: () => import('@/views/routes/EmailDemoRoute.vue')
+  },
+  {
+    path: '/auth/token',
+    name: 'TokenAuth',
+    component: () => import('@/views/routes/TokenAuthRoute.vue')
+  }
 ]
 
 const router = createRouter({
-    history: createWebHistory(),
-    routes
+  history: createWebHistory(),
+  routes
 })
 
 export default router

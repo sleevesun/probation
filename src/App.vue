@@ -9,14 +9,15 @@
 <style>
 #app {
   width: 100vw;
-  height: 100vh;
+  min-height: 100vh;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 body, html {
   margin: 0;
   padding: 0;
   background-color: #f0f2f5;
+  min-height: 100%;
 }
 </style>
