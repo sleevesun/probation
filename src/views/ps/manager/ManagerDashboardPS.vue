@@ -70,7 +70,7 @@
       </table>
     </section>
 
-    <a-modal v-model:open="detailModalVisible" title="员工转正详情" width="960px" :footer="null" wrap-class-name="ps-modal-wrap">
+    <a-modal v-model:open="detailModalVisible" title="员工转正详情" width="1080px" :footer="null" wrap-class-name="ps-modal-wrap">
       <div v-if="detailModalRecord" class="ps-modal-content">
         <div class="ps-form-grid">
           <div class="ps-field"><label>员工姓名</label><div>{{ detailModalRecord.emp_name }}</div></div>
@@ -114,7 +114,7 @@
       </div>
     </a-modal>
 
-    <a-modal v-model:open="actionModalVisible" :title="actionModalTitle" width="960px" :footer="null" wrap-class-name="ps-modal-wrap">
+    <a-modal v-model:open="actionModalVisible" :title="actionModalTitle" width="1080px" :footer="null" wrap-class-name="ps-modal-wrap">
       <div v-if="actionModalRecord" class="ps-modal-content">
         <template v-if="actionModalType === 'manager-goal-review'">
           <div class="ps-form-grid">

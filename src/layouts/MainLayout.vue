@@ -1,8 +1,8 @@
 <template>
-  <a-layout style="min-height: 100vh">
+  <a-layout class="main-layout">
     <a-layout-sider v-model:collapsed="collapsed" collapsible>
       <div class="logo">
-        <h2 v-if="!collapsed" style="color: white; margin: 0; padding-left: 16px; line-height: 32px">试用期转正系统</h2>
+        <h2 v-if="!collapsed" class="logo-title">试用期转正系统</h2>
       </div>
       <a-menu
         v-model:selectedKeys="selectedKeys"
@@ -57,12 +57,12 @@
     </a-layout-sider>
     
     <a-layout>
-      <a-layout-header style="background: #fff; padding: 0 16px; display: flex; justify-content: flex-end; align-items: center; box-shadow: 0 1px 4px rgba(0,21,41,.08)">
-        <div style="margin-right: 16px">
+      <a-layout-header class="app-header">
+        <div class="role-switcher">
           当前演示角色: 
           <a-dropdown>
             <a class="ant-dropdown-link" @click.prevent>
-              <b style="color: #1890ff; font-size: 16px;">{{ roleMap[role] }}</b>
+              <b class="role-name">{{ roleMap[role] }}</b>
               <down-outlined />
             </a>
             <template #overlay>
@@ -75,10 +75,10 @@
             </template>
           </a-dropdown>
         </div>
-        <a-avatar style="background-color: #87d068"><user-outlined /></a-avatar>
+        <a-avatar class="header-avatar"><user-outlined /></a-avatar>
       </a-layout-header>
       
-      <a-layout-content style="margin: 16px; background: #fff; padding: 24px; min-height: 280px; overflow: auto">
+      <a-layout-content class="app-content">
         <router-view v-slot="{ Component }">
           <transition name="fade" mode="out-in">
             <component :is="Component" />
@@ -86,7 +86,7 @@
         </router-view>
       </a-layout-content>
       
-      <a-layout-footer style="text-align: center">
+      <a-layout-footer class="app-footer">
         Probation Evaluation System Demo ©2026 Created by Antigravity
       </a-layout-footer>
     </a-layout>
@@ -147,6 +147,53 @@ const handleRoleChange = ({ key }: { key: string }) => {
   border-radius: 6px;
   overflow: hidden;
 }
+
+/* [UI/UX 修复] 将内联样式抽取为 scoped 样式类 */
+.main-layout {
+  min-height: 100vh;
+}
+
+.logo-title {
+  color: white;
+  margin: 0;
+  padding-left: 16px;
+  line-height: 32px;
+}
+
+.app-header {
+  background: #fff;
+  padding: 0 16px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+}
+
+.role-switcher {
+  margin-right: 16px;
+}
+
+.role-name {
+  color: #1890ff;
+  font-size: 16px;
+}
+
+.header-avatar {
+  background-color: #87d068;
+}
+
+.app-content {
+  margin: 16px;
+  background: #fff;
+  padding: 24px;
+  min-height: 280px;
+  overflow: auto;
+}
+
+.app-footer {
+  text-align: center;
+}
+
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.2s ease;

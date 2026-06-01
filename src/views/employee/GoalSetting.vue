@@ -73,7 +73,7 @@
 import { ref, computed, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProbationStore, GoalItem } from '@/store/probation';
-import { message } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 
 const router = useRouter();
 const store = useProbationStore();
@@ -123,8 +123,18 @@ const addGoal = () => {
   }
 };
 
+// [UI/UX 修复] 删除操作添加确认机制，防止误删
 const removeGoal = (index: number) => {
-  formState.goals.splice(index, 1);
+  Modal.confirm({
+    title: '确认删除',
+    content: '确定要删除这条目标吗？删除后不可恢复。',
+    okText: '确认删除',
+    okType: 'danger',
+    cancelText: '取消',
+    onOk() {
+      formState.goals.splice(index, 1);
+    }
+  });
 };
 
 const handleSave = () => {

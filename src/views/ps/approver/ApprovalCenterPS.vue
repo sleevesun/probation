@@ -36,7 +36,7 @@
       </table>
     </section>
 
-    <a-modal v-model:open="detailVisible" title="试用期转正审批单" width="980px" :footer="null" wrap-class-name="ps-modal-wrap">
+    <a-modal v-model:open="detailVisible" title="试用期转正审批单" width="1080px" :footer="null" wrap-class-name="ps-modal-wrap">
       <div v-if="currentRecord" class="ps-modal-content">
         <div class="ps-sheet">
           <section class="ps-sheet__section">
