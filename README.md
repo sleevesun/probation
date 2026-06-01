@@ -1,5 +1,25 @@
-# Vue 3 + TypeScript + Vite
+# 试用期转正 Demo
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+这是“试用期管理及转正审批流程重构”的前端演示工程。
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## 启动
+
+```bash
+npm install
+npm run dev
+```
+
+## 打包验证
+
+```bash
+npx vite build
+```
+
+## 主要能力
+
+- 员工端：目标设定、自评、结果查看。
+- 直属上级端：团队看板、目标确认、转正评价。
+- HRBP 端：全景看板、评估触发、结果发布。
+- 审批人端：转正档案与审批动作。
+- 邮件 Demo：邮件模板预览与 Token 深度链接模拟。
+- 主题切换：现代样式与 PeopleSoft 样式。
