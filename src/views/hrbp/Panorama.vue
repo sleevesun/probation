@@ -9,7 +9,7 @@
           <a-table :dataSource="todoRecords" :columns="todoColumns" rowKey="master_id" size="middle" :pagination="false" class="light-table">
             <template #bodyCell="{ column, record }">
               <template v-if="column.dataIndex === 'todo_type'">
-                <a-tag :color="record.probation_status === '04' ? 'gold' : record.probation_status === '09' ? 'green' : 'blue'">
+                <a-tag :color="record.probation_status === '04' ? 'gold' : record.probation_status === '07' ? 'cyan' : record.probation_status === '09' ? 'green' : 'blue'">
                   {{ getTodoType(record) }}
                 </a-tag>
               </template>
@@ -19,6 +19,7 @@
                 <a-space>
                   <a-button v-if="record.probation_status === '04'" type="primary" size="small" @click="handleTrigger(record.master_id)">开启评估</a-button>
                   <a-button v-if="record.probation_status === '04'" size="small" @click="handleHold(record.master_id)">暂不开启</a-button>
+                  <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="handleTriggerApproval(record.master_id)">发起审批</a-button>
                   <a-button v-if="record.probation_status === '09'" type="primary" size="small" @click="openPublishModal(record)">发布结果</a-button>
                   <a-button type="link" size="small" @click="router.push('/manager/evaluation/' + record.master_id)">查看详情</a-button>
                 </a-space>
@@ -34,13 +35,9 @@
           <div style="margin-bottom: 12px; padding: 6px 12px; background: #fafafa; border-radius: 8px;">
             <a-steps :current="currentStepIndex" @change="onStepChange" type="navigation" size="small" class="custom-steps">
               <a-step :title="`全部(${stepCounts.all})`" />
-              <a-step :title="`待设定目标(${stepCounts.s01})`" />
-              <a-step :title="`已设定目标(${stepCounts.s02_03})`" />
-              <a-step :title="`待发起流程(${stepCounts.s04})`" />
-              <a-step :title="`待员工自评(${stepCounts.s05})`" />
-              <a-step :title="`待评价(${stepCounts.s06})`" />
-              <a-step :title="`审批中(${stepCounts.s08})`" />
-              <a-step :title="`待发布(${stepCounts.s09})`" />
+              <a-step :title="`目标制定(${stepCounts.s01_03})`" />
+              <a-step :title="`试用期评估(${stepCounts.s04_07})`" />
+              <a-step :title="`转正审批(${stepCounts.s08_09})`" />
             </a-steps>
           </div>
 
@@ -70,6 +67,7 @@
                 <a-space>
                   <a-button v-if="record.probation_status === '04'" type="primary" size="small" @click="handleTrigger(record.master_id)">开启转正流程</a-button>
                   <a-button v-if="record.probation_status === '04'" type="dashed" danger size="small" @click="handleHold(record.master_id)">暂不开启</a-button>
+                  <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="handleTriggerApproval(record.master_id)">发起审批</a-button>
                   <a-button v-if="record.probation_status === '09'" type="primary" size="small" @click="openPublishModal(record)">发布结果</a-button>
                   <a-button type="link" size="small" @click="router.push('/manager/evaluation/' + record.master_id)">查看详情</a-button>
                 </a-space>
@@ -157,31 +155,28 @@ const stepCounts = computed(() => {
   const records = store.records;
   return {
     all: formatCount(unfinishedRecords.value.length),
-    s01: formatCount(records.filter(r => r.probation_status === '01').length),
-    s02_03: formatCount(records.filter(r => ['02', '03'].includes(r.probation_status)).length),
-    s04: formatCount(records.filter(r => r.probation_status === '04').length),
-    s05: formatCount(records.filter(r => r.probation_status === '05').length),
-    s06: formatCount(records.filter(r => r.probation_status === '06').length),
-    s08: formatCount(records.filter(r => r.probation_status === '08').length),
-    s09: formatCount(records.filter(r => r.probation_status === '09').length)
+    s01_03: formatCount(records.filter(r => ['01', '02', '03'].includes(r.probation_status)).length),
+    s04_07: formatCount(records.filter(r => ['04', '05', '06', '07'].includes(r.probation_status)).length),
+    s08_09: formatCount(records.filter(r => ['08', '09'].includes(r.probation_status)).length)
   };
 });
 
 const onStepChange = (current: number) => {
   currentStepIndex.value = current;
-  const stepMap = ['all', '01', '02_03', '04', '05', '06', '08', '09'];
+  const stepMap = ['all', '01_03', '04_07', '08_09'];
   const filterVal = stepMap[current];
-  
+
   activeTab.value = 'unfinished';
   activeStepFilter.value = filterVal;
   activeTodoFilter.value = '';
 };
 
-const todoRecords = computed(() => store.records.filter(r => r.probation_status === '04' || r.probation_status === '09'));
+const todoRecords = computed(() => store.records.filter(r => ['04', '07', '09'].includes(r.probation_status)));
 
 const getTodoType = (record: ProbationMaster) => {
-  if (record.probation_status === '04') return '开启评估';
-  if (record.probation_status === '09') return '发布结果';
+  if (record.probation_status === '04') return '待开启评估';
+  if (record.probation_status === '07') return '待发起审批';
+  if (record.probation_status === '09') return '待发布结果';
   return '待处理';
 };
 
@@ -203,15 +198,18 @@ const filteredUnfinished = computed(() => {
   
   // 1. 流程轴过滤
   if (activeStepFilter.value !== 'all') {
-    if (activeStepFilter.value === '02_03') {
-      list = list.filter(r => ['02', '03'].includes(r.probation_status));
-    } else {
-      list = list.filter(r => r.probation_status === activeStepFilter.value);
+    if (activeStepFilter.value === '01_03') {
+      list = list.filter(r => ['01', '02', '03'].includes(r.probation_status));
+    } else if (activeStepFilter.value === '04_07') {
+      list = list.filter(r => ['04', '05', '06', '07'].includes(r.probation_status));
+    } else if (activeStepFilter.value === '08_09') {
+      list = list.filter(r => ['08', '09'].includes(r.probation_status));
     }
   }
 
   if (activeTodoFilter.value) {
     if (activeTodoFilter.value === '04') list = list.filter(r => r.probation_status === '04');
+    if (activeTodoFilter.value === '07') list = list.filter(r => r.probation_status === '07');
     if (activeTodoFilter.value === '09') list = list.filter(r => r.probation_status === '09');
   }
 
@@ -235,6 +233,7 @@ const sortedUnfinished = computed(() => {
 
 function getHRBPPriority(r: ProbationMaster): number {
   if (r.probation_status === '04') return 0;
+  if (r.probation_status === '07') return 0;
   if (r.probation_status === '09') return 0;
   return 1;
 }
@@ -298,6 +297,7 @@ const handlePublish = () => {
 
 const handleTrigger = (id: string) => { store.triggerProbation(id); message.success('已为该员工开启转正自评流程'); };
 const handleHold = (id: string) => { store.holdProbation(id); message.warning('已挂起'); };
+const handleTriggerApproval = (id: string) => { store.triggerApproval(id); message.success('已发起转正审批流程'); };
 </script>
 
 <style scoped>

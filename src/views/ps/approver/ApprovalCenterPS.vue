@@ -82,6 +82,7 @@
             <div class="ps-section-title">单据概览</div>
             <div class="ps-form-grid">
               <div class="ps-field"><label>单据标题</label><div>关于 {{ currentRecord.emp_name }} 的试用期转正申请</div></div>
+              <div class="ps-field"><label>发起人</label><div>{{ currentRecord.hrbp_name }}（HRBP）</div></div>
               <div class="ps-field"><label>建议结论</label><div>{{ currentRecord.final_decision || '待明确' }}</div></div>
               <div class="ps-field"><label>姓名</label><div>{{ currentRecord.emp_name }}</div></div>
               <div class="ps-field"><label>工号</label><div>{{ currentRecord.emp_id }}</div></div>
@@ -193,6 +194,10 @@
                   <div class="mobile-field">
                     <span class="mobile-field__label">单据标题</span>
                     <span class="mobile-field__value">关于 {{ currentRecord.emp_name }} 的试用期转正申请</span>
+                  </div>
+                  <div class="mobile-field">
+                    <span class="mobile-field__label">发起人</span>
+                    <span class="mobile-field__value">{{ currentRecord.hrbp_name }}（HRBP）</span>
                   </div>
                   <div class="mobile-field">
                     <span class="mobile-field__label">建议结论</span>
@@ -313,16 +318,16 @@ const doneCount = computed(() => doneList.value.length)
 
 const evaluationRows = computed(() => {
   if (!currentRecord.value) return []
-  const makeRow = (type: string) => {
+  const makeRow = (type: string, label?: string) => {
     const evalItem = currentRecord.value!.evaluations.find(item => item.eval_type === type)
     return {
       key: type,
-      label: psEvalTypeLabel(type),
+      label: label || psEvalTypeLabel(type),
       owner: evalItem?.evaluator_name || '-',
       content: evalItem?.content || '暂无'
     }
   }
-  return [makeRow('self'), makeRow('manager'), makeRow('hrbp')]
+  return [makeRow('self'), makeRow('manager'), makeRow('hrbp', 'HRBP发起说明')]
 })
 
 function openDetail(record: ProbationMaster) {

@@ -88,7 +88,7 @@ const todoRows = computed(() => {
       ]
     case '04':
       return [
-        { title: '等待 HRBP 开启评估', desc: '目标已确认，等待 HRBP 发起转正流程。', path: '' }
+        { title: '等待 HRBP 开启评估', desc: '目标已确认，等待 HRBP 开启评估。', path: '' }
       ]
     case '05':
       return [
@@ -96,7 +96,11 @@ const todoRows = computed(() => {
       ]
     case '06':
       return [
-        { title: '等待上级与 HRBP 评价', desc: '您的自评已提交，正在等待上级和 HRBP 完成评价。', path: '' }
+        { title: '等待上级评价', desc: '您的自评已提交，正在等待上级完成评价。', path: '' }
+      ]
+    case '07':
+      return [
+        { title: '等待 HRBP 发起审批', desc: '上级已完成评价，等待 HRBP 发起审批流程。', path: '' }
       ]
     case '08':
       return [

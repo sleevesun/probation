@@ -8,7 +8,8 @@
         <a-step title="提交目标" />
         <a-step title="上级确认" />
         <a-step title="自评" />
-        <a-step title="审批中" />
+        <a-step title="上级评价" />
+        <a-step title="审批" />
         <a-step title="完成" />
       </a-steps>
     </a-card>
@@ -162,7 +163,7 @@ const todoList = computed(() => {
         id: '04',
         type: 'info',
         title: '【进行中】等待 HRBP 开启评估',
-        desc: '目标已确认，等待 HRBP 发起转正流程。',
+        desc: '目标已确认，等待 HRBP 开启评估。',
         icon: 'clock',
         color: '#fa8c16'
       });
@@ -182,10 +183,20 @@ const todoList = computed(() => {
       items.push({
         id: '06',
         type: 'info',
-        title: '【进行中】等待上级与 HRBP 评价',
-        desc: '您的自评已提交，正在等待上级和 HRBP 完成评价。',
+        title: '【进行中】等待上级评价',
+        desc: '您的自评已提交，正在等待上级完成评价。',
         icon: 'loading',
         color: '#722ed1'
+      });
+      break;
+    case '07':
+      items.push({
+        id: '07',
+        type: 'info',
+        title: '【进行中】等待 HRBP 发起审批',
+        desc: '上级已完成评价，等待 HRBP 发起审批流程。',
+        icon: 'clock',
+        color: '#fa8c16'
       });
       break;
     case '08':
@@ -244,15 +255,16 @@ const nextTodo = () => {
 };
 // ------------------------
 
-// 进度条: 提交目标(0) -> 上级确认(1) -> 自评(2) -> 审批中(3) -> 完成(4)
+// 进度条: 提交目标(0) -> 上级确认(1) -> 自评(2) -> 上级评价(3) -> 审批(4) -> 完成(5)
 const currentStep = computed(() => {
   const s = record.value?.probation_status;
   switch (s) {
     case '01': return 0;
     case '02': return 1;
     case '03': case '04': case '05': return 2;
-    case '06': case '08': case '09': return 3;
-    case '10': return 4;
+    case '06': return 3;
+    case '07': case '08': case '09': return 4;
+    case '10': return 5;
     default: return 0;
   }
 });

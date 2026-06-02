@@ -10,7 +10,7 @@
 
     <section class="ps-panel">
       <div class="ps-alert" :class="cannotEval ? 'ps-alert--warning' : 'ps-alert--info'">
-        {{ cannotEval ? readonlyHint : '当前记录可进行主管评估，提交后将等待 HRBP 完成评价。' }}
+        {{ cannotEval ? readonlyHint : '当前记录可进行主管评估，提交后将由 HRBP 发起审批流程。' }}
       </div>
     </section>
 

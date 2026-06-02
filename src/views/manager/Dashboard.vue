@@ -39,6 +39,7 @@
               <a-step :title="`待发起流程(${stepCounts.s04})`" />
               <a-step :title="`待员工自评(${stepCounts.s05})`" />
               <a-step :title="`待评价(${stepCounts.s06})`" />
+              <a-step :title="`待发起审批(${stepCounts.s07})`" />
               <a-step :title="`审批中(${stepCounts.s08})`" />
               <a-step :title="`待发布(${stepCounts.s09})`" />
             </a-steps>
@@ -75,7 +76,7 @@
                   <a-button v-if="record.probation_status === '02'" type="primary" size="small" @click="openGoalModal(record)">目标确认</a-button>
                   <a-button v-if="record.probation_status === '06' && !record.manager_eval_done" type="primary" size="small" @click="router.push(`/manager/evaluation/${record.master_id}`)">转正评价</a-button>
                   <a-button v-if="record.probation_status === '06' && record.manager_eval_done" type="text" size="small">已完成评价</a-button>
-                  <a-button v-if="['03'].includes(record.probation_status)" type="text" danger size="small" @click="forceReturn(record)">要求调整</a-button>
+                  <a-button v-if="['03'].includes(record.probation_status)" type="text" danger size="small" @click="forceReturn(record)">退回调整</a-button>
                   <a-button type="link" size="small" @click="router.push(`/manager/evaluation/${record.master_id}`)">查看详情</a-button>
                 </a-space>
               </template>
@@ -126,7 +127,7 @@
               <a-button @click="showRejectInput = false; rejectComment = ''">取消退回</a-button>
               <a-button danger @click="handleReject" :disabled="!rejectComment.trim()">确认退回</a-button>
             </template>
-            <a-button type="primary" @click="handleConfirm" v-if="!showRejectInput">同意锁定</a-button>
+            <a-button type="primary" @click="handleConfirm" v-if="!showRejectInput">确认目标</a-button>
           </a-space>
         </div>
       </div>
@@ -168,6 +169,7 @@ const stepCounts = computed(() => {
     s04: formatCount(records.filter(r => r.probation_status === '04').length),
     s05: formatCount(records.filter(r => r.probation_status === '05').length),
     s06: formatCount(records.filter(r => r.probation_status === '06').length),
+    s07: formatCount(records.filter(r => r.probation_status === '07').length),
     s08: formatCount(records.filter(r => r.probation_status === '08').length),
     s09: formatCount(records.filter(r => r.probation_status === '09').length)
   };
@@ -175,7 +177,7 @@ const stepCounts = computed(() => {
 
 const onStepChange = (current: number) => {
   currentStepIndex.value = current;
-  const stepMap = ['all', '01', '02_03', '04', '05', '06', '08', '09'];
+  const stepMap = ['all', '01', '02_03', '04', '05', '06', '07', '08', '09'];
   const filterVal = stepMap[current];
   
   activeTab.value = 'unfinished';
@@ -288,7 +290,7 @@ const openGoalModal = (record: ProbationMaster) => {
 };
 
 const handleConfirm = () => {
-  if (currentReviewRecord.value) { store.confirmGoals(currentReviewRecord.value.master_id); message.success('已同意目标'); goalModalVisible.value = false; }
+  if (currentReviewRecord.value) { store.confirmGoals(currentReviewRecord.value.master_id); message.success('已确认目标'); goalModalVisible.value = false; }
 };
 
 const handleReject = () => {
@@ -300,9 +302,9 @@ const handleReject = () => {
 
 const forceReturn = (record: ProbationMaster) => {
   Modal.confirm({
-    title: '确认要解锁目标要求员工重新调整吗？',
-    content: '解锁后流程将打回至"待设定目标"步骤',
-    onOk() { store.returnGoals(record.master_id, '主管要求调整目标'); message.success('已解锁打回'); }
+    title: '确认要退回目标让员工重新调整吗？',
+    content: '退回后流程将打回至"待设定目标"步骤',
+    onOk() { store.returnGoals(record.master_id, '主管要求调整目标'); message.success('已退回调整'); }
   });
 };
 </script>

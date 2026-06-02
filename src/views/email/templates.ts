@@ -154,29 +154,10 @@ export const emailTemplates: EmailTemplate[] = [
       </div>
     `
   },
-  {
-    id: '04_goal_submit_hrbp',
-    title: '【通知】员工已提交试用期目标',
-    role: 'HRBP',
-    defaultVars: {
-      hrbp_name: '刘建国',
-      employee_name: '王明辉',
-      manager_name: '陈思远',
-      login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
-    },
-    renderBody: (vars) => `
-      <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
-      <p>员工 <strong>${vars.employee_name}</strong> 已提交了试用期目标。</p>
-      <p>请登录系统查看，并提醒其上级（<strong>${vars.manager_name}</strong>）进行确认操作。</p>
-      <div style="text-align: center;">
-        <a href="${vars.login_url}" target="_blank" class="email-button">前往系统查看</a>
-      </div>
-    `
-  },
 
   // --- 2. 开启试用期评估 ---
   {
-    id: '05_eval_trigger_hrbp',
+    id: '04_eval_trigger_hrbp',
     title: '【待办】请开启试用期评估',
     role: 'HRBP',
     defaultVars: {
@@ -195,7 +176,7 @@ export const emailTemplates: EmailTemplate[] = [
     `
   },
   {
-    id: '06_eval_start_employee',
+    id: '05_eval_start_employee',
     title: '【待办】请完成试用期自评',
     role: '员工',
     defaultVars: {
@@ -212,29 +193,10 @@ export const emailTemplates: EmailTemplate[] = [
       </div>
     `
   },
-  {
-    id: '07_eval_start_manager',
-    title: '【通知】员工试用期评估已开启',
-    role: '上级',
-    defaultVars: {
-      manager_name: '陈思远',
-      employee_name: '王明辉',
-      hire_date: '2025-02-01',
-      login_url: `${baseUrl}/auth/token?token=mock_token_mgr&redirect=/manager/dashboard`
-    },
-    renderBody: (vars) => `
-      <p>亲爱的 <strong>${vars.manager_name}</strong>，</p>
-      <p>您的团队成员 <strong>${vars.employee_name}</strong> 入职已满 4.5 个月（入职日期：${vars.hire_date}），TA 的转正评估流程现已开启。</p>
-      <p>目前 TA 正在进行试用期自评。完成自评后，系统将再次通知您进行试用期评估。</p>
-      <div style="text-align: center;">
-        <a href="${vars.login_url}" target="_blank" class="email-button">登录系统查看</a>
-      </div>
-    `
-  },
 
   // --- 3. 试用期评估 ---
   {
-    id: '08_eval_todo_manager',
+    id: '06_eval_todo_manager',
     title: '【待办】请进行试用期评估',
     role: '上级',
     defaultVars: {
@@ -251,61 +213,75 @@ export const emailTemplates: EmailTemplate[] = [
       </div>
     `
   },
+
+  // --- 4. 发起审批 ---
   {
-    id: '09_eval_todo_hrbp',
-    title: '【待办】请进行试用期评估',
-    role: 'HRBP',
-    defaultVars: {
-      hrbp_name: '刘建国',
-      employee_name: '王明辉',
-      login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/manager/evaluation/M001`
-    },
-    renderBody: (vars) => `
-      <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
-      <p>员工 <strong>${vars.employee_name}</strong> 已完成试用期自评。</p>
-      <p>请及时登录试用期管理系统，进行 ${vars.employee_name} 的试用期评估。</p>
-      <div style="text-align: center;">
-        <a href="${vars.login_url}" class="email-button">前往评估</a>
-      </div>
-    `
-  },
-  {
-    id: '10_eval_overdue_manager',
-    title: '【催办】请尽快完成试用期评估',
-    role: '上级',
-    defaultVars: {
-      manager_name: '陈思远',
-      employee_name: '王明辉',
-      hire_date: '2025-02-01',
-      login_url: `${baseUrl}/auth/token?token=mock_token_mgr&redirect=/manager/evaluation/M001`
-    },
-    renderBody: (vars) => `
-      <p>亲爱的 <strong>${vars.manager_name}</strong>，</p>
-      <p>员工 <strong>${vars.employee_name}</strong> 入职已满 5.5 个月（入职日期：${vars.hire_date}）。</p>
-      <p>为了保证转正流程顺利完成，请及时登录试用期管理系统进行试用期评价。</p>
-      <div style="text-align: center;">
-        <a href="${vars.login_url}" target="_blank" class="email-button">立即处理</a>
-      </div>
-    `
-  },
-  {
-    id: '11_eval_overdue_hrbp',
-    title: '【跟进】员工试用期评估催办提醒',
+    id: '07_approval_initiate_hrbp',
+    title: '【待办】请发起转正审批流程',
     role: 'HRBP',
     defaultVars: {
       hrbp_name: '刘建国',
       employee_name: '王明辉',
       manager_name: '陈思远',
-      hire_date: '2025-02-01',
+      eval_result: '符合预期',
       login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
-      <p>员工 <strong>${vars.employee_name}</strong> 入职已满 5.5 个月（入职日期：${vars.hire_date}）。</p>
-      <p>目前该员工的试用期评估流程仍未完成。</p>
-      <p>请及时登录试用期管理系统完成您的试用期评价，或提醒其上级（<strong>${vars.manager_name}</strong>）尽快完成评价。</p>
+      <p>员工 <strong>${vars.employee_name}</strong> 的试用期评估已完成。</p>
+      <p style="padding: 12px; background-color: #f6ffed; border-left: 4px solid #52c41a; color: #666;">
+        <strong>评估结果：</strong>${vars.eval_result}<br>
+        <strong>上级评价人：</strong>${vars.manager_name}
+      </p>
+      <p>请及时登录试用期管理系统，确认评估结果并发起转正审批流程。</p>
       <div style="text-align: center;">
-        <a href="${vars.login_url}" class="email-button">前往系统查看</a>
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往发起审批</a>
+      </div>
+    `
+  },
+
+  // --- 5. 审批流程 ---
+  {
+    id: '08_approval_todo_approver',
+    title: '【待办】请审批员工转正申请',
+    role: '上级',
+    defaultVars: {
+      approver_name: '李总',
+      employee_name: '王明辉',
+      department: '产品研发部',
+      position: '高级前端工程师',
+      hire_date: '2025-02-01',
+      eval_summary: '该员工试用期间表现优秀，各项指标均达到预期。',
+      login_url: `${baseUrl}/auth/token?token=mock_token_approver&redirect=/approval/pending`
+    },
+    renderBody: (vars) => `
+      <p>亲爱的 <strong>${vars.approver_name}</strong>，</p>
+      <p>以下员工的转正申请已提交至您处，请审批：</p>
+      <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+        <tr>
+          <td style="padding: 8px 12px; background-color: #fafafa; border: 1px solid #f0f0f0; font-weight: 500;">员工姓名</td>
+          <td style="padding: 8px 12px; border: 1px solid #f0f0f0;">${vars.employee_name}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 12px; background-color: #fafafa; border: 1px solid #f0f0f0; font-weight: 500;">所属部门</td>
+          <td style="padding: 8px 12px; border: 1px solid #f0f0f0;">${vars.department}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 12px; background-color: #fafafa; border: 1px solid #f0f0f0; font-weight: 500;">岗位</td>
+          <td style="padding: 8px 12px; border: 1px solid #f0f0f0;">${vars.position}</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px 12px; background-color: #fafafa; border: 1px solid #f0f0f0; font-weight: 500;">入职日期</td>
+          <td style="padding: 8px 12px; border: 1px solid #f0f0f0;">${vars.hire_date}</td>
+        </tr>
+      </table>
+      <p style="padding: 12px; background-color: #f6ffed; border-left: 4px solid #52c41a; color: #666;">
+        <strong>评估摘要：</strong><br>
+        ${vars.eval_summary}
+      </p>
+      <p>请及时登录试用期管理系统进行审批处理。</p>
+      <div style="text-align: center;">
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往审批</a>
       </div>
     `
   }

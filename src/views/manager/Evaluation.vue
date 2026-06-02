@@ -96,7 +96,7 @@
                 提交上级评价
               </a-button>
               <div style="text-align: center; margin-top: 8px; color: #999; font-size: 12px" v-if="!cannotEval">
-                提交后将等待 HRBP 完成评价，双方均评价后进入审批
+                提交后将由 HRBP 发起审批流程
               </div>
             </div>
           </a-form>
@@ -153,7 +153,7 @@ const handleSubmit = () => {
   saving.value = true;
   setTimeout(() => {
     store.submitManagerEval(record.value!.master_id, reason.value || '主管评价通过', decision.value);
-    message.success('上级评价提交成功！' + (record.value?.hrbp_eval_done ? '双方评价完成，已进入审批流程。' : '等待 HRBP 完成评价后进入审批。'));
+    message.success('上级评价提交成功！等待 HRBP 发起审批流程。');
     saving.value = false;
     router.push('/manager/team');
   }, 800);

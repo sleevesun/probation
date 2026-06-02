@@ -42,13 +42,14 @@ export interface ProbationMaster {
      * 01 - 待设定目标
      * 02 - 目标待确认
      * 03 - 目标已确认
-     * 04 - 待发起转正流程
+     * 04 - 待开启评估
      * 05 - 待员工自评
-     * 06 - 评价阶段 (上级 + HRBP 并行评价)
-     * 08 - 转正流程审批
+     * 06 - 待上级评价
+     * 07 - 待发起审批
+     * 08 - 审批中
      * 09 - 待发布结果
      * 10 - 结果已发布
-     * 99 - 已挂起
+     * 99 - 暂不发起/终止
      */
     probation_status: string;
     final_decision?: '超出预期' | '符合预期' | '不符合录用条件';
@@ -56,9 +57,8 @@ export interface ProbationMaster {
     evaluations: EvaluationItem[];
     approval_logs: ApprovalLogItem[];
     return_comment?: string;
-    // 并行评价标志
+    // 评价标志
     manager_eval_done: boolean;
-    hrbp_eval_done: boolean;
     // 发布结果相关
     allow_employee_view_eval: boolean; // HRBP 是否允许员工查看评价
     result_published_time?: string;    // 发布时间
@@ -69,13 +69,14 @@ export const STATUS_MAP: Record<string, string> = {
     '01': '待设定目标',
     '02': '目标待确认',
     '03': '目标已确认',
-    '04': '待发起转正流程',
+    '04': '待开启评估',
     '05': '待员工自评',
-    '06': '评价阶段',
-    '08': '转正流程审批',
+    '06': '待上级评价',
+    '07': '待发起审批',
+    '08': '审批中',
     '09': '待发布结果',
     '10': '结果已发布',
-    '99': '已挂起'
+    '99': '暂不发起/终止'
 };
 
 export const STATUS_COLOR: Record<string, string> = {
@@ -85,6 +86,7 @@ export const STATUS_COLOR: Record<string, string> = {
     '04': 'orange',
     '05': 'purple',
     '06': 'volcano',
+    '07': 'cyan',
     '08': 'orange',
     '09': 'gold',
     '10': 'success',
@@ -92,15 +94,11 @@ export const STATUS_COLOR: Record<string, string> = {
 };
 
 /**
- * 获取状态的详细展示文本（区分评价阶段中的子状态）
+ * 获取状态的详细展示文本（状态 06 仅显示"待上级评价"）
  */
 export function getDetailedStatusText(record: ProbationMaster): string {
     if (record.probation_status === '06') {
-        const parts: string[] = [];
-        if (!record.manager_eval_done) parts.push('待上级评价');
-        if (!record.hrbp_eval_done) parts.push('待HRBP评价');
-        if (parts.length === 0) return '评价已完成';
-        return parts.join(' / ');
+        return '待上级评价';
     }
     return STATUS_MAP[record.probation_status] || record.probation_status;
 }
@@ -126,13 +124,10 @@ export function getCurrentHandler(record: ProbationMaster): string {
         case '04':
         case '09':
             return record.hrbp_name; // HRBP操作
-        case '06': {
-            // 评价阶段，可能是上级或 HRBP 之一，也可能都没评
-            const pending: string[] = [];
-            if (!record.manager_eval_done) pending.push(record.manager_name);
-            if (!record.hrbp_eval_done) pending.push(record.hrbp_name);
-            return pending.length > 0 ? pending.join(' / ') : '审批中'; // 若已全评完，理应流转到 08
-        }
+        case '06':
+            return record.manager_name; // 仅上级评价
+        case '07':
+            return record.hrbp_name; // HRBP 发起审批
         case '08':
             return '审批人A'; // 模拟转正审批流的当前审批人
         case '03':
@@ -155,7 +150,7 @@ export const useProbationStore = defineStore('probation', () => {
             hire_date: '2025-10-15', probation_status: '01',
             goals: [],
             evaluations: [], approval_logs: [],
-            manager_eval_done: false, hrbp_eval_done: false, allow_employee_view_eval: false
+            manager_eval_done: false, allow_employee_view_eval: false
         },
         // ---- 状态 01：目标被退回，需要重新编辑 ----
         {
@@ -169,7 +164,7 @@ export const useProbationStore = defineStore('probation', () => {
                 { goal_id: 'G19', dimension: '能力', content: '提升数据分析能力', measure: '能够独立完成数据分析报告' }
             ],
             evaluations: [], approval_logs: [],
-            manager_eval_done: false, hrbp_eval_done: false, allow_employee_view_eval: false
+            manager_eval_done: false, allow_employee_view_eval: false
         },
         // ---- 状态 02：目标待确认 ----
         {
@@ -182,7 +177,7 @@ export const useProbationStore = defineStore('probation', () => {
                 { goal_id: 'G2', dimension: '融入', content: '熟悉内部系统与协同流程，参与部门周会分享', measure: '完成新人 onboarding checklist，独立完成 1 次周会分享' }
             ],
             evaluations: [], approval_logs: [],
-            manager_eval_done: false, hrbp_eval_done: false, allow_employee_view_eval: false
+            manager_eval_done: false, allow_employee_view_eval: false
         },
         // ---- 状态 03：目标已确认 ----
         {
@@ -195,9 +190,9 @@ export const useProbationStore = defineStore('probation', () => {
                 { goal_id: 'G11', dimension: '融入', content: '参与 Code Review 机制建设', measure: '建立 Code Review 规范文档，每周至少 Review 3 个 PR', goal_review: '已输出 Code Review 规范文档，每周稳定 Review 4-5 个 PR，团队反馈良好。' }
             ],
             evaluations: [], approval_logs: [],
-            manager_eval_done: false, hrbp_eval_done: false, allow_employee_view_eval: false
+            manager_eval_done: false, allow_employee_view_eval: false
         },
-        // ---- 状态 04：待发起转正流程 ----
+        // ---- 状态 04：待开启评估 ----
         {
             master_id: 'M003', emp_name: '赵雪梅', emp_id: 'E1003',
             position: 'UI设计师', dept_name: '视觉设计组', parent_dept: '设计部',
@@ -208,7 +203,7 @@ export const useProbationStore = defineStore('probation', () => {
                 { goal_id: 'G4', dimension: '能力', content: '提升动效设计能力，完成2个动效项目', measure: '产出 2 个可落地的动效方案，经技术评审通过' }
             ],
             evaluations: [], approval_logs: [],
-            manager_eval_done: false, hrbp_eval_done: false, allow_employee_view_eval: false
+            manager_eval_done: false, allow_employee_view_eval: false
         },
         // ---- 状态 05：待员工自评 ----
         {
@@ -222,9 +217,9 @@ export const useProbationStore = defineStore('probation', () => {
                 { goal_id: 'G17', dimension: '融入', content: '参与测试流程优化，推动缺陷管理规范化', measure: '提交至少 1 份流程优化建议，缺陷跟踪闭环率达到 95% 以上' }
             ],
             evaluations: [], approval_logs: [],
-            manager_eval_done: false, hrbp_eval_done: false, allow_employee_view_eval: false
+            manager_eval_done: false, allow_employee_view_eval: false
         },
-        // ---- 状态 06：评价阶段（上级未评、HRBP未评）----
+        // ---- 状态 06：待上级评价（仅上级未评价）----
         {
             master_id: 'M005', emp_name: '吴芳芳', emp_id: 'E1005',
             position: '后端开发工程师', dept_name: '服务端组', parent_dept: '研发部',
@@ -242,9 +237,35 @@ export const useProbationStore = defineStore('probation', () => {
                 }
             ],
             approval_logs: [],
-            manager_eval_done: false, hrbp_eval_done: false, allow_employee_view_eval: false
+            manager_eval_done: false, allow_employee_view_eval: false
         },
-        // ---- 状态 08：转正流程审批（待审批）----
+        // ---- 状态 07：待发起审批（上级已评价，HRBP 待发起审批）----
+        {
+            master_id: 'M012', emp_name: '孙浩然', emp_id: 'E1012',
+            position: '后端开发工程师', dept_name: '服务端组', parent_dept: '研发部',
+            manager_name: '陈思远', hrbp_name: '刘建国',
+            hire_date: '2025-04-20', probation_status: '07',
+            final_decision: '符合预期',
+            goals: [
+                { goal_id: 'G20', dimension: '业绩', content: '完成订单系统重构', measure: '订单系统重构上线，QPS 提升 50%', goal_review: '订单系统已重构上线，QPS 提升 60%，超出预期。' },
+                { goal_id: 'G21', dimension: '能力', content: '掌握微服务架构设计', measure: '独立完成微服务拆分方案并通过评审', goal_review: '已独立完成微服务拆分方案并通过评审。' }
+            ],
+            evaluations: [
+                {
+                    eval_id: 'EV030', evaluator_name: '孙浩然', evaluator_role: '员工',
+                    eval_type: 'self', content: '试用期完成了订单系统重构，QPS 提升 60%。学习了微服务架构，已能独立设计方案。整体表现良好。',
+                    create_time: '2025-10-10 10:00'
+                },
+                {
+                    eval_id: 'EV031', evaluator_name: '陈思远', evaluator_role: '主管',
+                    eval_type: 'manager', content: '符合预期 - 该同学技术能力扎实，订单重构项目完成度高，建议转正。',
+                    create_time: '2025-10-12 14:00'
+                }
+            ],
+            approval_logs: [],
+            manager_eval_done: true, allow_employee_view_eval: false
+        },
+        // ---- 状态 08：审批中（从 07 发起审批后）----
         {
             master_id: 'M010', emp_name: '黄伟强', emp_id: 'E1010',
             position: '前端开发工程师', dept_name: '移动开发组', parent_dept: '研发部',
@@ -266,15 +287,10 @@ export const useProbationStore = defineStore('probation', () => {
                     eval_id: 'EV021', evaluator_name: '陈思远', evaluator_role: '主管',
                     eval_type: 'manager', content: '符合预期 - 该同学技术能力扎实，首页改版项目完成度高，Flutter 学习速度快，团队融入良好。建议转正。',
                     create_time: '2025-09-18 14:00'
-                },
-                {
-                    eval_id: 'EV022', evaluator_name: '刘建国', evaluator_role: 'HRBP',
-                    eval_type: 'hrbp', content: '试用期表现稳定，工作积极主动，团队协作良好，建议转正。',
-                    create_time: '2025-09-19 10:00'
                 }
             ],
             approval_logs: [],
-            manager_eval_done: true, hrbp_eval_done: true, allow_employee_view_eval: false
+            manager_eval_done: true, allow_employee_view_eval: false
         },
         // ---- 状态 09：待发布结果 ----
         {
@@ -294,17 +310,13 @@ export const useProbationStore = defineStore('probation', () => {
                 {
                     eval_id: 'EV011', evaluator_name: '陈思远', evaluator_role: '主管',
                     eval_type: 'manager', content: '该同学表现优秀，CTR 提升超出预期，积极融入团队。建议转正。', create_time: '2025-07-22 14:00'
-                },
-                {
-                    eval_id: 'EV012', evaluator_name: '刘建国', evaluator_role: 'HRBP',
-                    eval_type: 'hrbp', content: '试用期表现稳定，团队协作良好，建议转正。', create_time: '2025-07-23 10:00'
                 }
             ],
             approval_logs: [
                 { log_id: 'L001', node_name: '二级部门负责人', approver_name: '赵总', action: '同意', comment: '同意转正', action_time: '2025-07-25 09:00' },
                 { log_id: 'L002', node_name: 'HRG', approver_name: '钱总', action: '同意', comment: '', action_time: '2025-07-26 11:00' }
             ],
-            manager_eval_done: true, hrbp_eval_done: true, allow_employee_view_eval: false
+            manager_eval_done: true, allow_employee_view_eval: false
         },
         // ---- 状态 10：结果已发布 (转正通过) ----
         {
@@ -324,16 +336,12 @@ export const useProbationStore = defineStore('probation', () => {
                 {
                     eval_id: 'EV003', evaluator_name: '陈思远', evaluator_role: '主管',
                     eval_type: 'manager', content: '数据看板质量较高，工作认真负责，符合预期。', create_time: '2025-06-20 16:00'
-                },
-                {
-                    eval_id: 'EV013', evaluator_name: '刘建国', evaluator_role: 'HRBP',
-                    eval_type: 'hrbp', content: '表现稳定，融入良好。', create_time: '2025-06-21 10:00'
                 }
             ],
             approval_logs: [
                 { log_id: 'L003', node_name: '二级部门负责人', approver_name: '赵总', action: '同意', action_time: '2025-06-25 09:00' }
             ],
-            manager_eval_done: true, hrbp_eval_done: true, allow_employee_view_eval: true,
+            manager_eval_done: true, allow_employee_view_eval: true,
             result_published_time: '2025-06-28 10:00'
         },
         // ---- 状态 10：结果已发布 (转正未通过) ----
@@ -355,16 +363,12 @@ export const useProbationStore = defineStore('probation', () => {
                     eval_id: 'EV005', evaluator_name: '陈思远', evaluator_role: '主管',
                     eval_type: 'manager', content: '活动完成率远低于预期，缺乏有效改进。',
                     reject_reason: '活动完成率 55% 远低于 80% 目标，多次辅导后无明显改善。', create_time: '2025-04-25 14:00'
-                },
-                {
-                    eval_id: 'EV014', evaluator_name: '刘建国', evaluator_role: 'HRBP',
-                    eval_type: 'hrbp', content: '试用期表现未达到录用标准。', create_time: '2025-04-26 10:00'
                 }
             ],
             approval_logs: [
                 { log_id: 'L004', node_name: '二级部门负责人', approver_name: '赵总', action: '同意', comment: '同意不予转正', action_time: '2025-04-28 09:00' }
             ],
-            manager_eval_done: true, hrbp_eval_done: true, allow_employee_view_eval: false,
+            manager_eval_done: true, allow_employee_view_eval: false,
             result_published_time: '2025-05-01 10:00'
         }
     ]);
@@ -404,7 +408,13 @@ export const useProbationStore = defineStore('probation', () => {
         if (r) r.probation_status = '99';
     }
 
-    /** 员工提交自评 -> 06 同时开启上级评价 + HRBP评价
+    /** HRBP 发起审批 -> 08 审批中 */
+    function triggerApproval(masterId: string) {
+        const r = records.value.find(rec => rec.master_id === masterId);
+        if (r) r.probation_status = '08';
+    }
+
+    /** 员工提交自评 -> 06 待上级评价
      *  content: 逐目标自评内容（JSON 序列化） + 总体评价
      */
     function submitSelfEval(masterId: string, content: string, empName: string) {
@@ -420,11 +430,10 @@ export const useProbationStore = defineStore('probation', () => {
             });
             r.probation_status = '06';
             r.manager_eval_done = false;
-            r.hrbp_eval_done = false;
         }
     }
 
-    /** 上级提交评价 */
+    /** 上级提交评价 -> 07 待发起审批 */
     function submitManagerEval(masterId: string, content: string, decision: string) {
         const r = records.value.find(rec => rec.master_id === masterId);
         if (r) {
@@ -439,26 +448,7 @@ export const useProbationStore = defineStore('probation', () => {
             });
             r.final_decision = decision as any;
             r.manager_eval_done = true;
-            // 如果 HRBP 也已完成 -> 进入审批
-            if (r.hrbp_eval_done) r.probation_status = '08';
-        }
-    }
-
-    /** HRBP 提交评价 */
-    function submitHRBPEval(masterId: string, content: string) {
-        const r = records.value.find(rec => rec.master_id === masterId);
-        if (r) {
-            r.evaluations.push({
-                eval_id: 'EV' + Date.now(),
-                evaluator_name: r.hrbp_name,
-                evaluator_role: 'HRBP',
-                eval_type: 'hrbp',
-                content,
-                create_time: new Date().toLocaleString()
-            });
-            r.hrbp_eval_done = true;
-            // 如果主管也已完成 -> 进入审批
-            if (r.manager_eval_done) r.probation_status = '08';
+            r.probation_status = '07';
         }
     }
 
@@ -492,7 +482,6 @@ export const useProbationStore = defineStore('probation', () => {
             });
             r.probation_status = '06';
             r.manager_eval_done = false;
-            r.hrbp_eval_done = false;
         }
     }
 
@@ -518,8 +507,8 @@ export const useProbationStore = defineStore('probation', () => {
     return {
         records, currentUserRole, currentEmpId,
         saveGoals, confirmGoals, returnGoals,
-        triggerProbation, holdProbation,
-        submitSelfEval, submitManagerEval, submitHRBPEval,
+        triggerProbation, holdProbation, triggerApproval,
+        submitSelfEval, submitManagerEval,
         approveRecord, rejectRecord,
         publishResult, setProbationStatus, setCurrentEmpId
     };

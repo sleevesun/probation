@@ -62,7 +62,7 @@
             <div class="mobile-card__body">
               <div class="mobile-card__title">关于 {{ record.emp_name }} 的试用期转正申请</div>
               <div class="mobile-card__meta">
-                <span>发起人：{{ record.manager_name }}</span>
+                <span>发起人：{{ record.hrbp_name }}</span>
               </div>
             </div>
             <div class="mobile-card__footer">
@@ -100,6 +100,7 @@
           <div class="approval-sheet__title">单据概览</div>
           <a-descriptions bordered size="small" :column="2">
             <a-descriptions-item label="单据标题" :span="2">关于 {{ currentRecord.emp_name }} 的试用期转正申请</a-descriptions-item>
+            <a-descriptions-item label="发起人">{{ currentRecord.hrbp_name }}（HRBP）</a-descriptions-item>
             <a-descriptions-item label="姓名">{{ currentRecord.emp_name }}</a-descriptions-item>
             <a-descriptions-item label="工号">{{ currentRecord.emp_id }}</a-descriptions-item>
             <a-descriptions-item label="岗位">{{ currentRecord.position }}</a-descriptions-item>
@@ -201,6 +202,10 @@
                   <div class="mobile-field">
                     <span class="mobile-field__label">单据标题</span>
                     <span class="mobile-field__value">关于 {{ currentRecord.emp_name }} 的试用期转正申请</span>
+                  </div>
+                  <div class="mobile-field">
+                    <span class="mobile-field__label">发起人</span>
+                    <span class="mobile-field__value">{{ currentRecord.hrbp_name }}（HRBP）</span>
                   </div>
                   <div class="mobile-field">
                     <span class="mobile-field__label">姓名</span>
@@ -321,7 +326,7 @@ const doneList = computed(() => store.records.filter(r => ['09', '10'].includes(
 const columns = [
   { title: '标题', customRender: ({ record }: any) => `关于 ${record.emp_name} 的试用期转正申请` },
   { title: '部门', dataIndex: 'dept_display', width: 180 },
-  { title: '发起人', dataIndex: 'manager_name' },
+  { title: '发起人', dataIndex: 'hrbp_name' },
   { title: '操作', key: 'action', width: 140 }
 ]
 
@@ -342,7 +347,7 @@ const evaluationRows = computed(() => {
   return [
     formatEvalRow('员工自评', 'self'),
     formatEvalRow('直属主管评价', 'manager'),
-    formatEvalRow('HRBP评价', 'hrbp')
+    formatEvalRow('HRBP发起说明', 'hrbp')
   ]
 })
 

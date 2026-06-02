@@ -35,8 +35,9 @@
           </template>
           <template v-if="column.key === 'action'">
              <a-space>
-                <a-button type="primary" size="small" @click="handleRun(record.master_id)">开启转正流程</a-button>
-                <a-button type="dashed" danger size="small" @click="handleHold(record.master_id)">暂不开启(挂起)</a-button>
+                <a-button v-if="record.probation_status === '04'" type="primary" size="small" @click="handleRun(record.master_id)">开启转正流程</a-button>
+                <a-button v-if="record.probation_status === '04'" type="dashed" danger size="small" @click="handleHold(record.master_id)">暂不开启(挂起)</a-button>
+                <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="handleTriggerApproval(record.master_id)">发起审批</a-button>
              </a-space>
           </template>
         </template>
@@ -54,7 +55,7 @@ const store = useProbationStore();
 const selectedRowKeys = ref<string[]>([]);
 const hasSelected = computed(() => selectedRowKeys.value.length > 0);
 
-const targetData = computed(() => store.records.filter(r => r.probation_status === '04'));
+const targetData = computed(() => store.records.filter(r => ['04', '07'].includes(r.probation_status)));
 
 const columns = [
   { title: '姓名', dataIndex: 'emp_name' },
@@ -78,6 +79,11 @@ const handleRun = (id: string) => {
 const handleHold = (id: string) => {
   store.holdProbation(id);
   message.warning('已将该员工试用期流程挂起');
+};
+
+const handleTriggerApproval = (id: string) => {
+  store.triggerApproval(id);
+  message.success('已发起转正审批流程');
 };
 
 const batchTrigger = (isStart: boolean) => {

@@ -63,6 +63,7 @@
               <a-button size="small" @click="openDetailModal(item)">查看详情</a-button>
               <a-button v-if="item.probation_status === '04'" size="small" type="primary" @click="openActionModal(item, 'hrbp-trigger')">发起转正流程</a-button>
               <a-button v-if="item.probation_status === '04'" size="small" danger @click="openActionModal(item, 'hrbp-hold')">暂不发起</a-button>
+              <a-button v-if="item.probation_status === '07'" size="small" type="primary" @click="openActionModal(item, 'hrbp-approval')">发起审批</a-button>
               <a-button v-if="item.probation_status === '09'" size="small" @click="openActionModal(item, 'hrbp-publish')">发布结果</a-button>
             </td>
           </tr>
@@ -143,6 +144,15 @@
           </div>
         </template>
 
+        <template v-if="actionModalType === 'hrbp-approval'">
+          <div class="ps-alert ps-alert--info" style="margin-top: 16px">确认后将发起该员工的转正审批流程，提交至审批人审批。</div>
+          <div class="ps-toolbar" style="margin-top: 16px">
+            <div class="ps-toolbar__spacer"></div>
+            <a-button size="small" @click="closeActionModal">取消</a-button>
+            <a-button size="small" type="primary" @click="handleTriggerApproval">确认发起</a-button>
+          </div>
+        </template>
+
         <template v-if="actionModalType === 'hrbp-publish'">
           <div class="ps-alert ps-alert--warning" style="margin-top: 16px" v-if="actionRecordOverSixMonths">该员工试用期已超过 6 个月，请尽快发布结果。</div>
           <div class="ps-section-title" style="margin-top: 16px">现有评价记录</div>
@@ -181,8 +191,8 @@ import { message } from 'ant-design-vue'
 import { useProbationStore, getCurrentHandler, getDetailedStatusText, getMonthsSinceHire, type ProbationMaster } from '@/store/probation'
 
 type MainTab = 'todo' | 'unfinished' | 'finished'
-type StageFilter = '01' | '02_03' | '04' | '05' | '06' | '08' | '09'
-type ActionModalType = 'hrbp-trigger' | 'hrbp-hold' | 'hrbp-publish'
+type StageFilter = '01' | '02_03' | '04' | '05' | '06' | '07' | '08' | '09'
+type ActionModalType = 'hrbp-trigger' | 'hrbp-hold' | 'hrbp-publish' | 'hrbp-approval'
 
 const store = useProbationStore()
 
@@ -204,6 +214,7 @@ const stageOptions = [
   { value: '04', label: '待发起流程' },
   { value: '05', label: '待员工自评' },
   { value: '06', label: '待评估' },
+  { value: '07', label: '待发起审批' },
   { value: '08', label: '审批中' },
   { value: '09', label: '待发布' }
 ] satisfies { value: StageFilter; label: string }[]
@@ -214,7 +225,7 @@ const rows = computed(() => {
   let list = store.records
 
   if (activeTab.value === 'todo') {
-    list = list.filter(item => item.probation_status === '04' || item.probation_status === '09')
+    list = list.filter(item => ['04', '07', '09'].includes(item.probation_status))
   } else if (activeTab.value === 'unfinished') {
     list = list.filter(item => item.probation_status !== '10')
     if (activeStageFilters.value.length > 0) {
@@ -243,6 +254,7 @@ const rows = computed(() => {
 const actionModalTitle = computed(() => {
   if (actionModalType.value === 'hrbp-trigger') return '发起转正流程'
   if (actionModalType.value === 'hrbp-hold') return '暂不发起'
+  if (actionModalType.value === 'hrbp-approval') return '发起审批'
   return '发布结果'
 })
 
@@ -251,6 +263,7 @@ const actionRecordOverSixMonths = computed(() => actionModalRecord.value ? parse
 
 function getPriority(record: ProbationMaster) {
   if (record.probation_status === '04') return 0
+  if (record.probation_status === '07') return 0
   if (record.probation_status === '09') return 1
   return 2
 }
@@ -318,6 +331,13 @@ function handlePublish() {
   if (!actionModalRecord.value) return
   store.publishResult(actionModalRecord.value.master_id, allowEmployeeView.value)
   message.success('结果已发布')
+  closeActionModal()
+}
+
+function handleTriggerApproval() {
+  if (!actionModalRecord.value) return
+  store.triggerApproval(actionModalRecord.value.master_id)
+  message.success('已发起转正审批流程')
   closeActionModal()
 }
 </script>

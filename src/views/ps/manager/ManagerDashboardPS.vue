@@ -62,7 +62,7 @@
             <td class="ps-table__actions">
               <a-button size="small" @click="openDetailModal(item)">查看详情</a-button>
               <a-button v-if="item.probation_status === '02'" size="small" type="primary" @click="openActionModal(item, 'manager-goal-review')">确认目标</a-button>
-              <a-button v-if="item.probation_status === '03'" size="small" danger @click="openActionModal(item, 'manager-force-adjust')">要求调整</a-button>
+              <a-button v-if="item.probation_status === '03'" size="small" danger @click="openActionModal(item, 'manager-force-adjust')">退回调整</a-button>
               <a-button v-if="item.probation_status === '06' && !item.manager_eval_done" size="small" type="primary" @click="openActionModal(item, 'manager-evaluation')">转正评估</a-button>
             </td>
           </tr>
@@ -140,7 +140,7 @@
             <div class="ps-toolbar__spacer"></div>
             <a-button size="small" @click="closeActionModal">取消</a-button>
             <a-button size="small" danger :disabled="!rejectComment.trim()" @click="handleReject">退回修改</a-button>
-            <a-button size="small" type="primary" @click="handleConfirm">同意锁定</a-button>
+            <a-button size="small" type="primary" @click="handleConfirm">确认目标</a-button>
           </div>
         </template>
 
@@ -218,7 +218,7 @@ import { message } from 'ant-design-vue'
 import { useProbationStore, getCurrentHandler, getDetailedStatusText, type ProbationMaster } from '@/store/probation'
 
 type MainTab = 'todo' | 'unfinished' | 'finished'
-type StageFilter = '01' | '02_03' | '04' | '05' | '06' | '08' | '09'
+type StageFilter = '01' | '02_03' | '04' | '05' | '06' | '07' | '08' | '09'
 type ActionModalType = 'manager-goal-review' | 'manager-force-adjust' | 'manager-evaluation'
 
 const store = useProbationStore()
@@ -243,7 +243,8 @@ const stageOptions = [
   { value: '02_03', label: '已设定目标' },
   { value: '04', label: '待发起流程' },
   { value: '05', label: '待员工自评' },
-  { value: '06', label: '待评估' },
+  { value: '06', label: '待评价' },
+  { value: '07', label: '待发起审批' },
   { value: '08', label: '审批中' },
   { value: '09', label: '待发布' }
 ] satisfies { value: StageFilter; label: string }[]
@@ -254,7 +255,7 @@ const tableData = computed(() => {
   let list = store.records
 
   if (activeTab.value === 'todo') {
-    list = list.filter(item => item.probation_status === '02' || (item.probation_status === '06' && !item.manager_eval_done))
+    list = list.filter(item => item.probation_status === '02' || item.probation_status === '06')
   } else if (activeTab.value === 'unfinished') {
     list = list.filter(item => item.probation_status !== '10')
     if (activeStageFilters.value.length > 0) {
@@ -334,7 +335,7 @@ function closeActionModal() {
 function handleConfirm() {
   if (!actionModalRecord.value) return
   store.confirmGoals(actionModalRecord.value.master_id)
-  message.success('已同意锁定目标')
+  message.success('已确认目标')
   closeActionModal()
 }
 

@@ -23,7 +23,6 @@
             <th>员工</th>
             <th>当前状态</th>
             <th>经理评价</th>
-            <th>HRBP评价</th>
             <th>操作</th>
           </tr>
         </thead>
@@ -35,10 +34,10 @@
             <td>{{ item.emp_name }}</td>
             <td>{{ item.probation_status }}</td>
             <td>{{ item.manager_eval_done ? '已完成' : '未完成' }}</td>
-            <td>{{ item.hrbp_eval_done ? '已完成' : '未完成' }}</td>
             <td class="ps-table__actions">
-              <a-button size="small" @click="handleRun(item.master_id)">开启转正</a-button>
-              <a-button size="small" danger @click="handleHold(item.master_id)">挂起</a-button>
+              <a-button v-if="item.probation_status === '04'" size="small" @click="handleRun(item.master_id)">开启转正</a-button>
+              <a-button v-if="item.probation_status === '04'" size="small" danger @click="handleHold(item.master_id)">挂起</a-button>
+              <a-button v-if="item.probation_status === '07'" size="small" type="primary" @click="handleTriggerApproval(item.master_id)">发起审批</a-button>
             </td>
           </tr>
         </tbody>
@@ -55,7 +54,7 @@ import { useProbationStore } from '@/store/probation'
 const store = useProbationStore()
 const selectedKeys = ref<string[]>([])
 
-const targetRows = computed(() => store.records.filter(item => ['04', '05', '06', '09', '99'].includes(item.probation_status)))
+const targetRows = computed(() => store.records.filter(item => ['04', '05', '06', '07', '09', '99'].includes(item.probation_status)))
 const allSelected = computed(() => !!targetRows.value.length && selectedKeys.value.length === targetRows.value.length)
 
 function toggleOne(masterId: string) {
@@ -79,6 +78,12 @@ function handleHold(id: string) {
   store.holdProbation(id)
   selectedKeys.value = selectedKeys.value.filter(item => item !== id)
   message.warning('已将该员工流程挂起')
+}
+
+function handleTriggerApproval(id: string) {
+  store.triggerApproval(id)
+  selectedKeys.value = selectedKeys.value.filter(item => item !== id)
+  message.success('已发起转正审批流程')
 }
 
 function batchTrigger(isStart: boolean) {
