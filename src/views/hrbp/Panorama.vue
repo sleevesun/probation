@@ -177,22 +177,12 @@ const onStepChange = (current: number) => {
   activeTodoFilter.value = '';
 };
 
-const hrbpTodoTriggerCount = computed(() => store.records.filter(r => r.probation_status === '04').length);
-const hrbpTodoPublishCount = computed(() => store.records.filter(r => r.probation_status === '09').length);
-const hrbpTodoTotal = computed(() => hrbpTodoTriggerCount.value + hrbpTodoPublishCount.value);
 const todoRecords = computed(() => store.records.filter(r => r.probation_status === '04' || r.probation_status === '09'));
 
 const getTodoType = (record: ProbationMaster) => {
   if (record.probation_status === '04') return '开启评估';
   if (record.probation_status === '09') return '发布结果';
   return '待处理';
-};
-
-const onTodoClick = (filterKey: string) => {
-  activeTodoFilter.value = activeTodoFilter.value === filterKey ? '' : filterKey;
-  activeTab.value = 'unfinished';
-  activeStepFilter.value = 'all';
-  currentStepIndex.value = 0;
 };
 
 const deptOptions = computed(() => {

@@ -183,17 +183,7 @@ const onStepChange = (current: number) => {
   activeTodoFilter.value = '';
 };
 
-const managerTodoConfirmCount = computed(() => store.records.filter(r => r.probation_status === '02').length);
-const managerTodoEvalCount = computed(() => store.records.filter(r => r.probation_status === '06' && !r.manager_eval_done).length);
-const managerTodoTotal = computed(() => managerTodoConfirmCount.value + managerTodoEvalCount.value);
 const todoRecords = computed(() => store.records.filter(r => r.probation_status === '02' || (r.probation_status === '06' && !r.manager_eval_done)));
-
-const onTodoClick = (filterKey: string) => {
-  activeTodoFilter.value = activeTodoFilter.value === filterKey ? '' : filterKey;
-  activeTab.value = 'unfinished';
-  activeStepFilter.value = 'all';
-  currentStepIndex.value = 0;
-};
 
 const deptOptions = computed(() => {
   const depts = new Set(store.records.map(r => `${r.parent_dept}\\${r.dept_name}`));
