@@ -105,7 +105,7 @@
                   <td>{{ goal.dimension }}</td>
                   <td>{{ goal.content }}</td>
                   <td>{{ goal.measure }}</td>
-                  <td>{{ goal.goal_review || '暂无' }}</td>
+                  <td>{{ goal.goal_review || '暂无目标回顾' }}</td>
                 </tr>
               </tbody>
             </table>
@@ -240,7 +240,7 @@
                       <span class="mobile-field__label">衡量方式：</span>{{ goal.measure }}
                     </div>
                     <div class="mobile-goal-item__review">
-                      <span class="mobile-field__label">目标回顾：</span>{{ goal.goal_review || '暂无' }}
+                      <span class="mobile-field__label">目标回顾：</span>{{ goal.goal_review || '暂无目标回顾' }}
                     </div>
                   </div>
                 </div>
@@ -274,18 +274,18 @@
                   </div>
                 </div>
 
-                <!-- 审批意见卡片（待办时显示） -->
-                <div v-if="activeTab === 'todo'" class="mobile-approval-action">
-                  <div class="mobile-detail-card" style="margin-bottom: 0;">
-                    <div class="mobile-detail-card__title">审批意见</div>
-                    <a-textarea v-model:value="comment" :rows="3" placeholder="请输入审批意见，退回时必填" />
-                  </div>
-                  <div class="mobile-action-bar">
-                    <a-button class="mobile-action-bar__btn" danger @click="rejectRecord">退回</a-button>
-                    <a-button class="mobile-action-bar__btn" type="primary" @click="approveRecord">同意</a-button>
-                  </div>
+                <!-- 审批意见卡片（待办时显示，随内容滚动） -->
+                <div v-if="activeTab === 'todo'" class="mobile-detail-card">
+                  <div class="mobile-detail-card__title">审批意见</div>
+                  <a-textarea v-model:value="comment" :rows="3" placeholder="退回时必填，同意可不填" />
                 </div>
               </div>
+            </div>
+
+            <!-- 底部固定操作栏（待办时显示） -->
+            <div v-if="activeTab === 'todo'" class="iphone-fixed-action-bar">
+              <a-button class="iphone-fixed-action-bar__btn" danger @click="rejectRecord">驳回</a-button>
+              <a-button class="iphone-fixed-action-bar__btn" type="primary" @click="approveRecord">通过</a-button>
             </div>
 
             <!-- Home Indicator -->
@@ -346,7 +346,7 @@ function approveRecord() {
 function rejectRecord() {
   if (!currentRecord.value) return
   if (!comment.value.trim()) {
-    message.error('退回时请填写说明')
+    message.error('驳回意见为必填项，请填写后重试')
     return
   }
   store.rejectRecord(currentRecord.value.master_id, '审批人A', '二级部门负责人', comment.value)
@@ -697,9 +697,9 @@ function rejectRecord() {
   word-break: break-all;
 }
 
-/* ====== 目标项 ====== */
+/* ====== 目标项（TASK-016 优化移动端阅读） ====== */
 .mobile-goal-item {
-  padding: 10px 0;
+  padding: 12px 0;
   border-bottom: 1px solid #f5f5f5;
 }
 
@@ -712,23 +712,32 @@ function rejectRecord() {
   display: inline-block;
   background: #e6f7ff;
   color: #1890ff;
-  font-size: 11px;
-  padding: 1px 6px;
-  border-radius: 3px;
-  margin-bottom: 4px;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 6px;
 }
 
 .mobile-goal-item__content {
-  font-size: 14px;
+  font-size: 15px;
   color: #333;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  line-height: 1.6;
+  word-break: break-all;
 }
 
 .mobile-goal-item__measure,
 .mobile-goal-item__review {
-  font-size: 12px;
+  font-size: 14px;
   color: #666;
-  margin-top: 2px;
+  margin-top: 6px;
+  line-height: 1.6;
+  word-break: break-all;
+}
+
+.mobile-goal-item__measure .mobile-field__label,
+.mobile-goal-item__review .mobile-field__label {
+  font-size: 13px;
 }
 
 /* ====== 评价项 ====== */
@@ -824,27 +833,21 @@ function rejectRecord() {
   font-size: 13px;
 }
 
-/* ====== 审批操作区（固定底部） ====== */
-.mobile-approval-action {
-  position: sticky;
-  bottom: 0;
-  background: #fff;
-  padding: 12px;
-  border-top: 1px solid #f0f0f0;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.06);
-  border-radius: 8px;
-}
-
-.mobile-action-bar {
+/* ====== iPhone 底部固定操作栏（TASK-015） ====== */
+.iphone-fixed-action-bar {
   display: flex;
   gap: 12px;
-  margin-top: 12px;
+  padding: 10px 16px;
+  padding-bottom: 24px;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+  flex-shrink: 0;
 }
 
-.mobile-action-bar__btn {
+.iphone-fixed-action-bar__btn {
   flex: 1;
   height: 44px;
   font-size: 15px;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 </style>

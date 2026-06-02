@@ -1,6 +1,6 @@
 <template>
   <div class="workbench-page">
-    <a-page-header title="团队试用期管理" sub-title="优先处理你的待办，再查看全量进度" />
+    <a-page-header title="团队试用期管理" />
 
     <!-- Tabs -->
     <a-card class="workbench-card">
@@ -17,7 +17,7 @@
               <template v-if="column.dataIndex === 'tenure'">{{ getMonthsSinceHire(record.hire_date) }} 个月</template>
               <template v-if="column.key === 'action'">
                 <a-space>
-                  <a-button v-if="record.probation_status === '02'" type="primary" size="small" @click="openGoalModal(record)">处理目标</a-button>
+                  <a-button v-if="record.probation_status === '02'" type="primary" size="small" @click="openGoalModal(record)">确认目标</a-button>
                   <a-button v-if="record.probation_status === '06' && !record.manager_eval_done" type="primary" size="small" @click="openEvalModal(record)">去评价</a-button>
                   <a-button type="link" size="small" @click="openEvalModal(record)">查看详情</a-button>
                 </a-space>
@@ -36,9 +36,8 @@
               <a-step :title="`全部(${stepCounts.all})`" />
               <a-step :title="`待设定目标(${stepCounts.s01})`" />
               <a-step :title="`已设定目标(${stepCounts.s02_03})`" />
-              <a-step :title="`待发起流程(${stepCounts.s04})`" />
               <a-step :title="`待员工自评(${stepCounts.s05})`" />
-              <a-step :title="`待评价(${stepCounts.s06})`" />
+              <a-step :title="`待上级评价(${stepCounts.s06})`" />
               <a-step :title="`待发起审批(${stepCounts.s07})`" />
               <a-step :title="`审批中(${stepCounts.s08})`" />
               <a-step :title="`待发布(${stepCounts.s09})`" />
@@ -170,14 +169,12 @@
 
         <!-- 上级评价 -->
         <div style="font-weight: 600; margin: 20px 0 8px; font-size: 14px">上级评价</div>
-        <a-alert
-          v-if="evalModalRecord.manager_eval_done"
-          type="success" message="您已完成评价" show-icon style="margin-bottom: 16px"
-        />
-        <a-alert
-          v-else-if="evalModalRecord.probation_status !== '06'"
-          type="info" message="当前阶段不可评价" :description="`当前状态：${getDetailedStatusText(evalModalRecord)}`" show-icon style="margin-bottom: 16px"
-        />
+        <div
+          v-if="evalModalRecord.probation_status !== '06'"
+          style="margin-bottom: 12px; color: #999; font-size: 12px"
+        >
+          当前状态「{{ getDetailedStatusText(evalModalRecord) }}」暂不可评价
+        </div>
 
         <a-form layout="vertical">
           <a-form-item label="建议转正结论" required>
@@ -255,7 +252,7 @@ const stepCounts = computed(() => {
 
 const onStepChange = (current: number) => {
   currentStepIndex.value = current;
-  const stepMap = ['all', '01', '02_03', '04', '05', '06', '07', '08', '09'];
+  const stepMap = ['all', '01', '02_03', '05', '06', '07', '08', '09'];
   const filterVal = stepMap[current];
   
   activeTab.value = 'unfinished';
@@ -355,7 +352,8 @@ const finishedColumns = [
 const goalColumns = [
   { title: '目标维度', dataIndex: 'dimension', width: 100 },
   { title: '目标内容', dataIndex: 'content' },
-  { title: '衡量方式/预期结果', dataIndex: 'measure' }
+  { title: '衡量方式/预期结果', dataIndex: 'measure' },
+  { title: '目标回顾', dataIndex: 'goal_review', customRender: ({ text }: any) => text || '暂无目标回顾' }
 ];
 
 const goalModalVisible = ref(false);

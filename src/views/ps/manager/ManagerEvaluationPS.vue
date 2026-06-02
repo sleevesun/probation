@@ -27,12 +27,13 @@
     <section class="ps-panel">
       <div class="ps-section-title">考核目标</div>
       <table class="ps-table">
-        <thead><tr><th>维度</th><th>内容</th><th>衡量方式/预期结果</th></tr></thead>
+        <thead><tr><th>维度</th><th>内容</th><th>衡量方式/预期结果</th><th>目标回顾</th></tr></thead>
         <tbody>
           <tr v-for="goal in record?.goals || []" :key="goal.goal_id">
             <td>{{ goal.dimension }}</td>
             <td>{{ goal.content }}</td>
             <td>{{ goal.measure }}</td>
+            <td>{{ goal.goal_review || '暂无目标回顾' }}</td>
           </tr>
         </tbody>
       </table>

@@ -83,15 +83,16 @@
 
         <div class="ps-section-title" style="margin-top: 16px">考核目标</div>
         <table class="ps-table">
-          <thead><tr><th>维度</th><th>目标内容</th><th>衡量方式/预期结果</th></tr></thead>
+          <thead><tr><th>维度</th><th>目标内容</th><th>衡量方式/预期结果</th><th>目标回顾</th></tr></thead>
           <tbody>
             <tr v-if="!detailModalRecord.goals.length">
-              <td colspan="3">暂无目标</td>
+              <td colspan="4">暂无目标</td>
             </tr>
             <tr v-for="goal in detailModalRecord.goals" :key="goal.goal_id">
               <td>{{ goal.dimension }}</td>
               <td>{{ goal.content }}</td>
               <td>{{ goal.measure }}</td>
+              <td>{{ goal.goal_review || '暂无目标回顾' }}</td>
             </tr>
           </tbody>
         </table>
@@ -125,12 +126,13 @@
           </div>
           <div class="ps-section-title" style="margin-top: 16px">目标明细</div>
           <table class="ps-table">
-            <thead><tr><th>维度</th><th>目标内容</th><th>衡量方式/预期结果</th></tr></thead>
+            <thead><tr><th>维度</th><th>目标内容</th><th>衡量方式/预期结果</th><th>目标回顾</th></tr></thead>
             <tbody>
               <tr v-for="goal in actionModalRecord.goals" :key="goal.goal_id">
                 <td>{{ goal.dimension }}</td>
                 <td>{{ goal.content }}</td>
                 <td>{{ goal.measure }}</td>
+                <td>{{ goal.goal_review || '暂无目标回顾' }}</td>
               </tr>
             </tbody>
           </table>
@@ -168,12 +170,13 @@
           </div>
           <div class="ps-section-title" style="margin-top: 16px">目标内容</div>
           <table class="ps-table">
-            <thead><tr><th>维度</th><th>内容</th><th>衡量方式/预期结果</th></tr></thead>
+            <thead><tr><th>维度</th><th>内容</th><th>衡量方式/预期结果</th><th>目标回顾</th></tr></thead>
             <tbody>
               <tr v-for="goal in actionModalRecord.goals" :key="goal.goal_id">
                 <td>{{ goal.dimension }}</td>
                 <td>{{ goal.content }}</td>
                 <td>{{ goal.measure }}</td>
+                <td>{{ goal.goal_review || '暂无目标回顾' }}</td>
               </tr>
             </tbody>
           </table>
@@ -218,7 +221,7 @@ import { message } from 'ant-design-vue'
 import { useProbationStore, getCurrentHandler, getDetailedStatusText, type ProbationMaster } from '@/store/probation'
 
 type MainTab = 'todo' | 'unfinished' | 'finished'
-type StageFilter = '01' | '02_03' | '04' | '05' | '06' | '07' | '08' | '09'
+type StageFilter = '01' | '02_03' | '05' | '06' | '07' | '08' | '09'
 type ActionModalType = 'manager-goal-review' | 'manager-force-adjust' | 'manager-evaluation'
 
 const store = useProbationStore()
@@ -241,9 +244,8 @@ const reason = ref('')
 const stageOptions = [
   { value: '01', label: '待设定目标' },
   { value: '02_03', label: '已设定目标' },
-  { value: '04', label: '待发起流程' },
   { value: '05', label: '待员工自评' },
-  { value: '06', label: '待评价' },
+  { value: '06', label: '待上级评价' },
   { value: '07', label: '待发起审批' },
   { value: '08', label: '审批中' },
   { value: '09', label: '待发布' }

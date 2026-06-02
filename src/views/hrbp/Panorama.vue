@@ -1,6 +1,6 @@
 <template>
   <div class="workbench-page">
-    <a-page-header title="试用期全景管理" sub-title="聚焦待办处理，必要时再进入全量进度" />
+    <a-page-header title="试用期全景管理" />
 
     <!-- Tabs -->
     <a-card class="workbench-card">
@@ -9,7 +9,7 @@
           <a-table :dataSource="todoRecords" :columns="todoColumns" rowKey="master_id" size="middle" :pagination="false" class="light-table">
             <template #bodyCell="{ column, record }">
               <template v-if="column.dataIndex === 'todo_type'">
-                <a-tag :color="record.probation_status === '04' ? 'gold' : record.probation_status === '07' ? 'cyan' : record.probation_status === '09' ? 'green' : 'blue'">
+                <a-tag :color="record.probation_status === '04' ? 'gold' : record.probation_status === '07' ? 'cyan' : record.probation_status === '09' ? 'green' : record.probation_status === '99' ? 'error' : 'blue'">
                   {{ getTodoType(record) }}
                 </a-tag>
               </template>
@@ -19,8 +19,9 @@
                 <a-space>
                   <a-button v-if="record.probation_status === '04'" type="primary" size="small" @click="handleTrigger(record.master_id)">开启评估</a-button>
                   <a-button v-if="record.probation_status === '04'" size="small" @click="handleHold(record.master_id)">暂不开启</a-button>
-                  <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="handleTriggerApproval(record.master_id)">发起审批</a-button>
-                  <a-button v-if="record.probation_status === '09'" type="primary" size="small" @click="openPublishModal(record)">发布结果</a-button>
+                  <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="openApprovalPreview(record)">发起审批</a-button>
+                  <a-button v-if="record.probation_status === '09'" type="primary" size="small" @click="confirmPublish(record)">发布结果</a-button>
+                  <a-button v-if="record.probation_status === '99'" type="primary" danger size="small" disabled>发起离职</a-button>
                   <a-button type="link" size="small" @click="router.push('/manager/evaluation/' + record.master_id)">查看详情</a-button>
                 </a-space>
               </template>
@@ -65,10 +66,11 @@
               </template>
               <template v-if="column.key === 'action'">
                 <a-space>
-                  <a-button v-if="record.probation_status === '04'" type="primary" size="small" @click="handleTrigger(record.master_id)">开启转正流程</a-button>
-                  <a-button v-if="record.probation_status === '04'" type="dashed" danger size="small" @click="handleHold(record.master_id)">暂不开启</a-button>
-                  <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="handleTriggerApproval(record.master_id)">发起审批</a-button>
-                  <a-button v-if="record.probation_status === '09'" type="primary" size="small" @click="openPublishModal(record)">发布结果</a-button>
+                  <a-button v-if="record.probation_status === '04'" type="primary" size="small" @click="handleTrigger(record.master_id)">开启评估</a-button>
+                  <a-button v-if="record.probation_status === '04'" size="small" @click="handleHold(record.master_id)">暂不开启</a-button>
+                  <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="openApprovalPreview(record)">发起审批</a-button>
+                  <a-button v-if="record.probation_status === '09'" type="primary" size="small" @click="confirmPublish(record)">发布结果</a-button>
+                  <a-button v-if="record.probation_status === '99'" type="primary" danger size="small" disabled>发起离职</a-button>
                   <a-button type="link" size="small" @click="router.push('/manager/evaluation/' + record.master_id)">查看详情</a-button>
                 </a-space>
               </template>
@@ -127,6 +129,56 @@
         </a-form>
       </div>
     </a-modal>
+
+    <!-- 审批单预览 Modal -->
+    <a-modal v-model:open="approvalPreviewVisible" title="转正审批单预览" width="750px" :footer="null">
+      <div v-if="approvalPreviewRecord">
+        <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
+          <a-descriptions-item label="员工">{{ approvalPreviewRecord.emp_name }} ({{ approvalPreviewRecord.emp_id }})</a-descriptions-item>
+          <a-descriptions-item label="岗位">{{ approvalPreviewRecord.position }}</a-descriptions-item>
+          <a-descriptions-item label="部门">{{ approvalPreviewRecord.parent_dept }}\{{ approvalPreviewRecord.dept_name }}</a-descriptions-item>
+          <a-descriptions-item label="入职日期">{{ approvalPreviewRecord.hire_date }}</a-descriptions-item>
+          <a-descriptions-item label="直属主管">{{ approvalPreviewRecord.manager_name }}</a-descriptions-item>
+          <a-descriptions-item label="转正结论">
+            <a-tag :color="approvalPreviewRecord.final_decision === '不符合录用条件' ? 'error' : 'success'">{{ approvalPreviewRecord.final_decision || '-' }}</a-tag>
+          </a-descriptions-item>
+        </a-descriptions>
+
+        <!-- 目标信息 -->
+        <a-card size="small" title="目标信息" style="margin-bottom: 12px">
+          <a-table :dataSource="approvalPreviewRecord.goals" :columns="goalColumns" rowKey="goal_id" size="small" :pagination="false" bordered />
+        </a-card>
+
+        <!-- 员工自评 -->
+        <a-card size="small" title="员工自评" style="margin-bottom: 12px; background: #f6ffed">
+          <div v-if="selfEval" style="white-space: pre-wrap;">{{ selfEval.content }}</div>
+          <a-empty v-else description="暂无自评" />
+        </a-card>
+
+        <!-- 上级评价 -->
+        <a-card size="small" title="上级评价" style="margin-bottom: 12px; background: #e6f7ff">
+          <div v-if="managerEval" style="white-space: pre-wrap;">{{ managerEval.content }}</div>
+          <a-empty v-else description="暂无上级评价" />
+        </a-card>
+
+        <!-- HRBP 发起信息 -->
+        <a-card size="small" title="HRBP 发起信息" style="margin-bottom: 16px">
+          <div style="white-space: pre-wrap;">发起人：{{ approvalPreviewRecord.hrbp_name }}</div>
+        </a-card>
+
+        <a-form layout="vertical">
+          <a-form-item label="转正说明 / 备注（非必填）">
+            <a-textarea v-model:value="approvalRemark" :rows="3" placeholder="可填写转正说明或备注信息" />
+          </a-form-item>
+          <div style="text-align: right">
+            <a-space>
+              <a-button @click="approvalPreviewVisible = false">取消</a-button>
+              <a-button type="primary" @click="submitApproval">提交审批</a-button>
+            </a-space>
+          </div>
+        </a-form>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -134,7 +186,7 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProbationStore, ProbationMaster, STATUS_COLOR, getDetailedStatusText, getMonthsSinceHire, getCurrentHandler } from '@/store/probation';
-import { message } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 
 const router = useRouter();
 const store = useProbationStore();
@@ -171,12 +223,13 @@ const onStepChange = (current: number) => {
   activeTodoFilter.value = '';
 };
 
-const todoRecords = computed(() => store.records.filter(r => ['04', '07', '09'].includes(r.probation_status)));
+const todoRecords = computed(() => store.records.filter(r => ['04', '07', '09', '99'].includes(r.probation_status)));
 
 const getTodoType = (record: ProbationMaster) => {
   if (record.probation_status === '04') return '待开启评估';
   if (record.probation_status === '07') return '待发起审批';
   if (record.probation_status === '09') return '待发布结果';
+  if (record.probation_status === '99') return '暂不开启/终止';
   return '待处理';
 };
 
@@ -277,27 +330,75 @@ const currentManagerEval = computed(() => currentRecord.value?.evaluations.find(
 const publishModalVisible = ref(false);
 const allowViewEval = ref(false);
 
+// Approval preview
+const approvalPreviewVisible = ref(false);
+const approvalPreviewRecord = ref<ProbationMaster | null>(null);
+const approvalRemark = ref('');
+const selfEval = computed(() => approvalPreviewRecord.value?.evaluations.find(e => e.eval_type === 'self'));
+const managerEval = computed(() => approvalPreviewRecord.value?.evaluations.find(e => e.eval_type === 'manager'));
+
+const goalColumns = [
+  { title: '维度', dataIndex: 'dimension', width: 80 },
+  { title: '内容', dataIndex: 'content' },
+  { title: '衡量方式/预期结果', dataIndex: 'measure', width: 200 }
+];
+
 const isOverSixMonths = computed(() => {
   if (!currentRecord.value) return false;
   const months = parseFloat(getMonthsSinceHire(currentRecord.value.hire_date));
   return months >= 6;
 });
 
-const openPublishModal = (record: ProbationMaster) => {
-  currentRecord.value = record; allowViewEval.value = false; publishModalVisible.value = true;
-};
-
 const handlePublish = () => {
   if (currentRecord.value) {
-    store.publishResult(currentRecord.value.master_id, allowViewEval.value);
-    message.success('结果已发布！' + (allowViewEval.value ? '员工可查看上级评价。' : '员工不可查看上级评价。'));
-    publishModalVisible.value = false;
+    Modal.confirm({
+      title: '确认发布结果',
+      content: '确认后将发布该员工的转正结果，发布后员工可查看。是否继续？',
+      onOk: () => {
+        store.publishResult(currentRecord.value!.master_id, allowViewEval.value);
+        message.success('结果已发布！' + (allowViewEval.value ? '员工可查看上级评价。' : '员工不可查看上级评价。'));
+        publishModalVisible.value = false;
+      }
+    });
   }
 };
 
-const handleTrigger = (id: string) => { store.triggerProbation(id); message.success('已开启评估'); };
-const handleHold = (id: string) => { store.holdProbation(id); message.warning('已挂起'); };
-const handleTriggerApproval = (id: string) => { store.triggerApproval(id); message.success('已发起转正审批流程'); };
+const handleTrigger = (id: string) => {
+  Modal.confirm({
+    title: '确认开启评估',
+    content: '确认后将开启该员工的试用期评估，状态将变为"待员工自评"。',
+    onOk: () => { store.triggerProbation(id); message.success('已开启评估'); }
+  });
+};
+
+const handleHold = (id: string) => {
+  Modal.confirm({
+    title: '确认暂不开启',
+    content: '确认后该记录将进入暂不开启/终止状态，不再继续触发转正流程。',
+    okType: 'danger',
+    onOk: () => { store.holdProbation(id); message.warning('已暂不开启'); }
+  });
+};
+
+const openApprovalPreview = (record: ProbationMaster) => {
+  approvalPreviewRecord.value = record;
+  approvalRemark.value = '';
+  approvalPreviewVisible.value = true;
+};
+
+const submitApproval = () => {
+  if (approvalPreviewRecord.value) {
+    store.triggerApproval(approvalPreviewRecord.value.master_id);
+    message.success('已发起转正审批流程');
+    approvalPreviewVisible.value = false;
+  }
+};
+
+const confirmPublish = (record: ProbationMaster) => {
+  currentRecord.value = record;
+  allowViewEval.value = false;
+  publishModalVisible.value = true;
+};
 </script>
 
 <style scoped>
