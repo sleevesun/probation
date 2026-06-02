@@ -295,7 +295,7 @@ const handlePublish = () => {
   }
 };
 
-const handleTrigger = (id: string) => { store.triggerProbation(id); message.success('已为该员工开启转正自评流程'); };
+const handleTrigger = (id: string) => { store.triggerProbation(id); message.success('已开启评估'); };
 const handleHold = (id: string) => { store.holdProbation(id); message.warning('已挂起'); };
 const handleTriggerApproval = (id: string) => { store.triggerApproval(id); message.success('已发起转正审批流程'); };
 </script>

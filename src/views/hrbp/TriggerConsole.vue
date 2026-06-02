@@ -73,7 +73,7 @@ const onSelectChange = (keys: string[]) => { selectedRowKeys.value = keys; };
 
 const handleRun = (id: string) => {
   store.triggerProbation(id);
-  message.success('已为该员工开启转正自评流程');
+  message.success('已开启评估');
 };
 
 const handleHold = (id: string) => {

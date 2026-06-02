@@ -61,7 +61,7 @@
             <td>{{ getCurrentHandler(item) }}</td>
             <td class="ps-table__actions">
               <a-button size="small" @click="openDetailModal(item)">查看详情</a-button>
-              <a-button v-if="item.probation_status === '04'" size="small" type="primary" @click="openActionModal(item, 'hrbp-trigger')">发起转正流程</a-button>
+              <a-button v-if="item.probation_status === '04'" size="small" type="primary" @click="openActionModal(item, 'hrbp-trigger')">开启评估</a-button>
               <a-button v-if="item.probation_status === '04'" size="small" danger @click="openActionModal(item, 'hrbp-hold')">暂不发起</a-button>
               <a-button v-if="item.probation_status === '07'" size="small" type="primary" @click="openActionModal(item, 'hrbp-approval')">发起审批</a-button>
               <a-button v-if="item.probation_status === '09'" size="small" @click="openActionModal(item, 'hrbp-publish')">发布结果</a-button>
@@ -127,11 +127,11 @@
         </div>
 
         <template v-if="actionModalType === 'hrbp-trigger'">
-          <div class="ps-alert ps-alert--info" style="margin-top: 16px">确认后将开启该员工的转正自评流程。</div>
+          <div class="ps-alert ps-alert--info" style="margin-top: 16px">确认后将开启该员工的试用期评估。</div>
           <div class="ps-toolbar" style="margin-top: 16px">
             <div class="ps-toolbar__spacer"></div>
             <a-button size="small" @click="closeActionModal">取消</a-button>
-            <a-button size="small" type="primary" @click="handleTrigger">确认发起</a-button>
+            <a-button size="small" type="primary" @click="handleTrigger">确认开启</a-button>
           </div>
         </template>
 
@@ -211,7 +211,7 @@ const allowEmployeeView = ref(false)
 const stageOptions = [
   { value: '01', label: '待设定目标' },
   { value: '02_03', label: '已设定目标' },
-  { value: '04', label: '待发起流程' },
+  { value: '04', label: '待开启评估' },
   { value: '05', label: '待员工自评' },
   { value: '06', label: '待评估' },
   { value: '07', label: '待发起审批' },
@@ -252,7 +252,7 @@ const rows = computed(() => {
 })
 
 const actionModalTitle = computed(() => {
-  if (actionModalType.value === 'hrbp-trigger') return '发起转正流程'
+  if (actionModalType.value === 'hrbp-trigger') return '开启评估'
   if (actionModalType.value === 'hrbp-hold') return '暂不发起'
   if (actionModalType.value === 'hrbp-approval') return '发起审批'
   return '发布结果'
@@ -316,7 +316,7 @@ function closeActionModal() {
 function handleTrigger() {
   if (!actionModalRecord.value) return
   store.triggerProbation(actionModalRecord.value.master_id)
-  message.success('已发起转正流程')
+  message.success('已开启评估')
   closeActionModal()
 }
 
