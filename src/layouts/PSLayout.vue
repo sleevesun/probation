@@ -156,6 +156,6 @@ function handleRoleChange(nextRole: RoleKey) {
 }
 
 function goHome() {
-  window.location.href = '/dashboard'
+  router.push('/')
 }
 </script>
