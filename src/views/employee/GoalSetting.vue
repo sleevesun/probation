@@ -1,5 +1,6 @@
 <template>
   <div>
+    <EmployeeSwitcher />
     <a-page-header title="试用期目标设定" @back="() => router.back()" />
 
     <a-alert
@@ -31,14 +32,8 @@
              <template v-if="column.dataIndex === 'content'">
                 <a-textarea v-model:value="row.content" :rows="2" :disabled="isLock" placeholder="请输入具体目标内容及衡量标准" />
              </template>
-             <template v-if="column.dataIndex === 'weight'">
-                <a-input-number 
-                  v-model:value="row.weight" 
-                  :min="1" :max="100" 
-                  :formatter="(value: number) => `${value}%`"
-                  :parser="(value: string) => value.replace('%', '')"
-                  :disabled="isLock"
-                />
+             <template v-if="column.dataIndex === 'measure'">
+                <a-textarea v-model:value="row.measure" :rows="2" :disabled="isLock" placeholder="请输入衡量方式或预期结果" />
              </template>
              <template v-if="column.key === 'action'">
                 <a-button type="link" danger @click="removeGoal(index)" :disabled="isLock">删除</a-button>
@@ -46,14 +41,10 @@
           </template>
         </a-table>
 
-        <div style="margin-top: 16px; display: flex; justify-content: space-between">
+        <div style="margin-top: 16px">
           <a-button type="dashed" @click="addGoal" style="width: 200px" :disabled="formState.goals.length >= 5 || isLock">
             + 添加目标 (上限 5 条)
           </a-button>
-
-          <div style="font-size: 16px; font-weight: bold">
-            权重合计: <span :style="{ color: totalWeight === 100 ? '#52c41a' : '#f5222d' }">{{ totalWeight }}%</span>
-          </div>
         </div>
 
         <a-divider />
@@ -61,7 +52,7 @@
         <div style="text-align: right" v-if="!isLock">
           <a-space>
             <a-button @click="handleSave" :loading="saving">保存草稿</a-button>
-            <a-button type="primary" @click="handleSubmit" :loading="saving" :disabled="totalWeight !== 100">提交确认</a-button>
+            <a-button type="primary" @click="handleSubmit" :loading="saving">提交确认</a-button>
           </a-space>
         </div>
       </a-form>
@@ -70,10 +61,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, onMounted } from 'vue';
+import { ref, computed, reactive, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProbationStore, GoalItem } from '@/store/probation';
 import { message, Modal } from 'ant-design-vue';
+import EmployeeSwitcher from '@/components/EmployeeSwitcher.vue';
 
 const router = useRouter();
 const store = useProbationStore();
@@ -91,26 +83,29 @@ const formState = reactive({
   goals: [] as GoalItem[]
 });
 
-onMounted(() => {
+function initForm() {
   if (record.value && record.value.goals) {
-    // deep clone to avoid modifying store directly before save
     formState.goals = JSON.parse(JSON.stringify(record.value.goals));
+  } else {
+    formState.goals = [];
   }
   if (formState.goals.length === 0 && !isLock.value) {
     addGoal();
   }
+}
+
+onMounted(initForm);
+
+watch(() => store.currentEmpId, () => {
+  initForm();
 });
 
 const columns = [
-  { title: '考核维度', dataIndex: 'dimension', width: 150 },
-  { title: '目标内容与衡量标准', dataIndex: 'content' },
-  { title: '权重', dataIndex: 'weight', width: 120 },
-  { title: '操作', key: 'action', width: 100 }
+  { title: '目标维度', dataIndex: 'dimension', width: 120 },
+  { title: '目标内容', dataIndex: 'content' },
+  { title: '衡量方式/预期结果', dataIndex: 'measure' },
+  { title: '操作', key: 'action', width: 80 }
 ];
-
-const totalWeight = computed(() => {
-  return formState.goals.reduce((sum, item) => sum + (item.weight || 0), 0);
-});
 
 const addGoal = () => {
   if (formState.goals.length < 5) {
@@ -118,7 +113,7 @@ const addGoal = () => {
       goal_id: 'G' + Date.now(),
       dimension: '业绩',
       content: '',
-      weight: 20
+      measure: ''
     });
   }
 };
@@ -147,13 +142,14 @@ const handleSave = () => {
 };
 
 const handleSubmit = () => {
-  if (totalWeight.value !== 100) {
-    message.error('权重合计必须为 100%');
-    return;
-  }
   const hasEmptyContent = formState.goals.some(g => !g.content || g.content.trim() === '');
   if (hasEmptyContent) {
     message.error('请填写完整所有的目标内容');
+    return;
+  }
+  const hasEmptyMeasure = formState.goals.some(g => !g.measure || g.measure.trim() === '');
+  if (hasEmptyMeasure) {
+    message.error('请填写完整所有的衡量方式/预期结果');
     return;
   }
 

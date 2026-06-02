@@ -6,7 +6,7 @@
       </div>
       <a-menu
         v-model:selectedKeys="selectedKeys"
-        theme="dark"
+        theme="light"
         mode="inline"
         @click="handleMenuClick"
       >
@@ -87,7 +87,7 @@
       </a-layout-content>
       
       <a-layout-footer class="app-footer">
-        Probation Evaluation System Demo ©2026 Created by Antigravity
+        试用期转正系统 Demo ©2026
       </a-layout-footer>
     </a-layout>
   </a-layout>
@@ -119,10 +119,10 @@ watch(() => route.path, (newPath) => {
 const role = computed(() => store.currentUserRole);
 
 const roleMap: Record<string, string> = {
-  'Employee': '👨‍💻 新员工 (张三 E1001)',
-  'Manager': '👔 直属主管 (李四)',
-  'HRBP': '🛡️ HRBP (王五)',
-  'Approver': '👑 高管审批人'
+  'Employee': '新员工 王明辉',
+  'Manager': '直属上级 陈思远',
+  'HRBP': 'HRBP 刘建国',
+  'Approver': '审批人'
 };
 
 const handleMenuClick = ({ key }: { key: string }) => {
@@ -141,32 +141,65 @@ const handleRoleChange = ({ key }: { key: string }) => {
 
 <style scoped>
 .logo {
-  height: 32px;
-  background: rgba(255, 255, 255, 0.2);
-  margin: 16px;
-  border-radius: 6px;
+  height: 36px;
+  background: #f5f8ff;
+  margin: 16px 14px;
+  border-radius: 8px;
   overflow: hidden;
 }
 
 /* [UI/UX 修复] 将内联样式抽取为 scoped 样式类 */
 .main-layout {
   min-height: 100vh;
+  background: #f5f7fb;
+}
+
+.main-layout :deep(.ant-layout-sider) {
+  background: #ffffff;
+  border-right: 1px solid #edf1f7;
+  box-shadow: none;
+}
+
+.main-layout :deep(.ant-layout-sider-trigger) {
+  background: #ffffff;
+  color: #64748b;
+  border-top: 1px solid #edf1f7;
+}
+
+.main-layout :deep(.ant-menu-light) {
+  border-inline-end: 0;
+}
+
+.main-layout :deep(.ant-menu-item),
+.main-layout :deep(.ant-menu-submenu-title) {
+  border-radius: 8px;
+  margin-inline: 10px;
+  width: calc(100% - 20px);
+}
+
+.main-layout :deep(.ant-menu-item-selected) {
+  background: #eef5ff;
+  color: #2563eb;
 }
 
 .logo-title {
-  color: white;
+  color: #1f2a44;
   margin: 0;
-  padding-left: 16px;
-  line-height: 32px;
+  padding-left: 14px;
+  line-height: 36px;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .app-header {
-  background: #fff;
-  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 0 24px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
+  border-bottom: 1px solid #edf1f7;
+  box-shadow: none;
+  backdrop-filter: blur(12px);
 }
 
 .role-switcher {
@@ -174,17 +207,18 @@ const handleRoleChange = ({ key }: { key: string }) => {
 }
 
 .role-name {
-  color: #1890ff;
-  font-size: 16px;
+  color: #2563eb;
+  font-size: 14px;
 }
 
 .header-avatar {
-  background-color: #87d068;
+  background-color: #e8f1ff;
+  color: #2563eb;
 }
 
 .app-content {
-  margin: 16px;
-  background: #fff;
+  margin: 0;
+  background: #f5f7fb;
   padding: 24px;
   min-height: 280px;
   overflow: auto;
@@ -192,6 +226,8 @@ const handleRoleChange = ({ key }: { key: string }) => {
 
 .app-footer {
   text-align: center;
+  background: #f5f7fb;
+  color: #94a3b8;
 }
 
 .fade-enter-active,

@@ -1,40 +1,37 @@
 <template>
-  <div>
-    <a-page-header title="团队试用期管理看板" sub-title="下属的试用期跟踪与任务处理" />
-
-    <!-- 待办摘要区 -->
-    <a-card style="margin-top: 16px" :bodyStyle="{ padding: '16px 20px' }">
-      <div class="todo-summary">
-        <div class="todo-summary__header">
-          <div class="todo-summary__title">你的待办</div>
-        </div>
-        <div class="todo-summary__tags">
-          <button type="button" 
-                  class="todo-tag todo-tag--warning" 
-                  :class="{'todo-tag--active': activeTodoFilter === '02'}"
-                  @click="onTodoClick('02')">
-            <span class="todo-tag__label">待确认目标</span>
-            <span class="todo-tag__count">{{ managerTodoConfirmCount }}</span>
-          </button>
-          
-          <button type="button" 
-                  class="todo-tag todo-tag--danger" 
-                  :class="{'todo-tag--active': activeTodoFilter === '06'}"
-                  @click="onTodoClick('06')">
-            <span class="todo-tag__label">待完成评价</span>
-            <span class="todo-tag__count">{{ managerTodoEvalCount }}</span>
-          </button>
-        </div>
-      </div>
-    </a-card>
+  <div class="workbench-page">
+    <a-page-header title="团队试用期管理" sub-title="优先处理你的待办，再查看全量进度" />
 
     <!-- Tabs -->
-    <a-card style="margin-top: 16px">
-      <a-tabs v-model:activeKey="activeTab">
+    <a-card class="workbench-card">
+      <a-tabs v-model:activeKey="activeTab" class="workbench-tabs">
+        <a-tab-pane key="todo" tab="待办">
+          <a-table :dataSource="todoRecords" :columns="todoColumns" rowKey="master_id" size="middle" :pagination="false" class="light-table">
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.dataIndex === 'todo_type'">
+                <a-tag :color="record.probation_status === '02' ? 'gold' : 'blue'">
+                  {{ record.probation_status === '02' ? '目标确认' : '转正评价' }}
+                </a-tag>
+              </template>
+              <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
+              <template v-if="column.dataIndex === 'tenure'">{{ getMonthsSinceHire(record.hire_date) }} 个月</template>
+              <template v-if="column.key === 'action'">
+                <a-space>
+                  <a-button v-if="record.probation_status === '02'" type="primary" size="small" @click="openGoalModal(record)">处理目标</a-button>
+                  <a-button v-if="record.probation_status === '06' && !record.manager_eval_done" type="primary" size="small" @click="router.push(`/manager/evaluation/${record.master_id}`)">去评价</a-button>
+                  <a-button type="link" size="small" @click="router.push(`/manager/evaluation/${record.master_id}`)">查看详情</a-button>
+                </a-space>
+              </template>
+            </template>
+          </a-table>
+
+          <a-empty v-if="todoRecords.length === 0" description="当前没有待办" />
+        </a-tab-pane>
+
         <!-- 未转正 Tab -->
         <a-tab-pane key="unfinished" tab="未转正">
           <!-- 流程轴过滤 -->
-          <div style="margin-bottom: 24px; padding: 16px; background: #fafafa; border-radius: 8px;">
+          <div style="margin-bottom: 12px; padding: 6px 12px; background: #fafafa; border-radius: 8px;">
             <a-steps :current="currentStepIndex" @change="onStepChange" type="navigation" size="small" class="custom-steps">
               <a-step :title="`全部(${stepCounts.all})`" />
               <a-step :title="`待设定目标(${stepCounts.s01})`" />
@@ -146,7 +143,7 @@ import { message, Modal } from 'ant-design-vue';
 const router = useRouter();
 const store = useProbationStore();
 
-const activeTab = ref('unfinished');
+const activeTab = ref('todo');
 const searchText = ref('');
 const filterDept = ref<string | undefined>(undefined);
 const activeTodoFilter = ref<string>('');
@@ -162,7 +159,7 @@ const formatCount = (count: number) => count > 0 ? count : '-';
 
 const stepCounts = computed(() => {
   // 只统计当前主管下属的数据
-  // 这里简化处理，因为 mock 数据中 manager_name 都是 '李四'
+  // 这里简化处理，因为 mock 数据中 manager_name 都是 '陈思远'
   const records = store.records;
   return {
     all: formatCount(unfinishedRecords.value.length),
@@ -188,6 +185,8 @@ const onStepChange = (current: number) => {
 
 const managerTodoConfirmCount = computed(() => store.records.filter(r => r.probation_status === '02').length);
 const managerTodoEvalCount = computed(() => store.records.filter(r => r.probation_status === '06' && !r.manager_eval_done).length);
+const managerTodoTotal = computed(() => managerTodoConfirmCount.value + managerTodoEvalCount.value);
+const todoRecords = computed(() => store.records.filter(r => r.probation_status === '02' || (r.probation_status === '06' && !r.manager_eval_done)));
 
 const onTodoClick = (filterKey: string) => {
   activeTodoFilter.value = activeTodoFilter.value === filterKey ? '' : filterKey;
@@ -263,6 +262,15 @@ const columns = [
   { title: '操作', key: 'action', width: 240 }
 ];
 
+const todoColumns = [
+  { title: '待办类型', dataIndex: 'todo_type', width: 100 },
+  { title: '姓名', dataIndex: 'emp_name', width: 90 },
+  { title: '岗位', dataIndex: 'position', width: 140 },
+  { title: '直属部门', dataIndex: 'dept_display' },
+  { title: '入职时长', dataIndex: 'tenure', width: 100 },
+  { title: '操作', key: 'action', width: 190 }
+];
+
 const finishedColumns = [
   { title: '姓名', dataIndex: 'emp_name', width: 90 },
   { title: '工号', dataIndex: 'emp_id', width: 80 },
@@ -275,9 +283,9 @@ const finishedColumns = [
 ];
 
 const goalColumns = [
-  { title: '维度', dataIndex: 'dimension', width: 100 },
+  { title: '目标维度', dataIndex: 'dimension', width: 100 },
   { title: '目标内容', dataIndex: 'content' },
-  { title: '权重', dataIndex: 'weight', width: 80, customRender: ({text}: any) => `${text}%` }
+  { title: '衡量方式/预期结果', dataIndex: 'measure' }
 ];
 
 const goalModalVisible = ref(false);
@@ -319,9 +327,15 @@ const forceReturn = (record: ProbationMaster) => {
 .custom-steps :deep(.ant-steps-item) {
   cursor: pointer;
   transition: opacity 0.3s;
+  padding: 0 4px;
 }
 .custom-steps :deep(.ant-steps-item:hover) {
   opacity: 0.8;
+}
+.custom-steps :deep(.ant-steps-item-title) {
+  font-size: 12px;
+  line-height: 22px;
+  padding: 0;
 }
 .custom-steps :deep(.ant-steps-item-description) {
   font-weight: bold;
@@ -330,5 +344,9 @@ const forceReturn = (record: ProbationMaster) => {
 /* 隐藏默认序号圆圈 */
 .custom-steps :deep(.ant-steps-item-icon) {
   display: none;
+}
+.custom-steps :deep(.ant-steps-item-tail) {
+  padding: 0;
+  top: 11px;
 }
 </style>

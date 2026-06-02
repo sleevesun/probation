@@ -83,7 +83,7 @@
 
         <div class="ps-section-title" style="margin-top: 16px">考核目标</div>
         <table class="ps-table">
-          <thead><tr><th>维度</th><th>目标内容</th><th>权重</th></tr></thead>
+          <thead><tr><th>维度</th><th>目标内容</th><th>衡量方式/预期结果</th></tr></thead>
           <tbody>
             <tr v-if="!detailModalRecord.goals.length">
               <td colspan="3">暂无目标</td>
@@ -91,7 +91,7 @@
             <tr v-for="goal in detailModalRecord.goals" :key="goal.goal_id">
               <td>{{ goal.dimension }}</td>
               <td>{{ goal.content }}</td>
-              <td>{{ goal.weight }}%</td>
+              <td>{{ goal.measure }}</td>
             </tr>
           </tbody>
         </table>
@@ -125,12 +125,12 @@
           </div>
           <div class="ps-section-title" style="margin-top: 16px">目标明细</div>
           <table class="ps-table">
-            <thead><tr><th>维度</th><th>目标内容</th><th>权重</th></tr></thead>
+            <thead><tr><th>维度</th><th>目标内容</th><th>衡量方式/预期结果</th></tr></thead>
             <tbody>
               <tr v-for="goal in actionModalRecord.goals" :key="goal.goal_id">
                 <td>{{ goal.dimension }}</td>
                 <td>{{ goal.content }}</td>
-                <td>{{ goal.weight }}%</td>
+                <td>{{ goal.measure }}</td>
               </tr>
             </tbody>
           </table>
@@ -168,12 +168,12 @@
           </div>
           <div class="ps-section-title" style="margin-top: 16px">目标内容</div>
           <table class="ps-table">
-            <thead><tr><th>维度</th><th>内容</th><th>权重</th></tr></thead>
+            <thead><tr><th>维度</th><th>内容</th><th>衡量方式/预期结果</th></tr></thead>
             <tbody>
               <tr v-for="goal in actionModalRecord.goals" :key="goal.goal_id">
                 <td>{{ goal.dimension }}</td>
                 <td>{{ goal.content }}</td>
-                <td>{{ goal.weight }}%</td>
+                <td>{{ goal.measure }}</td>
               </tr>
             </tbody>
           </table>

@@ -1,5 +1,6 @@
 <template>
   <div>
+    <EmployeeSwitcher />
     <a-page-header title="我的试用期" :sub-title="`入职第 ${daysSinceHire} 天 / 共 180 天`" />
 
     <a-card style="margin-top: 16px">
@@ -91,6 +92,7 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProbationStore } from '@/store/probation';
 import { ExceptionOutlined, FormOutlined, ClockCircleOutlined, LoadingOutlined, CheckOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
+import EmployeeSwitcher from '@/components/EmployeeSwitcher.vue';
 
 const router = useRouter();
 const store = useProbationStore();
@@ -107,72 +109,122 @@ const daysSinceHire = computed(() => {
 const currentTodoIndex = ref(0);
 
 const todoList = computed(() => {
-  return [
-    {
-      id: '01',
-      type: 'action',
-      title: '【待办】填写试用期目标',
-      desc: '请在入职 2 周内完成试用期目标的设定并提交上级确认。',
-      icon: 'exception',
-      color: '#f56a00',
-      path: '/employee/goals'
-    },
-    {
-      id: 'return_comment',
-      type: 'alert',
-      title: '上级退回意见',
-      desc: record.value?.return_comment || '您的试用期目标需要调整，详细原因请参考沟通记录。'
-    },
-    {
-      id: '02',
-      type: 'info',
-      title: '【进行中】等待上级确认目标',
-      desc: '您的试用期目标已提交，正在等待上级确认。',
-      icon: 'clock',
-      color: '#1890ff'
-    },
-    {
-      id: '05',
-      type: 'action',
-      title: '【待办】填写试用期自评',
-      desc: '转正流程已开启，请尽快完成转正自评。',
-      icon: 'form',
-      color: '#87d068',
-      path: '/employee/self-eval'
-    },
-    {
-      id: '06',
-      type: 'info',
-      title: '【进行中】等待上级与 HRBP 评价',
-      desc: '您的自评已提交，正在等待上级和 HRBP 完成评价。',
-      icon: 'loading',
-      color: '#722ed1'
-    },
-    {
-      id: '08',
-      type: 'info',
-      title: '【进行中】转正流程审批中',
-      desc: '您的转正申请正在审批流程中，请耐心等待。',
-      icon: 'loading',
-      color: '#fa8c16'
-    },
-    {
-      id: '09',
-      type: 'info',
-      title: '【进行中】等待结果通知',
-      desc: '您的转正结果将在入职满 5.5 个月后通知，请耐心等待。',
-      icon: 'clock',
-      color: '#fa8c16'
-    },
-    {
-      id: '10',
-      type: 'result',
-      title: '【结果】恭喜您通过转正！',
-      desc: '恭喜您通过转正！',
-      icon: 'check',
-      color: '#52c41a'
+  const status = record.value?.probation_status;
+  const items: any[] = [];
+
+  switch (status) {
+    case '01': {
+      const isReturned = !!record.value?.return_comment;
+      // 如果有退回意见，先显示退回原因
+      if (isReturned) {
+        items.push({
+          id: 'return_comment',
+          type: 'alert',
+          title: '目标被退回，请修改后重新提交',
+          desc: record.value.return_comment
+        });
+      }
+      items.push({
+        id: '01',
+        type: 'action',
+        title: isReturned ? '【待办】重新编辑试用期目标' : '【待办】填写试用期目标',
+        desc: isReturned
+          ? '请根据上级退回意见调整目标内容，修改完成后重新提交。'
+          : '请在入职 2 周内完成试用期目标的设定并提交上级确认。',
+        icon: 'exception',
+        color: '#f56a00',
+        path: '/employee/goals'
+      });
+      break;
     }
-  ];
+    case '02':
+      items.push({
+        id: '02',
+        type: 'info',
+        title: '【进行中】等待上级确认目标',
+        desc: '您的试用期目标已提交，正在等待上级确认。',
+        icon: 'clock',
+        color: '#1890ff'
+      });
+      break;
+    case '03':
+      items.push({
+        id: '03',
+        type: 'info',
+        title: '【进行中】目标已确认',
+        desc: '目标已确认，等待 HRBP 开启评估。',
+        icon: 'check',
+        color: '#52c41a'
+      });
+      break;
+    case '04':
+      items.push({
+        id: '04',
+        type: 'info',
+        title: '【进行中】等待 HRBP 开启评估',
+        desc: '目标已确认，等待 HRBP 发起转正流程。',
+        icon: 'clock',
+        color: '#fa8c16'
+      });
+      break;
+    case '05':
+      items.push({
+        id: '05',
+        type: 'action',
+        title: '【待办】填写试用期自评',
+        desc: '转正流程已开启，请尽快完成转正自评。',
+        icon: 'form',
+        color: '#87d068',
+        path: '/employee/self-eval'
+      });
+      break;
+    case '06':
+      items.push({
+        id: '06',
+        type: 'info',
+        title: '【进行中】等待上级与 HRBP 评价',
+        desc: '您的自评已提交，正在等待上级和 HRBP 完成评价。',
+        icon: 'loading',
+        color: '#722ed1'
+      });
+      break;
+    case '08':
+      items.push({
+        id: '08',
+        type: 'info',
+        title: '【进行中】转正流程审批中',
+        desc: '您的转正申请正在审批流程中，请耐心等待。',
+        icon: 'loading',
+        color: '#fa8c16'
+      });
+      break;
+    case '09':
+      items.push({
+        id: '09',
+        type: 'info',
+        title: '【进行中】等待结果通知',
+        desc: '您的转正结果将在入职满 5.5 个月后通知，请耐心等待。',
+        icon: 'clock',
+        color: '#fa8c16'
+      });
+      break;
+    case '10': {
+      const isPassed = record.value?.final_decision !== '不符合录用条件';
+      items.push({
+        id: '10',
+        type: 'result',
+        title: isPassed ? '【结果】恭喜您通过转正！' : '【结果】未通过转正',
+        desc: isPassed ? '恭喜您通过试用期转正，祝您工作顺利！' : '很遗憾，您未通过试用期转正。',
+        icon: isPassed ? 'check' : 'exception',
+        color: isPassed ? '#52c41a' : '#f5222d'
+      });
+      break;
+    }
+    default:
+      break;
+  }
+
+  return items;
 });
 
 const currentTodo = computed(() => {

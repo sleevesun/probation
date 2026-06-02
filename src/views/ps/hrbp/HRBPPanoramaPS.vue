@@ -63,7 +63,6 @@
               <a-button size="small" @click="openDetailModal(item)">查看详情</a-button>
               <a-button v-if="item.probation_status === '04'" size="small" type="primary" @click="openActionModal(item, 'hrbp-trigger')">发起转正流程</a-button>
               <a-button v-if="item.probation_status === '04'" size="small" danger @click="openActionModal(item, 'hrbp-hold')">暂不发起</a-button>
-              <a-button v-if="item.probation_status === '06' && !item.hrbp_eval_done" size="small" @click="openActionModal(item, 'hrbp-evaluation')">HRBP评价</a-button>
               <a-button v-if="item.probation_status === '09'" size="small" @click="openActionModal(item, 'hrbp-publish')">发布结果</a-button>
             </td>
           </tr>
@@ -86,7 +85,7 @@
 
         <div class="ps-section-title" style="margin-top: 16px">目标信息</div>
         <table class="ps-table">
-          <thead><tr><th>维度</th><th>内容</th><th>权重</th></tr></thead>
+          <thead><tr><th>维度</th><th>内容</th><th>衡量方式/预期结果</th></tr></thead>
           <tbody>
             <tr v-if="!detailModalRecord.goals.length">
               <td colspan="3">暂无目标</td>
@@ -94,7 +93,7 @@
             <tr v-for="goal in detailModalRecord.goals" :key="goal.goal_id">
               <td>{{ goal.dimension }}</td>
               <td>{{ goal.content }}</td>
-              <td>{{ goal.weight }}%</td>
+              <td>{{ goal.measure }}</td>
             </tr>
           </tbody>
         </table>
@@ -144,31 +143,6 @@
           </div>
         </template>
 
-        <template v-if="actionModalType === 'hrbp-evaluation'">
-          <div class="ps-section-title" style="margin-top: 16px">现有评价记录</div>
-          <table class="ps-table">
-            <thead><tr><th>类型</th><th>评价人</th><th>内容</th><th>时间</th></tr></thead>
-            <tbody>
-              <tr v-if="!actionModalRecord.evaluations.length">
-                <td colspan="4">暂无评价记录</td>
-              </tr>
-              <tr v-for="item in actionModalRecord.evaluations" :key="item.eval_id">
-                <td>{{ evalTypeText(item.eval_type) }}</td>
-                <td>{{ item.evaluator_name }}</td>
-                <td>{{ item.content }}</td>
-                <td>{{ item.create_time }}</td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="ps-section-title" style="margin-top: 16px">HRBP评价意见</div>
-          <a-textarea v-model:value="evalContent" :rows="5" placeholder="填写 HRBP 综合评价意见" />
-          <div class="ps-toolbar" style="margin-top: 16px">
-            <div class="ps-toolbar__spacer"></div>
-            <a-button size="small" @click="closeActionModal">取消</a-button>
-            <a-button size="small" type="primary" @click="handleEval">提交评价</a-button>
-          </div>
-        </template>
-
         <template v-if="actionModalType === 'hrbp-publish'">
           <div class="ps-alert ps-alert--warning" style="margin-top: 16px" v-if="actionRecordOverSixMonths">该员工试用期已超过 6 个月，请尽快发布结果。</div>
           <div class="ps-section-title" style="margin-top: 16px">现有评价记录</div>
@@ -208,7 +182,7 @@ import { useProbationStore, getCurrentHandler, getDetailedStatusText, getMonthsS
 
 type MainTab = 'todo' | 'unfinished' | 'finished'
 type StageFilter = '01' | '02_03' | '04' | '05' | '06' | '08' | '09'
-type ActionModalType = 'hrbp-trigger' | 'hrbp-hold' | 'hrbp-evaluation' | 'hrbp-publish'
+type ActionModalType = 'hrbp-trigger' | 'hrbp-hold' | 'hrbp-publish'
 
 const store = useProbationStore()
 
@@ -222,7 +196,6 @@ const detailModalRecord = ref<ProbationMaster | null>(null)
 const actionModalVisible = ref(false)
 const actionModalType = ref<ActionModalType>('hrbp-trigger')
 const actionModalRecord = ref<ProbationMaster | null>(null)
-const evalContent = ref('')
 const allowEmployeeView = ref(false)
 
 const stageOptions = [
@@ -241,7 +214,7 @@ const rows = computed(() => {
   let list = store.records
 
   if (activeTab.value === 'todo') {
-    list = list.filter(item => item.probation_status === '04' || (item.probation_status === '06' && !item.hrbp_eval_done) || item.probation_status === '09')
+    list = list.filter(item => item.probation_status === '04' || item.probation_status === '09')
   } else if (activeTab.value === 'unfinished') {
     list = list.filter(item => item.probation_status !== '10')
     if (activeStageFilters.value.length > 0) {
@@ -270,7 +243,6 @@ const rows = computed(() => {
 const actionModalTitle = computed(() => {
   if (actionModalType.value === 'hrbp-trigger') return '发起转正流程'
   if (actionModalType.value === 'hrbp-hold') return '暂不发起'
-  if (actionModalType.value === 'hrbp-evaluation') return 'HRBP评价'
   return '发布结果'
 })
 
@@ -279,9 +251,8 @@ const actionRecordOverSixMonths = computed(() => actionModalRecord.value ? parse
 
 function getPriority(record: ProbationMaster) {
   if (record.probation_status === '04') return 0
-  if (record.probation_status === '06' && !record.hrbp_eval_done) return 1
-  if (record.probation_status === '09') return 2
-  return 3
+  if (record.probation_status === '09') return 1
+  return 2
 }
 
 function matchesStage(record: ProbationMaster, stages: StageFilter[]) {
@@ -321,7 +292,6 @@ function openActionModal(record: ProbationMaster, type: ActionModalType) {
   actionModalRecord.value = record
   actionModalType.value = type
   actionModalVisible.value = true
-  evalContent.value = ''
   allowEmployeeView.value = false
 }
 
@@ -341,13 +311,6 @@ function handleHold() {
   if (!actionModalRecord.value) return
   store.holdProbation(actionModalRecord.value.master_id)
   message.warning('记录已挂起')
-  closeActionModal()
-}
-
-function handleEval() {
-  if (!actionModalRecord.value) return
-  store.submitHRBPEval(actionModalRecord.value.master_id, evalContent.value || 'HRBP评价通过')
-  message.success('HRBP评价已提交')
   closeActionModal()
 }
 

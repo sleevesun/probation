@@ -126,9 +126,9 @@ const cannotEval = computed(() => {
 });
 
 const goalColumns = [
-  { title: '考核维度', dataIndex: 'dimension', width: 100 },
+  { title: '目标维度', dataIndex: 'dimension', width: 100 },
   { title: '目标内容', dataIndex: 'content' },
-  { title: '权重', dataIndex: 'weight', width: 80, customRender: ({text}: any) => `${text}%` }
+  { title: '衡量方式/预期结果', dataIndex: 'measure' }
 ];
 
 const selfEval = computed(() => (record.value?.evaluations || []).find(e => e.eval_type === 'self'));

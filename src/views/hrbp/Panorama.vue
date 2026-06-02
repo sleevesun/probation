@@ -1,47 +1,37 @@
 <template>
-  <div>
-    <a-page-header title="试用期全景看板" sub-title="管辖范围内新员工试用期全域数据监控" />
-
-    <!-- 待办摘要区 -->
-    <a-card style="margin-top: 16px" :bodyStyle="{ padding: '16px 20px' }">
-      <div class="todo-summary">
-        <div class="todo-summary__header">
-          <div class="todo-summary__title">你的待办</div>
-        </div>
-        <div class="todo-summary__tags">
-          <button type="button" 
-                  class="todo-tag todo-tag--warning" 
-                  :class="{'todo-tag--active': activeTodoFilter === '04'}"
-                  @click="onTodoClick('04')">
-            <span class="todo-tag__label">待发起流程</span>
-            <span class="todo-tag__count">{{ hrbpTodoTriggerCount }}</span>
-          </button>
-          
-          <button type="button" 
-                  class="todo-tag todo-tag--danger" 
-                  :class="{'todo-tag--active': activeTodoFilter === '06'}"
-                  @click="onTodoClick('06')">
-            <span class="todo-tag__label">待HRBP评价</span>
-            <span class="todo-tag__count">{{ hrbpTodoEvalCount }}</span>
-          </button>
-
-          <button type="button" 
-                  class="todo-tag todo-tag--primary" 
-                  :class="{'todo-tag--active': activeTodoFilter === '09'}"
-                  @click="onTodoClick('09')">
-            <span class="todo-tag__label">待发布结果</span>
-            <span class="todo-tag__count">{{ hrbpTodoPublishCount }}</span>
-          </button>
-        </div>
-      </div>
-    </a-card>
+  <div class="workbench-page">
+    <a-page-header title="试用期全景管理" sub-title="聚焦待办处理，必要时再进入全量进度" />
 
     <!-- Tabs -->
-    <a-card style="margin-top: 16px">
-      <a-tabs v-model:activeKey="activeTab">
+    <a-card class="workbench-card">
+      <a-tabs v-model:activeKey="activeTab" class="workbench-tabs">
+        <a-tab-pane key="todo" tab="待办">
+          <a-table :dataSource="todoRecords" :columns="todoColumns" rowKey="master_id" size="middle" :pagination="false" class="light-table">
+            <template #bodyCell="{ column, record }">
+              <template v-if="column.dataIndex === 'todo_type'">
+                <a-tag :color="record.probation_status === '04' ? 'gold' : record.probation_status === '09' ? 'green' : 'blue'">
+                  {{ getTodoType(record) }}
+                </a-tag>
+              </template>
+              <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
+              <template v-if="column.dataIndex === 'tenure'">{{ getMonthsSinceHire(record.hire_date) }} 个月</template>
+              <template v-if="column.key === 'action'">
+                <a-space>
+                  <a-button v-if="record.probation_status === '04'" type="primary" size="small" @click="handleTrigger(record.master_id)">开启评估</a-button>
+                  <a-button v-if="record.probation_status === '04'" size="small" @click="handleHold(record.master_id)">暂不开启</a-button>
+                  <a-button v-if="record.probation_status === '09'" type="primary" size="small" @click="openPublishModal(record)">发布结果</a-button>
+                  <a-button type="link" size="small" @click="router.push('/manager/evaluation/' + record.master_id)">查看详情</a-button>
+                </a-space>
+              </template>
+            </template>
+          </a-table>
+
+          <a-empty v-if="todoRecords.length === 0" description="当前没有待办" />
+        </a-tab-pane>
+
         <a-tab-pane key="unfinished" tab="未转正">
           <!-- 流程轴过滤 -->
-          <div style="margin-bottom: 24px; padding: 16px; background: #fafafa; border-radius: 8px;">
+          <div style="margin-bottom: 12px; padding: 6px 12px; background: #fafafa; border-radius: 8px;">
             <a-steps :current="currentStepIndex" @change="onStepChange" type="navigation" size="small" class="custom-steps">
               <a-step :title="`全部(${stepCounts.all})`" />
               <a-step :title="`待设定目标(${stepCounts.s01})`" />
@@ -80,8 +70,6 @@
                 <a-space>
                   <a-button v-if="record.probation_status === '04'" type="primary" size="small" @click="handleTrigger(record.master_id)">开启转正流程</a-button>
                   <a-button v-if="record.probation_status === '04'" type="dashed" danger size="small" @click="handleHold(record.master_id)">暂不开启</a-button>
-                  <a-button v-if="record.probation_status === '06' && !record.hrbp_eval_done" type="primary" size="small" @click="openEvalModal(record)">HRBP评价</a-button>
-                  <a-button v-if="record.probation_status === '06' && record.hrbp_eval_done" type="text" size="small">已完成评价</a-button>
                   <a-button v-if="record.probation_status === '09'" type="primary" size="small" @click="openPublishModal(record)">发布结果</a-button>
                   <a-button type="link" size="small" @click="router.push('/manager/evaluation/' + record.master_id)">查看详情</a-button>
                 </a-space>
@@ -104,44 +92,6 @@
         </a-tab-pane>
       </a-tabs>
     </a-card>
-
-    <!-- HRBP评价 Modal -->
-    <a-modal v-model:open="evalModalVisible" title="HRBP 试用期评价" width="700px" :footer="null">
-      <div v-if="currentRecord">
-        <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
-          <a-descriptions-item label="员工">{{ currentRecord.emp_name }} ({{ currentRecord.emp_id }})</a-descriptions-item>
-          <a-descriptions-item label="岗位">{{ currentRecord.position }}</a-descriptions-item>
-          <a-descriptions-item label="部门">{{ currentRecord.parent_dept }}\{{ currentRecord.dept_name }}</a-descriptions-item>
-          <a-descriptions-item label="入职时间">{{ currentRecord.hire_date }}</a-descriptions-item>
-        </a-descriptions>
-
-        <!-- 显示员工自评 -->
-        <a-card size="small" title="员工自评" style="margin-bottom: 12px">
-          <div v-if="currentSelfEval" style="white-space: pre-wrap; background: #fafafa; padding: 8px; border-radius: 4px;">{{ currentSelfEval.content }}</div>
-          <a-empty v-else description="暂无" />
-        </a-card>
-
-        <!-- 上级评价（如有） -->
-        <a-card size="small" title="上级评价" style="margin-bottom: 12px" v-if="currentManagerEval">
-          <div style="white-space: pre-wrap; background: #f6ffed; padding: 8px; border-radius: 4px;">
-            <strong>结论：{{ currentRecord.final_decision }}</strong><br/>
-            {{ currentManagerEval.content }}
-          </div>
-        </a-card>
-
-        <a-form layout="vertical">
-          <a-form-item label="HRBP 评价意见" required>
-            <a-textarea v-model:value="hrbpEvalContent" :rows="4" placeholder="请从 HRBP 角度对该员工试用期表现进行综合评价..." />
-          </a-form-item>
-          <div style="text-align: right">
-            <a-space>
-              <a-button @click="evalModalVisible = false">取消</a-button>
-              <a-button type="primary" @click="handleHRBPEval" :disabled="!hrbpEvalContent.trim()">提交评价</a-button>
-            </a-space>
-          </div>
-        </a-form>
-      </div>
-    </a-modal>
 
     <!-- 发布结果 Modal -->
     <a-modal v-model:open="publishModalVisible" title="发布转正结果" width="700px" :footer="null">
@@ -190,7 +140,7 @@ import { message } from 'ant-design-vue';
 
 const router = useRouter();
 const store = useProbationStore();
-const activeTab = ref('unfinished');
+const activeTab = ref('todo');
 const searchText = ref('');
 const filterDept = ref<string | undefined>(undefined);
 const activeTodoFilter = ref<string>('');
@@ -228,8 +178,15 @@ const onStepChange = (current: number) => {
 };
 
 const hrbpTodoTriggerCount = computed(() => store.records.filter(r => r.probation_status === '04').length);
-const hrbpTodoEvalCount = computed(() => store.records.filter(r => r.probation_status === '06' && !r.hrbp_eval_done).length);
 const hrbpTodoPublishCount = computed(() => store.records.filter(r => r.probation_status === '09').length);
+const hrbpTodoTotal = computed(() => hrbpTodoTriggerCount.value + hrbpTodoPublishCount.value);
+const todoRecords = computed(() => store.records.filter(r => r.probation_status === '04' || r.probation_status === '09'));
+
+const getTodoType = (record: ProbationMaster) => {
+  if (record.probation_status === '04') return '开启评估';
+  if (record.probation_status === '09') return '发布结果';
+  return '待处理';
+};
 
 const onTodoClick = (filterKey: string) => {
   activeTodoFilter.value = activeTodoFilter.value === filterKey ? '' : filterKey;
@@ -265,7 +222,6 @@ const filteredUnfinished = computed(() => {
 
   if (activeTodoFilter.value) {
     if (activeTodoFilter.value === '04') list = list.filter(r => r.probation_status === '04');
-    if (activeTodoFilter.value === '06') list = list.filter(r => r.probation_status === '06' && !r.hrbp_eval_done);
     if (activeTodoFilter.value === '09') list = list.filter(r => r.probation_status === '09');
   }
 
@@ -278,7 +234,7 @@ const filteredUnfinished = computed(() => {
   return list;
 });
 
-// HRBP sort: 04(待发起) & 06(待HRBP评价未完成) & 09(待发布) first -> rest by hire_date
+// HRBP sort: 04(待发起) & 09(待发布) first -> rest by hire_date
 const sortedUnfinished = computed(() => {
   return [...filteredUnfinished.value].sort((a, b) => {
     const pa = getHRBPPriority(a); const pb = getHRBPPriority(b);
@@ -289,7 +245,6 @@ const sortedUnfinished = computed(() => {
 
 function getHRBPPriority(r: ProbationMaster): number {
   if (r.probation_status === '04') return 0;
-  if (r.probation_status === '06' && !r.hrbp_eval_done) return 0;
   if (r.probation_status === '09') return 0;
   return 1;
 }
@@ -307,6 +262,16 @@ const columns = [
   { title: '操作', key: 'action', width: 240 }
 ];
 
+const todoColumns = [
+  { title: '待办类型', dataIndex: 'todo_type', width: 100 },
+  { title: '姓名', dataIndex: 'emp_name', width: 90 },
+  { title: '岗位', dataIndex: 'position', width: 140 },
+  { title: '直属主管', dataIndex: 'manager_name', width: 100 },
+  { title: '直属部门', dataIndex: 'dept_display' },
+  { title: '入职时长', dataIndex: 'tenure', width: 100 },
+  { title: '操作', key: 'action', width: 240 }
+];
+
 const finishedColumns = [
   { title: '姓名', dataIndex: 'emp_name', width: 90 },
   { title: '工号', dataIndex: 'emp_id', width: 80 },
@@ -317,27 +282,9 @@ const finishedColumns = [
   { title: '操作', key: 'action', width: 100 }
 ];
 
-// HRBP eval modal
-const evalModalVisible = ref(false);
-const currentRecord = ref<ProbationMaster | null>(null);
-const hrbpEvalContent = ref('');
-
-const currentSelfEval = computed(() => currentRecord.value?.evaluations.find(e => e.eval_type === 'self'));
-const currentManagerEval = computed(() => currentRecord.value?.evaluations.find(e => e.eval_type === 'manager'));
-
-const openEvalModal = (record: ProbationMaster) => {
-  currentRecord.value = record; hrbpEvalContent.value = ''; evalModalVisible.value = true;
-};
-
-const handleHRBPEval = () => {
-  if (currentRecord.value && hrbpEvalContent.value.trim()) {
-    store.submitHRBPEval(currentRecord.value.master_id, hrbpEvalContent.value);
-    message.success('HRBP评价提交成功！' + (currentRecord.value.manager_eval_done ? '双方评价完成，已进入审批流程。' : '等待上级完成评价后进入审批。'));
-    evalModalVisible.value = false;
-  }
-};
-
 // Publish result modal
+const currentRecord = ref<ProbationMaster | null>(null);
+const currentManagerEval = computed(() => currentRecord.value?.evaluations.find(e => e.eval_type === 'manager'));
 const publishModalVisible = ref(false);
 const allowViewEval = ref(false);
 
@@ -373,9 +320,15 @@ const handleHold = (id: string) => { store.holdProbation(id); message.warning('�
 .custom-steps :deep(.ant-steps-item) {
   cursor: pointer;
   transition: opacity 0.3s;
+  padding: 0 4px;
 }
 .custom-steps :deep(.ant-steps-item:hover) {
   opacity: 0.8;
+}
+.custom-steps :deep(.ant-steps-item-title) {
+  font-size: 12px;
+  line-height: 22px;
+  padding: 0;
 }
 .custom-steps :deep(.ant-steps-item-description) {
   font-weight: bold;
@@ -384,5 +337,9 @@ const handleHold = (id: string) => { store.holdProbation(id); message.warning('�
 /* 隐藏默认序号圆圈 */
 .custom-steps :deep(.ant-steps-item-icon) {
   display: none;
+}
+.custom-steps :deep(.ant-steps-item-tail) {
+  padding: 0;
+  top: 11px;
 }
 </style>

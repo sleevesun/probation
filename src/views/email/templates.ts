@@ -100,7 +100,7 @@ export const emailTemplates: EmailTemplate[] = [
     title: '【提醒】请提交试用期目标',
     role: '员工',
     defaultVars: {
-      employee_name: '张三',
+      employee_name: '王明辉',
       hire_date: '2025-02-01',
       login_url: `${baseUrl}/auth/token?token=mock_token_emp&redirect=/employee/goals`
     },
@@ -118,8 +118,8 @@ export const emailTemplates: EmailTemplate[] = [
     title: '【通知】试用期目标被退回',
     role: '员工',
     defaultVars: {
-      employee_name: '张三',
-      manager_name: '李四',
+      employee_name: '王明辉',
+      manager_name: '陈思远',
       reject_reason: '业绩目标权重偏低，请调整。',
       login_url: `${baseUrl}/auth/token?token=mock_token_emp&redirect=/employee/goals`
     },
@@ -141,8 +141,8 @@ export const emailTemplates: EmailTemplate[] = [
     title: '【待办】请确认员工试用期目标',
     role: '上级',
     defaultVars: {
-      manager_name: '李四',
-      employee_name: '张三',
+      manager_name: '陈思远',
+      employee_name: '王明辉',
       login_url: `${baseUrl}/auth/token?token=mock_token_mgr&redirect=/manager/dashboard`
     },
     renderBody: (vars) => `
@@ -159,9 +159,9 @@ export const emailTemplates: EmailTemplate[] = [
     title: '【通知】员工已提交试用期目标',
     role: 'HRBP',
     defaultVars: {
-      hrbp_name: '王五',
-      employee_name: '张三',
-      manager_name: '李四',
+      hrbp_name: '刘建国',
+      employee_name: '王明辉',
+      manager_name: '陈思远',
       login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
     },
     renderBody: (vars) => `
@@ -180,8 +180,8 @@ export const emailTemplates: EmailTemplate[] = [
     title: '【待办】请开启试用期评估',
     role: 'HRBP',
     defaultVars: {
-      hrbp_name: '王五',
-      employee_name: '张三',
+      hrbp_name: '刘建国',
+      employee_name: '王明辉',
       hire_date: '2025-02-01',
       login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
     },
@@ -199,7 +199,7 @@ export const emailTemplates: EmailTemplate[] = [
     title: '【待办】请完成试用期自评',
     role: '员工',
     defaultVars: {
-      employee_name: '张三',
+      employee_name: '王明辉',
       deadline_date: '2025-07-01',
       login_url: `${baseUrl}/auth/token?token=mock_token_emp&redirect=/employee/self-eval`
     },
@@ -217,8 +217,8 @@ export const emailTemplates: EmailTemplate[] = [
     title: '【通知】员工试用期评估已开启',
     role: '上级',
     defaultVars: {
-      manager_name: '李四',
-      employee_name: '张三',
+      manager_name: '陈思远',
+      employee_name: '王明辉',
       hire_date: '2025-02-01',
       login_url: `${baseUrl}/auth/token?token=mock_token_mgr&redirect=/manager/dashboard`
     },
@@ -238,8 +238,8 @@ export const emailTemplates: EmailTemplate[] = [
     title: '【待办】请进行试用期评估',
     role: '上级',
     defaultVars: {
-      manager_name: '李四',
-      employee_name: '张三',
+      manager_name: '陈思远',
+      employee_name: '王明辉',
       login_url: `${baseUrl}/auth/token?token=mock_token_mgr&redirect=/manager/evaluation/M001`
     },
     renderBody: (vars) => `
@@ -256,8 +256,8 @@ export const emailTemplates: EmailTemplate[] = [
     title: '【待办】请进行试用期评估',
     role: 'HRBP',
     defaultVars: {
-      hrbp_name: '王五',
-      employee_name: '张三',
+      hrbp_name: '刘建国',
+      employee_name: '王明辉',
       login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/manager/evaluation/M001`
     },
     renderBody: (vars) => `
@@ -274,8 +274,8 @@ export const emailTemplates: EmailTemplate[] = [
     title: '【催办】请尽快完成试用期评估',
     role: '上级',
     defaultVars: {
-      manager_name: '李四',
-      employee_name: '张三',
+      manager_name: '陈思远',
+      employee_name: '王明辉',
       hire_date: '2025-02-01',
       login_url: `${baseUrl}/auth/token?token=mock_token_mgr&redirect=/manager/evaluation/M001`
     },
@@ -293,9 +293,9 @@ export const emailTemplates: EmailTemplate[] = [
     title: '【跟进】员工试用期评估催办提醒',
     role: 'HRBP',
     defaultVars: {
-      hrbp_name: '王五',
-      employee_name: '张三',
-      manager_name: '李四',
+      hrbp_name: '刘建国',
+      employee_name: '王明辉',
+      manager_name: '陈思远',
       hire_date: '2025-02-01',
       login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
     },
