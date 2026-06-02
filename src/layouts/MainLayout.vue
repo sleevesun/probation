@@ -58,8 +58,11 @@
     
     <a-layout>
       <a-layout-header class="app-header">
+        <a-button type="link" @click="router.push('/dashboard')" class="back-home-btn">
+          <home-outlined /> 首页
+        </a-button>
         <div class="role-switcher">
-          当前演示角色: 
+          当前演示角色:
           <a-dropdown>
             <a class="ant-dropdown-link" @click.prevent>
               <b class="role-name">{{ roleMap[role] }}</b>
@@ -97,12 +100,13 @@
 import { ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useProbationStore } from '@/store/probation';
-import { 
-  UserOutlined, 
-  TeamOutlined, 
-  SafetyCertificateOutlined, 
+import {
+  UserOutlined,
+  TeamOutlined,
+  SafetyCertificateOutlined,
   CheckSquareOutlined,
-  DownOutlined
+  DownOutlined,
+  HomeOutlined
 } from '@ant-design/icons-vue';
 
 const router = useRouter();
@@ -195,11 +199,20 @@ const handleRoleChange = ({ key }: { key: string }) => {
   background: rgba(255, 255, 255, 0.92);
   padding: 0 24px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   border-bottom: 1px solid #edf1f7;
   box-shadow: none;
   backdrop-filter: blur(12px);
+}
+
+.back-home-btn {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.back-home-btn:hover {
+  color: #2563eb;
 }
 
 .role-switcher {

@@ -25,10 +25,19 @@
         </a-card>
       </a-col>
     </a-row>
+
+    <a-row style="margin-top: 24px">
+      <a-col :span="24">
+        <a-button type="link" @click="router.push('/email-demo')">
+          <mail-outlined /> 查看通知与邮件 Demo
+        </a-button>
+      </a-col>
+    </a-row>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { MailOutlined } from '@ant-design/icons-vue'
 const router = useRouter()
 </script>
