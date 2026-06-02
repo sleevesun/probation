@@ -1,22 +1,20 @@
 <template>
   <div>
     <EmployeeSwitcher />
-    <a-page-header title="我的试用期" :sub-title="`入职第 ${daysSinceHire} 天 / 共 180 天`" />
+    <a-page-header title="我的试用期" :sub-title="`已入职 ${daysSinceHire} 天`" />
 
     <a-card style="margin-top: 16px">
       <a-steps :current="currentStep" size="small" :status="stepStatus">
         <a-step title="提交目标" />
         <a-step title="上级确认" />
-        <a-step title="自评" />
-        <a-step title="上级评价" />
-        <a-step title="审批" />
+        <a-step title="试用期自评" />
         <a-step title="完成" />
       </a-steps>
     </a-card>
 
     <a-row :gutter="16" style="margin-top: 24px">
       <a-col :span="12">
-        <a-card title="待办事项" :bordered="false">
+        <a-card title="当前进展" :bordered="false">
           <template #extra>
             <a-space v-if="todoList.length > 1">
               <a-button type="text" size="small" :disabled="currentTodoIndex === 0" @click="prevTodo">
@@ -150,23 +148,14 @@ const todoList = computed(() => {
       });
       break;
     case '03':
+    case '04':
       items.push({
         id: '03',
         type: 'info',
         title: '【进行中】目标已确认',
-        desc: '目标已确认，等待 HRBP 开启评估。',
+        desc: '目标已确认，等待试用期评估开启。',
         icon: 'check',
         color: '#52c41a'
-      });
-      break;
-    case '04':
-      items.push({
-        id: '04',
-        type: 'info',
-        title: '【进行中】等待 HRBP 开启评估',
-        desc: '目标已确认，等待 HRBP 开启评估。',
-        icon: 'clock',
-        color: '#fa8c16'
       });
       break;
     case '05':
@@ -181,43 +170,16 @@ const todoList = computed(() => {
       });
       break;
     case '06':
-      items.push({
-        id: '06',
-        type: 'info',
-        title: '【进行中】等待上级评价',
-        desc: '您的自评已提交，正在等待上级完成评价。',
-        icon: 'loading',
-        color: '#722ed1'
-      });
-      break;
     case '07':
-      items.push({
-        id: '07',
-        type: 'info',
-        title: '【进行中】等待 HRBP 发起审批',
-        desc: '上级已完成评价，等待 HRBP 发起审批流程。',
-        icon: 'clock',
-        color: '#fa8c16'
-      });
-      break;
     case '08':
-      items.push({
-        id: '08',
-        type: 'info',
-        title: '【进行中】转正流程审批中',
-        desc: '您的转正申请正在审批流程中，请耐心等待。',
-        icon: 'loading',
-        color: '#fa8c16'
-      });
-      break;
     case '09':
       items.push({
-        id: '09',
+        id: 'eval',
         type: 'info',
-        title: '【进行中】等待结果通知',
-        desc: '您的转正结果将在入职满 5.5 个月后通知，请耐心等待。',
-        icon: 'clock',
-        color: '#fa8c16'
+        title: '【进行中】试用期评估中',
+        desc: '您的试用期评估正在进行中，请耐心等待结果。',
+        icon: 'loading',
+        color: '#722ed1'
       });
       break;
     case '10': {
@@ -256,16 +218,16 @@ const nextTodo = () => {
 };
 // ------------------------
 
-// 进度条: 提交目标(0) -> 上级确认(1) -> 自评(2) -> 上级评价(3) -> 审批(4) -> 完成(5)
+// 进度条: 提交目标(0) -> 上级确认(1) -> 试用期自评(2) -> 完成(3)
 const currentStep = computed(() => {
   const s = record.value?.probation_status;
   switch (s) {
     case '01': return 0;
     case '02': return 1;
-    case '03': case '04': case '05': return 2;
-    case '06': return 3;
-    case '07': case '08': case '09': return 4;
-    case '10': return 5;
+    case '03': case '04': return 1;
+    case '05': return 2;
+    case '06': case '07': case '08': case '09': return 2;
+    case '10': return 3;
     default: return 0;
   }
 });

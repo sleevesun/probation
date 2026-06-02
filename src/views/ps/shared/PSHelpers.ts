@@ -30,3 +30,21 @@ export const psStatusText = (status: string) => {
   }
   return map[status] || status
 }
+
+/** 员工端专用状态文本，隐藏后台流程细节 */
+export const psEmployeeStatusText = (status: string) => {
+  const map: Record<string, string> = {
+    '01': '待设定目标',
+    '02': '目标待确认',
+    '03': '目标已确认',
+    '04': '目标已确认',
+    '05': '待填写试用期自评',
+    '06': '试用期评估中',
+    '07': '试用期评估中',
+    '08': '试用期评估中',
+    '09': '试用期评估中',
+    '10': '已完成',
+    '99': '暂不发起/终止'
+  }
+  return map[status] || status
+}

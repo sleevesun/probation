@@ -3,33 +3,31 @@
     <!-- 左侧列表 -->
     <div class="sidebar">
       <div class="sidebar-header">
-        <h3>邮件通知场景</h3>
+        <h3>待办与通知预览</h3>
+        <p class="sidebar-hint">系统待办是流程主驱动，邮件/WOA/OTP 仅作为触达渠道</p>
       </div>
       <a-menu
         v-model:selectedKeys="selectedKeys"
         mode="inline"
-        style="height: calc(100vh - 64px); overflow-y: auto;"
+        style="height: calc(100vh - 120px); overflow-y: auto;"
         @select="onSelectTemplate"
       >
-        <a-menu-item-group key="g1" title="1. 目标设定阶段">
-          <a-menu-item v-for="t in templates.filter(t => t.id.startsWith('01') || t.id.startsWith('02') || t.id.startsWith('03') || t.id.startsWith('04'))" :key="t.id">
-            <a-tag :color="getRoleColor(t.role)" size="small">{{ t.role }}</a-tag> {{ t.title }}
-          </a-menu-item>
-        </a-menu-item-group>
-        <a-menu-item-group key="g2" title="2. 开启试用期评估">
-          <a-menu-item v-for="t in templates.filter(t => t.id.startsWith('05') || t.id.startsWith('06') || t.id.startsWith('07'))" :key="t.id">
-            <a-tag :color="getRoleColor(t.role)" size="small">{{ t.role }}</a-tag> {{ t.title }}
-          </a-menu-item>
-        </a-menu-item-group>
-        <a-menu-item-group key="g3" title="3. 试用期评估">
-          <a-menu-item v-for="t in templates.filter(t => t.id.startsWith('08') || t.id.startsWith('09') || t.id.startsWith('10') || t.id.startsWith('11'))" :key="t.id">
+        <a-menu-item-group v-for="group in phaseGroups" :key="group.phase">
+          <template #title>
+            <span>{{ group.phase }}</span>
+            <span class="phase-desc">{{ group.description }}</span>
+          </template>
+          <a-menu-item
+            v-for="t in templates.filter(t => t.phase === group.phase)"
+            :key="t.id"
+          >
             <a-tag :color="getRoleColor(t.role)" size="small">{{ t.role }}</a-tag> {{ t.title }}
           </a-menu-item>
         </a-menu-item-group>
       </a-menu>
     </div>
 
-    <!-- 中间预览区 (原右侧) -->
+    <!-- 中间预览区 -->
     <div class="preview-panel">
       <div class="preview-header">
         <div class="header-left">
@@ -40,6 +38,25 @@
           <a-button @click="showConfig = !showConfig">
             {{ showConfig ? '隐藏配置' : '显示配置' }}
           </a-button>
+        </div>
+      </div>
+      <!-- 触发条件与动作说明 -->
+      <div v-if="currentTemplate" class="meta-bar">
+        <div class="meta-item">
+          <span class="meta-label">阶段</span>
+          <a-tag color="blue">{{ currentTemplate.phase }}</a-tag>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">接收角色</span>
+          <a-tag :color="getRoleColor(currentTemplate.role)">{{ currentTemplate.role }}</a-tag>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">触发条件</span>
+          <span class="meta-value">{{ currentTemplate.trigger }}</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-label">期望动作</span>
+          <span class="meta-value">{{ currentTemplate.action }}</span>
         </div>
       </div>
       <div class="preview-content">
@@ -75,7 +92,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { emailTemplates, renderEmailSkin } from './templates';
+import { emailTemplates, renderEmailSkin, phaseGroups } from './templates';
 import { message } from 'ant-design-vue';
 
 const templates = ref(emailTemplates);
@@ -136,7 +153,7 @@ const copyToClipboard = (val: string) => {
 }
 
 .sidebar {
-  width: 280px;
+  width: 300px;
   background: #fff;
   border-right: 1px solid #e8e8e8;
   flex-shrink: 0;
@@ -148,9 +165,24 @@ const copyToClipboard = (val: string) => {
 }
 
 .sidebar-header h3 {
-  margin: 0;
+  margin: 0 0 4px 0;
   font-size: 16px;
   font-weight: 600;
+}
+
+.sidebar-hint {
+  margin: 0;
+  font-size: 12px;
+  color: #999;
+  line-height: 1.4;
+}
+
+.phase-desc {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  font-weight: 400;
+  margin-top: 2px;
 }
 
 .operation-panel {
@@ -187,6 +219,32 @@ const copyToClipboard = (val: string) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.meta-bar {
+  background: #fafafa;
+  padding: 12px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.meta-label {
+  font-size: 12px;
+  color: #999;
+  white-space: nowrap;
+}
+
+.meta-value {
+  font-size: 13px;
+  color: #333;
 }
 
 .preview-content {
