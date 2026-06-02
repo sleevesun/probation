@@ -26,11 +26,11 @@
       </a-col>
     </a-row>
 
-    <a-row style="margin-top: 24px">
-      <a-col :span="24">
-        <a-button type="link" @click="router.push('/email-demo')">
-          <mail-outlined /> 查看通知与邮件 Demo
-        </a-button>
+    <a-row :gutter="[16, 16]" style="margin-top: 16px">
+      <a-col :span="6">
+        <a-card title="通知与邮件" hoverable @click="router.push('/email-demo')" style="background: #f6ffed">
+          <p><mail-outlined /> 查看待办通知与邮件模板</p>
+        </a-card>
       </a-col>
     </a-row>
   </div>

@@ -36,7 +36,7 @@
     
     <a-layout>
       <a-layout-header class="app-header">
-        <a-button type="link" @click="router.push('/dashboard')" class="back-home-btn">
+        <a-button type="link" @click="goHome" class="back-home-btn">
           <home-outlined /> 首页
         </a-button>
         <div class="role-switcher">
@@ -118,6 +118,10 @@ const handleRoleChange = ({ key }: { key: string }) => {
   if (key === 'Manager') router.push('/manager/team');
   if (key === 'HRBP') router.push('/hrbp/panorama');
   if (key === 'Approver') router.push('/approver/center');
+};
+
+const goHome = () => {
+  window.location.href = '/dashboard';
 };
 </script>
 
