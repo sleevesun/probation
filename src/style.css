@@ -111,7 +111,7 @@ body {
 
 .theme-picker__choices {
   display: grid;
-  grid-template-columns: repeat(2, minmax(280px, 420px));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 420px));
   gap: 24px;
   justify-content: center;
 }
@@ -138,6 +138,11 @@ body {
 .theme-picker__card--ps {
   background: linear-gradient(180deg, #fffaf8 0%, #f2f2f2 100%);
   color: #352f2f;
+}
+
+.theme-picker__card--email {
+  background: linear-gradient(180deg, #f6fff3 0%, #edf8f0 100%);
+  color: #213547;
 }
 
 .theme-picker__badge {
@@ -319,6 +324,15 @@ body {
   margin-bottom: 14px;
   color: var(--ps-muted);
   font-size: 12px;
+}
+
+.ps-layout__crumb--link {
+  color: var(--ps-link-blue);
+  cursor: pointer;
+}
+
+.ps-layout__crumb--link:hover {
+  text-decoration: underline;
 }
 
 .ps-layout__crumb-sep {

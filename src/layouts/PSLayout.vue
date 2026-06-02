@@ -53,9 +53,11 @@
 
       <main class="ps-layout__main">
         <div class="ps-layout__crumbs">
-          <span v-for="(crumb, index) in breadcrumbs" :key="crumb + index" class="ps-layout__crumb">
+          <span class="ps-layout__crumb ps-layout__crumb--link" @click="goHome">首页</span>
+          <span class="ps-layout__crumb-sep">/</span>
+          <span v-for="(crumb, index) in breadcrumbs.slice(1)" :key="crumb + index" class="ps-layout__crumb">
             <span>{{ crumb }}</span>
-            <span v-if="index < breadcrumbs.length - 1" class="ps-layout__crumb-sep">/</span>
+            <span v-if="index < breadcrumbs.length - 2" class="ps-layout__crumb-sep">/</span>
           </span>
         </div>
 
@@ -151,5 +153,9 @@ function handleRoleChange(nextRole: RoleKey) {
   if (nextRole === 'Manager') router.push('/manager/team')
   if (nextRole === 'HRBP') router.push('/hrbp/panorama')
   if (nextRole === 'Approver') router.push('/approver/center')
+}
+
+function goHome() {
+  window.location.href = '/dashboard'
 }
 </script>

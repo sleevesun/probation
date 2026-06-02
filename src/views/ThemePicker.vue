@@ -20,6 +20,13 @@
         <p>切换为传统 HR 工作台风格，采用左侧导航、页签、表格和分区表单组织信息。</p>
         <span class="theme-picker__action">进入 PS 方案</span>
       </button>
+
+      <button class="theme-picker__card theme-picker__card--email" @click="openEmailDemo">
+        <span class="theme-picker__badge">Email Demo</span>
+        <h2>发送邮件概览</h2>
+        <p>直接进入邮件通知与深链跳转演示，便于验证待办邮件和 Token 登录流程。</p>
+        <span class="theme-picker__action">进入邮件概览</span>
+      </button>
     </div>
   </div>
 </template>
@@ -34,5 +41,12 @@ const themeStore = useThemeStore()
 function enterTheme(theme: DemoTheme) {
   themeStore.setTheme(theme)
   router.push('/dashboard')
+}
+
+function openEmailDemo() {
+  if (!themeStore.theme) {
+    themeStore.setTheme('modern')
+  }
+  router.push('/email-demo')
 }
 </script>
