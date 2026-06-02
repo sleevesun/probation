@@ -37,6 +37,16 @@
               </a-alert>
             </a-list-item>
 
+            <a-list-item v-else-if="currentTodo.type === 'alert-action'">
+              <a-alert type="warning" show-icon style="width: 100%">
+                <template #message>{{ currentTodo.title }}</template>
+                <template #description>
+                  <div style="white-space: pre-line; margin-bottom: 8px">{{ currentTodo.desc }}</div>
+                  <a-button type="primary" size="small" @click="router.push(currentTodo.path)">去修改</a-button>
+                </template>
+              </a-alert>
+            </a-list-item>
+
             <a-list-item v-else>
               <a-list-item-meta :description="currentTodo.desc">
                 <template #title>
@@ -116,21 +126,12 @@ const todoList = computed(() => {
   switch (status) {
     case '01': {
       const isReturned = !!record.value?.return_comment;
-      // 如果有退回意见，先显示退回原因
-      if (isReturned) {
-        items.push({
-          id: 'return_comment',
-          type: 'alert',
-          title: '目标被退回，请修改后重新提交',
-          desc: record.value.return_comment
-        });
-      }
       items.push({
         id: '01',
-        type: 'action',
-        title: isReturned ? '【待办】重新编辑试用期目标' : '【待办】填写试用期目标',
+        type: isReturned ? 'alert-action' : 'action',
+        title: isReturned ? '目标被退回，请修改后重新提交' : '【待办】填写试用期目标',
         desc: isReturned
-          ? '请根据上级退回意见调整目标内容，修改完成后重新提交。'
+          ? `退回意见：${record.value.return_comment}\n请根据上级意见调整目标内容，修改完成后重新提交。`
           : '请在入职 2 周内完成试用期目标的设定并提交上级确认。',
         icon: 'exception',
         color: '#f56a00',

@@ -18,8 +18,8 @@
               <template v-if="column.key === 'action'">
                 <a-space>
                   <a-button v-if="record.probation_status === '02'" type="primary" size="small" @click="openGoalModal(record)">处理目标</a-button>
-                  <a-button v-if="record.probation_status === '06' && !record.manager_eval_done" type="primary" size="small" @click="router.push(`/manager/evaluation/${record.master_id}`)">去评价</a-button>
-                  <a-button type="link" size="small" @click="router.push(`/manager/evaluation/${record.master_id}`)">查看详情</a-button>
+                  <a-button v-if="record.probation_status === '06' && !record.manager_eval_done" type="primary" size="small" @click="openEvalModal(record)">去评价</a-button>
+                  <a-button type="link" size="small" @click="openEvalModal(record)">查看详情</a-button>
                 </a-space>
               </template>
             </template>
@@ -74,10 +74,10 @@
               <template v-if="column.key === 'action'">
                 <a-space>
                   <a-button v-if="record.probation_status === '02'" type="primary" size="small" @click="openGoalModal(record)">目标确认</a-button>
-                  <a-button v-if="record.probation_status === '06' && !record.manager_eval_done" type="primary" size="small" @click="router.push(`/manager/evaluation/${record.master_id}`)">转正评价</a-button>
-                  <a-button v-if="record.probation_status === '06' && record.manager_eval_done" type="text" size="small">已完成评价</a-button>
+                  <a-button v-if="record.probation_status === '06' && !record.manager_eval_done" type="primary" size="small" @click="openEvalModal(record)">转正评价</a-button>
+                  <a-button v-if="record.probation_status === '06' && record.manager_eval_done" type="text" size="small" @click="openEvalModal(record)">已完成评价</a-button>
                   <a-button v-if="['03'].includes(record.probation_status)" type="text" danger size="small" @click="forceReturn(record)">退回调整</a-button>
-                  <a-button type="link" size="small" @click="router.push(`/manager/evaluation/${record.master_id}`)">查看详情</a-button>
+                  <a-button type="link" size="small" @click="openEvalModal(record)">查看详情</a-button>
                 </a-space>
               </template>
             </template>
@@ -94,7 +94,7 @@
                 <a-tag :color="record.final_decision === '不符合录用条件' ? 'error' : 'success'">{{ record.final_decision || '-' }}</a-tag>
               </template>
               <template v-if="column.key === 'action'">
-                <a-button type="link" size="small" @click="router.push(`/manager/evaluation/${record.master_id}`)">查看详情</a-button>
+                <a-button type="link" size="small" @click="openEvalModal(record)">查看详情</a-button>
               </template>
             </template>
           </a-table>
@@ -132,16 +132,94 @@
         </div>
       </div>
     </a-modal>
+
+    <!-- Force Return Modal -->
+    <a-modal v-model:open="forceReturnModalVisible" title="退回调整" @ok="handleForceReturn" okText="确认退回" cancelText="取消" okType="danger" :okButtonProps="{ disabled: !forceReturnComment.trim() }">
+      <p>确认要退回 <strong>{{ forceReturnRecord?.emp_name }}</strong> 的目标，要求其重新调整吗？</p>
+      <p style="color: #999; font-size: 13px">退回后流程将打回至"待设定目标"步骤。</p>
+      <a-form-item label="退回说明" required style="margin-top: 16px">
+        <a-textarea v-model:value="forceReturnComment" :rows="4" placeholder="请输入退回说明，告知员工需要调整的原因（必填）..." />
+      </a-form-item>
+    </a-modal>
+
+    <!-- Evaluation Modal -->
+    <a-modal v-model:open="evalModalVisible" title="试用期评价与转正决策" width="900px" :footer="null" :bodyStyle="{ maxHeight: '75vh', overflowY: 'auto' }">
+      <div v-if="evalModalRecord">
+        <!-- 员工信息 -->
+        <a-descriptions bordered size="small" :column="3" style="margin-bottom: 16px">
+          <a-descriptions-item label="员工姓名">{{ evalModalRecord.emp_name }}</a-descriptions-item>
+          <a-descriptions-item label="工号">{{ evalModalRecord.emp_id }}</a-descriptions-item>
+          <a-descriptions-item label="岗位">{{ evalModalRecord.position }}</a-descriptions-item>
+          <a-descriptions-item label="部门">{{ evalModalRecord.parent_dept }}\{{ evalModalRecord.dept_name }}</a-descriptions-item>
+          <a-descriptions-item label="入职日期">{{ evalModalRecord.hire_date }}</a-descriptions-item>
+          <a-descriptions-item label="入职时长">{{ getMonthsSinceHire(evalModalRecord.hire_date) }} 个月</a-descriptions-item>
+          <a-descriptions-item label="直属上级">{{ evalModalRecord.manager_name }}</a-descriptions-item>
+          <a-descriptions-item label="HRBP">{{ evalModalRecord.hrbp_name }}</a-descriptions-item>
+        </a-descriptions>
+
+        <!-- 试用期考核目标 -->
+        <div style="font-weight: 600; margin: 16px 0 8px; font-size: 14px">试用期考核目标</div>
+        <a-table :dataSource="evalModalRecord.goals" :columns="goalColumns" :pagination="false" rowKey="goal_id" size="small" bordered />
+
+        <!-- 员工自评与总结 -->
+        <div style="font-weight: 600; margin: 16px 0 8px; font-size: 14px">员工自评与总结</div>
+        <div v-if="evalSelfEval" style="white-space: pre-wrap; background: #fafafa; padding: 12px; border-radius: 4px; font-size: 13px">
+          {{ evalSelfEval.content }}
+        </div>
+        <a-empty v-else description="员工暂未填写自评" :imageStyle="{ height: '40px' }" />
+
+        <!-- 上级评价 -->
+        <div style="font-weight: 600; margin: 20px 0 8px; font-size: 14px">上级评价</div>
+        <a-alert
+          v-if="evalModalRecord.manager_eval_done"
+          type="success" message="您已完成评价" show-icon style="margin-bottom: 16px"
+        />
+        <a-alert
+          v-else-if="evalModalRecord.probation_status !== '06'"
+          type="info" message="当前阶段不可评价" :description="`当前状态：${getDetailedStatusText(evalModalRecord)}`" show-icon style="margin-bottom: 16px"
+        />
+
+        <a-form layout="vertical">
+          <a-form-item label="建议转正结论" required>
+            <a-radio-group v-model:value="evalDecision" button-style="solid" :disabled="evalCannotEval">
+              <a-radio-button value="超出预期">超出预期</a-radio-button>
+              <a-radio-button value="符合预期">符合预期</a-radio-button>
+              <a-radio-button value="不符合录用条件">不符合</a-radio-button>
+            </a-radio-group>
+          </a-form-item>
+
+          <a-form-item label="评价意见与客观事实" :required="evalDecision === '不符合录用条件'">
+            <a-textarea
+              v-model:value="evalReason"
+              :rows="4"
+              placeholder="请填写评价意见。如选择不符合条件，此处为必填项。"
+              :disabled="evalCannotEval"
+            />
+          </a-form-item>
+
+          <div style="margin-top: 16px">
+            <a-button
+              type="primary" block size="large"
+              :disabled="evalCannotEval"
+              @click="handleEvalSubmit"
+              :loading="evalSaving"
+            >
+              提交上级评价
+            </a-button>
+            <div style="text-align: center; margin-top: 8px; color: #999; font-size: 12px" v-if="!evalCannotEval">
+              提交后将由 HRBP 发起审批流程
+            </div>
+          </div>
+        </a-form>
+      </div>
+    </a-modal>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
 import { useProbationStore, ProbationMaster, STATUS_COLOR, getDetailedStatusText, getMonthsSinceHire, getCurrentHandler } from '@/store/probation';
-import { message, Modal } from 'ant-design-vue';
-
-const router = useRouter();
+import { message } from 'ant-design-vue';
 const store = useProbationStore();
 
 const activeTab = ref('todo');
@@ -159,7 +237,7 @@ const finishedList = computed(() => store.records.filter(r => r.probation_status
 const formatCount = (count: number) => count > 0 ? count : '-';
 
 const stepCounts = computed(() => {
-  // 只统计当前主管下属的数据
+  // 只统计当前上级下属的数据
   // 这里简化处理，因为 mock 数据中 manager_name 都是 '陈思远'
   const records = store.records;
   return {
@@ -226,7 +304,7 @@ const filteredUnfinished = computed(() => {
   return list;
 });
 
-// 排序: 主管待办(02:待确认, 06:待上级评价) -> 04(待发起) -> 入职日期asc
+// 排序: 上级待办(02:待确认, 06:待上级评价) -> 04(待发起) -> 入职日期asc
 const sortedUnfinished = computed(() => {
   return [...filteredUnfinished.value].sort((a, b) => {
     const pa = getManagerPriority(a); const pb = getManagerPriority(b);
@@ -285,6 +363,10 @@ const currentReviewRecord = ref<ProbationMaster | null>(null);
 const showRejectInput = ref(false);
 const rejectComment = ref('');
 
+const forceReturnModalVisible = ref(false);
+const forceReturnRecord = ref<ProbationMaster | null>(null);
+const forceReturnComment = ref('');
+
 const openGoalModal = (record: ProbationMaster) => {
   currentReviewRecord.value = record; showRejectInput.value = false; rejectComment.value = ''; goalModalVisible.value = true;
 };
@@ -301,11 +383,56 @@ const handleReject = () => {
 };
 
 const forceReturn = (record: ProbationMaster) => {
-  Modal.confirm({
-    title: '确认要退回目标让员工重新调整吗？',
-    content: '退回后流程将打回至"待设定目标"步骤',
-    onOk() { store.returnGoals(record.master_id, '主管要求调整目标'); message.success('已退回调整'); }
-  });
+  forceReturnRecord.value = record;
+  forceReturnComment.value = '';
+  forceReturnModalVisible.value = true;
+};
+
+const handleForceReturn = () => {
+  if (!forceReturnRecord.value || !forceReturnComment.value.trim()) return;
+  store.returnGoals(forceReturnRecord.value.master_id, forceReturnComment.value);
+  message.success('已退回调整，退回说明已通知员工');
+  forceReturnModalVisible.value = false;
+  forceReturnRecord.value = null;
+  forceReturnComment.value = '';
+};
+
+// 评价弹窗
+const evalModalVisible = ref(false);
+const evalModalRecord = ref<ProbationMaster | null>(null);
+const evalDecision = ref<'超出预期' | '符合预期' | '不符合录用条件'>('符合预期');
+const evalReason = ref('');
+const evalSaving = ref(false);
+
+const evalCannotEval = computed(() => {
+  if (!evalModalRecord.value) return true;
+  return evalModalRecord.value.probation_status !== '06' || evalModalRecord.value.manager_eval_done;
+});
+
+const evalSelfEval = computed(() => {
+  if (!evalModalRecord.value) return null;
+  return (evalModalRecord.value.evaluations || []).find((e: any) => e.eval_type === 'self') || null;
+});
+
+const openEvalModal = (record: ProbationMaster) => {
+  evalModalRecord.value = record;
+  evalDecision.value = '符合预期';
+  evalReason.value = '';
+  evalModalVisible.value = true;
+};
+
+const handleEvalSubmit = () => {
+  if (evalDecision.value === '不符合录用条件' && !evalReason.value.trim()) {
+    message.error('结论为"不符合"时，评价意见为必填项');
+    return;
+  }
+  evalSaving.value = true;
+  setTimeout(() => {
+    store.submitManagerEval(evalModalRecord.value!.master_id, evalReason.value || '上级评价通过', evalDecision.value);
+    message.success('上级评价提交成功！等待 HRBP 发起审批流程。');
+    evalSaving.value = false;
+    evalModalVisible.value = false;
+  }, 800);
 };
 </script>
 

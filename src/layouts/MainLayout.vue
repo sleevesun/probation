@@ -10,49 +10,27 @@
         mode="inline"
         @click="handleMenuClick"
       >
-        <a-sub-menu key="sub1" v-if="role === 'Employee'">
-          <template #title>
-            <span>
-              <user-outlined />
-              <span>员工端门户</span>
-            </span>
-          </template>
+        <a-menu-item-group key="group-employee" v-if="role === 'Employee'">
+          <template #title><user-outlined /> 员工</template>
           <a-menu-item key="/employee/dashboard">我的试用期</a-menu-item>
           <a-menu-item key="/employee/goals">目标设定</a-menu-item>
           <a-menu-item key="/employee/self-eval">试用期自评</a-menu-item>
-        </a-sub-menu>
+        </a-menu-item-group>
 
-        <a-sub-menu key="sub2" v-if="role === 'Manager'">
-          <template #title>
-            <span>
-              <team-outlined />
-              <span>主管端门户</span>
-            </span>
-          </template>
+        <a-menu-item-group key="group-manager" v-if="role === 'Manager'">
+          <template #title><team-outlined /> 上级</template>
           <a-menu-item key="/manager/team">团队管理看板</a-menu-item>
-        </a-sub-menu>
-        
-        <a-sub-menu key="sub3" v-if="role === 'HRBP'">
-          <template #title>
-            <span>
-              <safety-certificate-outlined />
-              <span>HRBP 门户</span>
-            </span>
-          </template>
+        </a-menu-item-group>
+
+        <a-menu-item-group key="group-hrbp" v-if="role === 'HRBP'">
+          <template #title><safety-certificate-outlined /> HRBP</template>
           <a-menu-item key="/hrbp/panorama">试用期全景看板</a-menu-item>
-          <a-menu-item key="/hrbp/console">转正触发控制台</a-menu-item>
-        </a-sub-menu>
+        </a-menu-item-group>
 
-        <a-sub-menu key="sub4" v-if="role === 'Approver'">
-          <template #title>
-            <span>
-              <check-square-outlined />
-              <span>审批中心</span>
-            </span>
-          </template>
+        <a-menu-item-group key="group-approver" v-if="role === 'Approver'">
+          <template #title><check-square-outlined /> 审批</template>
           <a-menu-item key="/approver/center">我的审批待办</a-menu-item>
-        </a-sub-menu>
-
+        </a-menu-item-group>
       </a-menu>
     </a-layout-sider>
     
@@ -71,7 +49,7 @@
             <template #overlay>
               <a-menu @click="handleRoleChange">
                 <a-menu-item key="Employee">新员工</a-menu-item>
-                <a-menu-item key="Manager">直属主管</a-menu-item>
+                <a-menu-item key="Manager">直属上级</a-menu-item>
                 <a-menu-item key="HRBP">HRBP</a-menu-item>
                 <a-menu-item key="Approver">上级审批人</a-menu-item>
               </a-menu>

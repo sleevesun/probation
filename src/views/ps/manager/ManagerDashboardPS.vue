@@ -3,7 +3,7 @@
     <div class="ps-page__header">
       <div>
         <div class="ps-page__title">团队试用期看板</div>
-        <div class="ps-page__subtitle">主管视角下统一处理目标确认、评估提交和历史记录查询。</div>
+        <div class="ps-page__subtitle">上级视角下统一处理目标确认、评估提交和历史记录查询。</div>
       </div>
     </div>
 
@@ -200,7 +200,7 @@
               <a-radio value="不符合录用条件">不符合录用条件</a-radio>
             </a-radio-group>
           </div>
-          <a-textarea v-model:value="reason" :rows="5" placeholder="填写主管评估意见" />
+          <a-textarea v-model:value="reason" :rows="5" placeholder="填写上级评估意见" />
           <div class="ps-toolbar" style="margin-top: 16px">
             <div class="ps-toolbar__spacer"></div>
             <a-button size="small" @click="closeActionModal">取消</a-button>
@@ -293,7 +293,7 @@ function matchesStage(record: ProbationMaster, stages: StageFilter[]) {
 function evalTypeText(type: string) {
   const map: Record<string, string> = {
     self: '员工自评',
-    manager: '直属主管评价',
+    manager: '直属上级评价',
     hrbp: 'HRBP评价',
     invited: '邀请评议'
   }
@@ -359,8 +359,8 @@ function handleSubmitEvaluation() {
     message.error('不符合录用条件时必须填写说明')
     return
   }
-  store.submitManagerEval(actionModalRecord.value.master_id, reason.value || '主管评估通过', decision.value)
-  message.success('主管评估已提交')
+  store.submitManagerEval(actionModalRecord.value.master_id, reason.value || '上级评估通过', decision.value)
+  message.success('上级评估已提交')
   closeActionModal()
 }
 </script>

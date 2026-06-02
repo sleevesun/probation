@@ -57,8 +57,8 @@
           </a-descriptions>
         </a-card>
 
-        <!-- 主管决策 -->
-        <a-card title="主管评价" :bordered="false" style="background-color: #f0f5ff">
+        <!-- 上级决策 -->
+        <a-card title="上级评价" :bordered="false" style="background-color: #f0f5ff">
           <a-alert
             v-if="record?.manager_eval_done"
             type="success" message="您已完成评价" show-icon style="margin-bottom: 16px"
@@ -152,7 +152,7 @@ const handleSubmit = () => {
   }
   saving.value = true;
   setTimeout(() => {
-    store.submitManagerEval(record.value!.master_id, reason.value || '主管评价通过', decision.value);
+    store.submitManagerEval(record.value!.master_id, reason.value || '上级评价通过', decision.value);
     message.success('上级评价提交成功！等待 HRBP 发起审批流程。');
     saving.value = false;
     router.push('/manager/team');

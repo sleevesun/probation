@@ -86,17 +86,6 @@ const routes: RouteRecordRaw[] = [
     ]
   },
   {
-    path: '/hrbp/console',
-    component: ThemeLayout,
-    children: [
-      {
-        path: '',
-        name: 'HRBPConsole',
-        component: () => import('@/views/routes/HRBPConsoleRoute.vue')
-      }
-    ]
-  },
-  {
     path: '/approver/center',
     component: ThemeLayout,
     children: [

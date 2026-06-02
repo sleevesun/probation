@@ -3,14 +3,14 @@
     <div class="ps-page__header">
       <div>
         <div class="ps-page__title">转正评估</div>
-        <div class="ps-page__subtitle">列表进入详情页的传统评估模式，按信息区块展示考核依据与主管决策。</div>
+        <div class="ps-page__subtitle">列表进入详情页的传统评估模式，按信息区块展示考核依据与上级决策。</div>
       </div>
       <a-button size="small" @click="router.push('/manager/team')">返回列表</a-button>
     </div>
 
     <section class="ps-panel">
       <div class="ps-alert" :class="cannotEval ? 'ps-alert--warning' : 'ps-alert--info'">
-        {{ cannotEval ? readonlyHint : '当前记录可进行主管评估，提交后将由 HRBP 发起审批流程。' }}
+        {{ cannotEval ? readonlyHint : '当前记录可进行上级评估，提交后将由 HRBP 发起审批流程。' }}
       </div>
     </section>
 
@@ -54,7 +54,7 @@
     </section>
 
     <section class="ps-panel">
-      <div class="ps-section-title">主管评估</div>
+      <div class="ps-section-title">上级评估</div>
       <div class="ps-filter-bar">
         <label>结论</label>
         <a-radio-group v-model:value="decision" :disabled="cannotEval">
@@ -63,7 +63,7 @@
           <a-radio value="不符合录用条件">不符合录用条件</a-radio>
         </a-radio-group>
       </div>
-      <a-textarea v-model:value="reason" :rows="6" :disabled="cannotEval" placeholder="填写主管评估意见" />
+      <a-textarea v-model:value="reason" :rows="6" :disabled="cannotEval" placeholder="填写上级评估意见" />
       <div class="ps-toolbar" style="margin-top: 16px">
         <div class="ps-toolbar__spacer"></div>
         <a-button size="small" @click="router.push('/manager/team')">取消</a-button>
@@ -89,8 +89,8 @@ const record = computed(() => store.records.find(item => item.master_id === rout
 const cannotEval = computed(() => !record.value || record.value.probation_status !== '06' || record.value.manager_eval_done)
 const readonlyHint = computed(() => {
   if (!record.value) return '未找到对应记录。'
-  if (record.value.manager_eval_done) return '该记录已完成主管评估，目前为只读状态。'
-  return `当前状态为 ${record.value.probation_status}，暂不可提交主管评估。`
+  if (record.value.manager_eval_done) return '该记录已完成上级评估，目前为只读状态。'
+  return `当前状态为 ${record.value.probation_status}，暂不可提交上级评估。`
 })
 const decision = ref<'超出预期' | '符合预期' | '不符合录用条件'>('符合预期')
 const reason = ref('')
@@ -102,8 +102,8 @@ function handleSubmit() {
   }
   saving.value = true
   setTimeout(() => {
-    store.submitManagerEval(record.value!.master_id, reason.value || '主管评估通过', decision.value)
-    message.success('主管评估已提交')
+    store.submitManagerEval(record.value!.master_id, reason.value || '上级评估通过', decision.value)
+    message.success('上级评估已提交')
     saving.value = false
     router.push('/manager/team')
   }, 350)

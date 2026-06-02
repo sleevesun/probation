@@ -95,7 +95,6 @@ const routeTitleMap: Record<string, string[]> = {
   '/manager/team': ['首页', '流程审批', '团队试用期看板'],
   '/manager/evaluation/:id': ['首页', '流程审批', '转正评估'],
   '/hrbp/panorama': ['首页', 'HRG自助', '转正管理'],
-  '/hrbp/console': ['首页', 'HRG自助', '流程触发控制台'],
   '/approver/center': ['首页', '流程审批', '审批中心']
 }
 
@@ -123,8 +122,7 @@ const menuByRole: Record<RoleKey, Array<{ title: string; items: Array<{ label: s
     {
       title: 'HRG自助',
       items: [
-        { label: '转正管理', path: '/hrbp/panorama' },
-        { label: '流程触发控制台', path: '/hrbp/console' }
+        { label: '转正管理', path: '/hrbp/panorama' }
       ]
     }
   ],

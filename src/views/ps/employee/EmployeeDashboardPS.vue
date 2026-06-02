@@ -23,9 +23,9 @@
           <tbody>
             <tr v-for="item in todoRows" :key="item.title">
               <td>{{ item.title }}</td>
-              <td>{{ item.desc }}</td>
+              <td style="white-space: pre-line">{{ item.desc }}</td>
               <td>
-                <a-button v-if="item.path" size="small" @click="router.push(item.path)">进入</a-button>
+                <a-button v-if="item.path" size="small" type="primary" @click="router.push(item.path)">{{ item.actionText || '进入' }}</a-button>
                 <span v-else>-</span>
               </td>
             </tr>
@@ -67,53 +67,51 @@ const todoRows = computed(() => {
   switch (status) {
     case '01': {
       const isReturned = !!record.value?.return_comment
-      const items = []
-      if (isReturned) {
-        items.push({ title: '⚠️ 目标被退回', desc: record.value.return_comment, path: '' })
-      }
-      items.push({
-        title: isReturned ? '重新编辑试用期目标' : '填写试用期目标',
-        desc: isReturned ? '请根据上级退回意见调整目标内容，修改完成后重新提交。' : '请在入职 2 周内完成试用期目标的设定并提交上级确认。',
-        path: '/employee/goals'
-      })
-      return items
+      return [{
+        title: isReturned ? '目标被退回，请修改后重新提交' : '填写试用期目标',
+        desc: isReturned
+          ? `退回意见：${record.value.return_comment}\n请根据上级意见调整目标内容，修改完成后重新提交。`
+          : '请在入职 2 周内完成试用期目标的设定并提交上级确认。',
+        path: '/employee/goals',
+        actionText: isReturned ? '去修改' : '进入'
+      }]
     }
     case '02':
       return [
-        { title: '等待上级确认目标', desc: '您的试用期目标已提交，正在等待上级确认。', path: '' }
+        { title: '等待上级确认目标', desc: '您的试用期目标已提交，正在等待上级确认。', path: '', actionText: '进入' }
       ]
     case '03':
       return [
-        { title: '目标已确认', desc: '目标已确认，等待 HRBP 开启评估。', path: '' }
+        { title: '目标已确认', desc: '目标已确认，等待 HRBP 开启评估。', path: '', actionText: '进入' }
       ]
     case '04':
       return [
-        { title: '等待 HRBP 开启评估', desc: '目标已确认，等待 HRBP 开启评估。', path: '' }
+        { title: '等待 HRBP 开启评估', desc: '目标已确认，等待 HRBP 开启评估。', path: '', actionText: '进入' }
       ]
     case '05':
       return [
-        { title: '填写试用期自评', desc: '转正流程已开启，请尽快完成转正自评。', path: '/employee/self-eval' }
+        { title: '填写试用期自评', desc: '转正流程已开启，请尽快完成转正自评。', path: '/employee/self-eval', actionText: '进入' }
       ]
     case '06':
       return [
-        { title: '等待上级评价', desc: '您的自评已提交，正在等待上级完成评价。', path: '' }
+        { title: '等待上级评价', desc: '您的自评已提交，正在等待上级完成评价。', path: '', actionText: '进入' }
       ]
     case '07':
       return [
-        { title: '等待 HRBP 发起审批', desc: '上级已完成评价，等待 HRBP 发起审批流程。', path: '' }
+        { title: '等待 HRBP 发起审批', desc: '上级已完成评价，等待 HRBP 发起审批流程。', path: '', actionText: '进入' }
       ]
     case '08':
       return [
-        { title: '转正流程审批中', desc: '您的转正申请正在审批流程中，请耐心等待。', path: '' }
+        { title: '转正流程审批中', desc: '您的转正申请正在审批流程中，请耐心等待。', path: '', actionText: '进入' }
       ]
     case '09':
       return [
-        { title: '等待结果通知', desc: '您的转正结果将在入职满 5.5 个月后通知，请耐心等待。', path: '' }
+        { title: '等待结果通知', desc: '您的转正结果将在入职满 5.5 个月后通知，请耐心等待。', path: '', actionText: '进入' }
       ]
     case '10': {
       const isPassed = record.value?.final_decision !== '不符合录用条件'
       return [
-        { title: isPassed ? '转正通过' : '转正未通过', desc: isPassed ? '恭喜您通过试用期转正！' : '很遗憾，您未通过试用期转正。', path: '' }
+        { title: isPassed ? '转正通过' : '转正未通过', desc: isPassed ? '恭喜您通过试用期转正！' : '很遗憾，您未通过试用期转正。', path: '', actionText: '进入' }
       ]
     }
     default:
