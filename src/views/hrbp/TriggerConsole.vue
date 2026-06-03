@@ -38,6 +38,7 @@
                 <a-button v-if="record.probation_status === '04'" type="primary" size="small" @click="handleRun(record.master_id)">开启转正流程</a-button>
                 <a-button v-if="record.probation_status === '04'" type="dashed" danger size="small" @click="handleHold(record.master_id)">暂不开启(挂起)</a-button>
                 <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="handleTriggerApproval(record.master_id)">发起审批</a-button>
+                <a-button v-if="record.probation_status === '07'" danger size="small" @click="handleTerminate(record.master_id)">终止转正</a-button>
              </a-space>
           </template>
         </template>
@@ -49,7 +50,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useProbationStore, getMonthsSinceHire } from '@/store/probation';
-import { message } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 
 const store = useProbationStore();
 const selectedRowKeys = ref<string[]>([]);
@@ -84,6 +85,17 @@ const handleHold = (id: string) => {
 const handleTriggerApproval = (id: string) => {
   store.triggerApproval(id);
   message.success('已发起转正审批流程');
+};
+
+const handleTerminate = (id: string) => {
+  Modal.confirm({
+    title: '确认终止转正',
+    content: '确认后该员工将进入「暂不发起/终止」状态，不再继续当前转正流程。是否继续？',
+    okText: '确认终止',
+    okType: 'danger',
+    cancelText: '取消',
+    onOk: () => { store.holdProbation(id); message.warning('已终止转正'); }
+  });
 };
 
 const batchTrigger = (isStart: boolean) => {

@@ -20,6 +20,7 @@
                   <a-button v-if="record.probation_status === '04'" type="primary" size="small" @click="handleTrigger(record.master_id)">开启评估</a-button>
                   <a-button v-if="record.probation_status === '04'" size="small" @click="handleHold(record.master_id)">暂不开启</a-button>
                   <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="openApprovalPreview(record)">发起审批</a-button>
+                  <a-button v-if="record.probation_status === '07'" danger size="small" @click="handleTerminate(record.master_id)">终止转正</a-button>
                   <a-button v-if="record.probation_status === '09'" type="primary" size="small" @click="confirmPublish(record)">发布结果</a-button>
                   <a-button v-if="record.probation_status === '99'" type="primary" danger size="small" disabled>发起离职</a-button>
                   <a-button type="link" size="small" @click="router.push('/manager/evaluation/' + record.master_id)">查看详情</a-button>
@@ -69,6 +70,7 @@
                   <a-button v-if="record.probation_status === '04'" type="primary" size="small" @click="handleTrigger(record.master_id)">开启评估</a-button>
                   <a-button v-if="record.probation_status === '04'" size="small" @click="handleHold(record.master_id)">暂不开启</a-button>
                   <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="openApprovalPreview(record)">发起审批</a-button>
+                  <a-button v-if="record.probation_status === '07'" danger size="small" @click="handleTerminate(record.master_id)">终止转正</a-button>
                   <a-button v-if="record.probation_status === '09'" type="primary" size="small" @click="confirmPublish(record)">发布结果</a-button>
                   <a-button v-if="record.probation_status === '99'" type="primary" danger size="small" disabled>发起离职</a-button>
                   <a-button type="link" size="small" @click="router.push('/manager/evaluation/' + record.master_id)">查看详情</a-button>
@@ -377,6 +379,17 @@ const handleHold = (id: string) => {
     content: '确认后该记录将进入暂不开启/终止状态，不再继续触发转正流程。',
     okType: 'danger',
     onOk: () => { store.holdProbation(id); message.warning('已暂不开启'); }
+  });
+};
+
+const handleTerminate = (id: string) => {
+  Modal.confirm({
+    title: '确认终止转正',
+    content: '确认后该员工将进入「暂不发起/终止」状态，不再继续当前转正流程。是否继续？',
+    okText: '确认终止',
+    okType: 'danger',
+    cancelText: '取消',
+    onOk: () => { store.holdProbation(id); message.warning('已终止转正'); }
   });
 };
 
