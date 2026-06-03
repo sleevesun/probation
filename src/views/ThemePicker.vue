@@ -48,21 +48,18 @@
           <span class="home__demo-badge">Modern</span>
           <h3>现代样式</h3>
           <p>现代化 SaaS 界面，卡片布局、彩色标签和高信息密度交互。</p>
-          <span class="home__demo-action">进入现代方案 →</span>
         </button>
 
         <button class="home__demo-card home__demo-card--ps" @click="enterTheme('ps')">
           <span class="home__demo-badge">PeopleSoft</span>
           <h3>PS 样式</h3>
           <p>传统 HR 工作台风格，左侧导航、页签、表格和分区表单。</p>
-          <span class="home__demo-action">进入 PS 方案 →</span>
         </button>
 
         <button class="home__demo-card home__demo-card--email" @click="openEmailDemo">
           <span class="home__demo-badge">Email Demo</span>
           <h3>邮件通知演示</h3>
           <p>验证待办邮件通知与 Token 深链登录流程。</p>
-          <span class="home__demo-action">进入邮件概览 →</span>
         </button>
       </div>
     </section>
@@ -298,14 +295,7 @@ function openEmailDemo() {
   font-size: 13px;
   line-height: 1.5;
   color: #58606d;
-  margin: 0 0 16px;
-}
-
-.home__demo-action {
-  display: inline-block;
-  font-size: 14px;
-  font-weight: 700;
-  color: #2563eb;
+  margin: 0;
 }
 
 /* ====== Footer ====== */
