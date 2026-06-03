@@ -154,6 +154,28 @@ export const emailTemplates: EmailTemplate[] = [
     `
   },
   {
+    id: '02b_goal_return_employee',
+    phase: '目标设定',
+    title: '【待办】请修改并重新提交试用期目标',
+    role: '员工',
+    trigger: '上级退回试用期目标后，系统实时生成待办并通知',
+    action: '查看退回原因，修改目标后重新提交',
+    defaultVars: {
+      employee_name: '王明辉',
+      manager_name: '陈思远',
+      return_comment: '请补充更明确的阶段目标和可衡量结果，并区分核心工作与协作目标。',
+      login_url: `${baseUrl}/auth/token?token=mock_token_emp&redirect=/employee/goals`
+    },
+    renderBody: (vars) => `
+      <p>亲爱的 <strong>${vars.employee_name}</strong>，</p>
+      <p>您的试用期目标已被直属上级 <strong>${vars.manager_name}</strong> 退回，请根据反馈完成修改后重新提交。</p>
+      <p><strong>退回原因：</strong>${vars.return_comment}</p>
+      <div style="text-align: center;">
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往修改试用期目标</a>
+      </div>
+    `
+  },
+  {
     id: '03_goal_followup_hrbp_submitted',
     phase: '目标设定',
     title: '【提醒】请跟进上级确认目标进度',
@@ -220,9 +242,9 @@ export const emailTemplates: EmailTemplate[] = [
   {
     id: '06_goal_late_submit_notify_manager',
     phase: '目标设定',
-    title: '【通知】员工已补交试用期目标',
+    title: '【通知】员工已提交试用期目标',
     role: '上级',
-    trigger: '员工在入职 3 个月后才提交目标，系统实时通知',
+    trigger: '员工提交试用期目标后，系统实时通知',
     action: '登录系统，审核并确认员工目标',
     defaultVars: {
       manager_name: '陈思远',
@@ -231,7 +253,7 @@ export const emailTemplates: EmailTemplate[] = [
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.manager_name}</strong>，</p>
-      <p>您的团队成员 <strong>${vars.employee_name}</strong> 已提交试用期目标（晚于入职 3 个月）。</p>
+      <p>您的团队成员 <strong>${vars.employee_name}</strong> 已提交试用期目标。</p>
       <p>请及时登录系统进行审核确认。</p>
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往处理</a>
@@ -241,9 +263,9 @@ export const emailTemplates: EmailTemplate[] = [
   {
     id: '07_goal_late_submit_notify_hrbp',
     phase: '目标设定',
-    title: '【通知】员工已补交试用期目标',
+    title: '【通知】员工已提交试用期目标',
     role: 'HRBP',
-    trigger: '员工在入职 3 个月后才提交目标，系统实时通知',
+    trigger: '员工提交试用期目标后，系统实时通知',
     action: '知悉并跟进后续目标确认进度',
     defaultVars: {
       hrbp_name: '刘建国',
@@ -252,7 +274,7 @@ export const emailTemplates: EmailTemplate[] = [
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
-      <p>员工 <strong>${vars.employee_name}</strong> 已提交试用期目标（晚于入职 3 个月）。</p>
+      <p>员工 <strong>${vars.employee_name}</strong> 已提交试用期目标。</p>
       <p>系统已同步通知其直属上级进行确认，请关注后续确认进度。</p>
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>

@@ -2,8 +2,8 @@
   <div class="ps-page ps-page--standalone">
     <div class="ps-page__header">
       <div>
-        <div class="ps-page__title">邮件通知预览</div>
-        <div class="ps-page__subtitle">保留邮件 demo 功能，但外观切换为 PS 风格容器。</div>
+        <div class="ps-page__title">待办与通知预览</div>
+        <div class="ps-page__subtitle">保留通知 demo 功能，并以 PS 风格容器展示系统待办与辅助触达。</div>
       </div>
     </div>
 

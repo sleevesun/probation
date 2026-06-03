@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4f46e5"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" rx="8" fill="url(#bg)"/>
+  <rect x="40" y="40" width="560" height="280" rx="6" fill="rgba(255,255,255,0.12)"/>
+  <text x="320" y="140" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="28" font-weight="700">试用期管理诊断</text>
+  <text x="320" y="180" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="28" font-weight="700">&amp; 方案探讨</text>
+  <text x="320" y="230" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-family="Arial, sans-serif" font-size="14">PPT 方案汇报材料</text>
+  <circle cx="320" cy="280" r="20" fill="rgba(255,255,255,0.2)"/>
+  <polygon points="314,270 314,290 334,280" fill="white"/>
+</svg>
