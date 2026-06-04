@@ -85,8 +85,8 @@
     try {
       const res = await fetch(RAW_WEBHOOK_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-        body: text
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ msgtype: 'text', text: { content: text } })
       })
       if (!res.ok) {
         console.warn('[评论插件] webhook 返回非成功状态，已忽略。', res.status)
