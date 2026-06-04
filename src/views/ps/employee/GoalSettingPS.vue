@@ -18,27 +18,21 @@
       <table class="ps-table">
         <thead>
           <tr>
-            <th style="width: 100px">目标维度</th>
-            <th>目标内容</th>
-            <th>衡量方式/预期结果</th>
+            <th style="width: 60px">序号</th>
+            <th>目标内容 <span style="color: #ff4d4f">*</span></th>
+            <th>预期结果 <span style="color: #ff4d4f">*</span></th>
             <th style="width: 110px">权重</th>
             <th style="width: 70px">操作</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="(goal, index) in formState.goals" :key="goal.goal_id">
-            <td>
-              <a-select v-model:value="goal.dimension" size="small" style="width: 100%" :disabled="locked">
-                <a-select-option value="业绩">业绩</a-select-option>
-                <a-select-option value="能力">能力</a-select-option>
-                <a-select-option value="融入">融入</a-select-option>
-              </a-select>
-            </td>
+            <td style="text-align: center">{{ index + 1 }}</td>
             <td>
               <a-textarea v-model:value="goal.content" :rows="2" :disabled="locked" placeholder="请输入具体目标内容" />
             </td>
             <td>
-              <a-textarea v-model:value="goal.measure" :rows="2" :disabled="locked" placeholder="请输入衡量方式或预期结果" />
+              <a-textarea v-model:value="goal.measure" :rows="2" :disabled="locked" placeholder="请输入预期结果" />
             </td>
             <td>
               <a-input-number v-model:value="goal.weight" :min="1" :max="100" :disabled="locked" placeholder="%" size="small" style="width: 80px" addonAfter="%" />
@@ -111,7 +105,7 @@ function handleSubmit() {
     return
   }
   if (formState.goals.some(item => !item.measure.trim())) {
-    message.error('请补充完整衡量方式/预期结果')
+    message.error('请补充完整预期结果')
     return
   }
   // 权重校验

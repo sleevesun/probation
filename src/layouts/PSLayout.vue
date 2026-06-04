@@ -50,22 +50,22 @@
           </button>
         </div>
 
-        <!-- 员工切换组件（仅员工角色可见） -->
+        <!-- 演示状态切换组件（仅员工角色可见） -->
         <div v-if="role === 'Employee'" class="ps-sidebar-employee-switcher">
-          <div class="ps-sidebar-switcher-label">演示员工</div>
+          <div class="ps-sidebar-switcher-label">演示状态切换</div>
           <a-select
             :value="probationStore.currentEmpId"
             size="small"
             style="width: 100%"
             @change="handleEmpChange"
-            placeholder="请选择员工"
+            placeholder="请选择状态"
           >
             <a-select-option
               v-for="emp in employeeOptions"
               :key="emp.emp_id"
               :value="emp.emp_id"
             >
-              {{ emp.emp_name }}（{{ emp.statusLabel }}）
+              {{ emp.statusLabel }}
             </a-select-option>
           </a-select>
         </div>
@@ -104,7 +104,9 @@ const employeeOptions = computed(() => {
   return probationStore.records.map(r => ({
     emp_id: r.emp_id,
     emp_name: r.emp_name,
-    statusLabel: STATUS_MAP[r.probation_status] || r.probation_status
+    statusLabel: r.return_comment && r.probation_status === '01'
+      ? '目标被退回'
+      : (STATUS_MAP[r.probation_status] || r.probation_status)
   }))
 })
 

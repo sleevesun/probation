@@ -21,18 +21,14 @@
           bordered
         >
           <template #bodyCell="{ column, record: row, index }">
-             <template v-if="column.dataIndex === 'dimension'">
-                <a-select v-model:value="row.dimension" style="width: 100%" :disabled="isLock">
-                  <a-select-option value="业绩">业绩</a-select-option>
-                  <a-select-option value="能力">能力</a-select-option>
-                  <a-select-option value="融入">融入</a-select-option>
-                </a-select>
+             <template v-if="column.dataIndex === 'seq'">
+                {{ index + 1 }}
              </template>
              <template v-if="column.dataIndex === 'content'">
                 <a-textarea v-model:value="row.content" :rows="2" :disabled="isLock" placeholder="请输入具体目标内容及衡量标准" />
              </template>
              <template v-if="column.dataIndex === 'measure'">
-                <a-textarea v-model:value="row.measure" :rows="2" :disabled="isLock" placeholder="请输入衡量方式或预期结果" />
+                <a-textarea v-model:value="row.measure" :rows="2" :disabled="isLock" placeholder="请输入预期结果" />
              </template>
              <template v-if="column.dataIndex === 'weight'">
                 <a-input-number v-model:value="row.weight" :min="1" :max="100" :disabled="isLock" placeholder="%" style="width: 80px" addonAfter="%" />
@@ -63,7 +59,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, reactive, onMounted, watch } from 'vue';
+import { ref, computed, reactive, onMounted, watch, h } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProbationStore, GoalItem } from '@/store/probation';
 import { message, Modal } from 'ant-design-vue';
@@ -102,9 +98,9 @@ watch(() => store.currentEmpId, () => {
 });
 
 const columns = [
-  { title: '目标维度', dataIndex: 'dimension', width: 120 },
-  { title: '目标内容', dataIndex: 'content' },
-  { title: '衡量方式/预期结果', dataIndex: 'measure' },
+  { title: '序号', dataIndex: 'seq', width: 60 },
+  { title: h('span', ['目标内容', h('span', { style: { color: '#ff4d4f', marginLeft: '4px' } }, '*')]), dataIndex: 'content' },
+  { title: h('span', ['预期结果', h('span', { style: { color: '#ff4d4f', marginLeft: '4px' } }, '*')]), dataIndex: 'measure' },
   { title: '权重', dataIndex: 'weight', width: 110 },
   { title: '操作', key: 'action', width: 80 }
 ];
@@ -152,7 +148,7 @@ const handleSubmit = () => {
   }
   const hasEmptyMeasure = formState.goals.some(g => !g.measure || g.measure.trim() === '');
   if (hasEmptyMeasure) {
-    message.error('请填写完整所有的衡量方式/预期结果');
+    message.error('请填写完整所有的预期结果');
     return;
   }
 

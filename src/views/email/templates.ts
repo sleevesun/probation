@@ -1,10 +1,10 @@
-export type Phase = '目标设定' | '开启试用期评价' | '试用期评估';
+export type Phase = '目标设定' | '开启试用期评价' | '试用期评价' | '转正审批流程';
 
 export interface EmailTemplate {
   id: string;
   phase: Phase;
   title: string;
-  role: '员工' | '上级' | 'HRBP';
+  role: '员工' | '上级' | 'HRBP' | '审批人' | 'HRD' | 'HRBP head' | 'HRD, HRBP head';
   /** 触发条件说明 */
   trigger: string;
   /** 接收人需执行的动作说明 */
@@ -212,7 +212,7 @@ export const emailTemplates: EmailTemplate[] = [
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.manager_name}</strong>，</p>
       <p>您的团队成员 <strong>${vars.employee_name}</strong> 已入职满 3 个月，但尚未提交试用期目标。</p>
-      <p>请及时督促员工登录系统完成目标设定，以保障后续评估流程按时推进。</p>
+      <p>请及时督促员工登录系统完成目标设定，以保障后续评价流程按时推进。</p>
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>
       </div>
@@ -288,10 +288,10 @@ export const emailTemplates: EmailTemplate[] = [
   {
     id: '08_eval_trigger_hrbp',
     phase: '开启试用期评价',
-    title: '【待办】请开启试用期评估',
+    title: '【待办】请开启试用期评价',
     role: 'HRBP',
     trigger: '入职满 4.5 个月，且试用期目标已确认',
-    action: '登录系统，为该员工开启试用期评估流程',
+    action: '登录系统，为该员工开启试用期评价',
     defaultVars: {
       hrbp_name: '刘建国',
       employee_name: '王明辉',
@@ -301,7 +301,7 @@ export const emailTemplates: EmailTemplate[] = [
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
       <p>员工 <strong>${vars.employee_name}</strong> 入职已满 4.5 个月（入职日期：${vars.hire_date}），且试用期目标已确认。</p>
-      <p>请及时登录试用期管理系统，开启其试用期评估流程。</p>
+      <p>请及时登录试用期管理系统，开启其试用期评价。</p>
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往开启试用期评价</a>
       </div>
@@ -321,7 +321,7 @@ export const emailTemplates: EmailTemplate[] = [
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.employee_name}</strong>，</p>
-      <p>您的试用期评估流程已开启。</p>
+      <p>您的试用期评价已开启。</p>
       <p>请及时登录试用期管理系统，进行试用期自评。为了不影响您的转正进度，请不要晚于 <strong>${vars.deadline_date}</strong> 提交。</p>
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往填写自评</a>
@@ -331,10 +331,10 @@ export const emailTemplates: EmailTemplate[] = [
   {
     id: '10_eval_notify_manager',
     phase: '开启试用期评价',
-    title: '【通知】试用期评估已开启',
+    title: '【通知】试用期评价已开启',
     role: '上级',
     trigger: 'HRBP 开启试用期评价后，系统实时通知上级（仅知晓，无待办）',
-    action: '知悉评估已开启，待员工自评完成后将收到评价待办',
+    action: '知悉评价已开启，待员工自评完成后将收到评价待办',
     defaultVars: {
       manager_name: '陈思远',
       employee_name: '王明辉',
@@ -342,7 +342,7 @@ export const emailTemplates: EmailTemplate[] = [
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.manager_name}</strong>，</p>
-      <p>您的团队成员 <strong>${vars.employee_name}</strong> 的试用期评估流程已开启。</p>
+      <p>您的团队成员 <strong>${vars.employee_name}</strong> 的试用期评价已开启。</p>
       <p>员工正在进行自评，自评完成后您将收到评价待办通知。当前无需操作。</p>
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>
@@ -351,15 +351,15 @@ export const emailTemplates: EmailTemplate[] = [
   },
 
   // ============================================================
-  // 阶段三：试用期评估
+  // 阶段三：试用期评价
   // ============================================================
   {
     id: '11_eval_todo_manager',
-    phase: '试用期评估',
-    title: '【待办】请填写上级评价与转正建议',
+    phase: '试用期评价',
+    title: '【待办】请给出试用期评价',
     role: '上级',
     trigger: '员工完成自评提交后，系统实时生成上级评价待办',
-    action: '登录系统，填写上级评价并给出转正建议',
+    action: '请给出试用期评价',
     defaultVars: {
       manager_name: '陈思远',
       employee_name: '王明辉',
@@ -368,7 +368,7 @@ export const emailTemplates: EmailTemplate[] = [
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.manager_name}</strong>，</p>
       <p>员工 <strong>${vars.employee_name}</strong> 已完成试用期自评。</p>
-      <p>请及时登录试用期管理系统，填写上级评价并给出转正建议。</p>
+      <p>请给出试用期评价。</p>
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往评价</a>
       </div>
@@ -376,7 +376,7 @@ export const emailTemplates: EmailTemplate[] = [
   },
   {
     id: '12_eval_followup_hrbp',
-    phase: '试用期评估',
+    phase: '试用期评价',
     title: '【提醒】请跟进上级评价进度',
     role: 'HRBP',
     trigger: '员工自评完成后，系统通知 HRBP 跟进上级评价',
@@ -398,11 +398,11 @@ export const emailTemplates: EmailTemplate[] = [
   },
   {
     id: '13_eval_remind_manager_overdue',
-    phase: '试用期评估',
-    title: '【提醒】试用期评估即将逾期',
+    phase: '试用期评价',
+    title: '【提醒】试用期评价即将逾期',
     role: '上级',
-    trigger: '入职满 5.5 个月，上级评价尚未完成',
-    action: '尽快登录系统完成上级评价，避免影响转正进度',
+    trigger: '入职满 5.5 个月，尚未发起转正审批流程',
+    action: '如尚未给出试用期评价，请先完成评价；如已完成，请配合 HRBP 推进发起转正审批流程',
     defaultVars: {
       manager_name: '陈思远',
       employee_name: '王明辉',
@@ -411,8 +411,8 @@ export const emailTemplates: EmailTemplate[] = [
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.manager_name}</strong>，</p>
-      <p>员工 <strong>${vars.employee_name}</strong> 已入职满 5.5 个月（入职日期：${vars.hire_date}），试用期评估流程尚未完成。</p>
-      <p>请尽快登录系统完成上级评价，避免影响员工转正进度。</p>
+      <p>员工 <strong>${vars.employee_name}</strong> 已入职满 5.5 个月（入职日期：${vars.hire_date}），尚未发起转正审批流程。</p>
+      <p>如尚未给出试用期评价，请先完成评价；如已完成，请配合 HRBP 推进发起转正审批流程，避免影响员工转正进度。</p>
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往评价</a>
       </div>
@@ -420,11 +420,11 @@ export const emailTemplates: EmailTemplate[] = [
   },
   {
     id: '14_eval_remind_hrbp_overdue',
-    phase: '试用期评估',
-    title: '【提醒】试用期评估流程即将逾期',
+    phase: '试用期评价',
+    title: '【提醒】试用期评价即将逾期',
     role: 'HRBP',
-    trigger: '入职满 5.5 个月，自评或上级评价或审批仍未完成',
-    action: '排查未完成环节，推动相关角色尽快完成',
+    trigger: '入职满 5.5 个月，尚未发起转正审批流程',
+    action: '发起转正审批流程；如自评或上级评价尚未完成，请同步推动前序环节完成',
     defaultVars: {
       hrbp_name: '刘建国',
       employee_name: '王明辉',
@@ -433,10 +433,216 @@ export const emailTemplates: EmailTemplate[] = [
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
-      <p>员工 <strong>${vars.employee_name}</strong> 已入职满 5.5 个月（入职日期：${vars.hire_date}），试用期评估流程仍有未完成环节。</p>
-      <p>请排查自评、上级评价或审批进度，推动相关角色尽快完成。</p>
+      <p>员工 <strong>${vars.employee_name}</strong> 已入职满 5.5 个月（入职日期：${vars.hire_date}），尚未发起转正审批流程。</p>
+      <p>请尽快发起转正审批流程；如自评或上级评价尚未完成，请同步推动前序环节完成。</p>
       <div style="text-align: center;">
-        <a href="${vars.login_url}" target="_blank" class="email-button">前往处理</a>
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往发起流程</a>
+      </div>
+    `
+  },
+  {
+    id: 'eval_pass_notify_hrbp',
+    phase: '试用期评价',
+    title: '【待办】请发起转正审批流程',
+    role: 'HRBP',
+    trigger: '上级提交通过类试用期评价后',
+    action: '登录系统，发起转正审批流程',
+    defaultVars: {
+      hrbp_name: '刘建国',
+      employee_name: '王明辉',
+      manager_name: '陈思远',
+      conclusion: '通过（符合预期）',
+      login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
+    },
+    renderBody: (vars) => `
+      <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
+      <p>员工 <strong>${vars.employee_name}</strong> 的直属上级 <strong>${vars.manager_name}</strong> 已完成试用期评价，评价结论为 <strong>${vars.conclusion}</strong>。</p>
+      <p>请及时登录试用期管理系统，发起转正审批流程。</p>
+      <div style="text-align: center;">
+        <a href="${vars.login_url}" target="_blank" class="email-button">发起转正审批流程</a>
+      </div>
+    `
+  },
+  // ============================================================
+  // B6-NOTICE-001: 上级评价不通过后通知 HRBP
+  // ============================================================
+  {
+    id: 'eval_reject_notify_hrbp',
+    phase: '试用期评价',
+    title: '【试用期评价】{员工姓名} 评价不通过通知',
+    role: 'HRBP',
+    trigger: '上级提交评价为"不通过（不符合转正条件）"时',
+    action: '跟进后续人事处理',
+    defaultVars: {
+      hrbp_name: '刘建国',
+      employee_name: '王明辉',
+      manager_name: '陈思远',
+      login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
+    },
+    renderBody: (vars) => `
+      <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
+      <p>员工 <strong>${vars.employee_name}</strong> 的试用期评价已完成，其直属上级 <strong>${vars.manager_name}</strong> 的评价结论为 <strong>不通过（不符合转正条件）</strong>。</p>
+      <p>该员工已进入不开启/终止状态，请及时跟进后续人事处理工作。</p>
+      <div style="text-align: center;">
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往跟进处理</a>
+      </div>
+    `
+  },
+  // ============================================================
+  // B6-NOTICE-002: 5.5 个月未发起审批通知 HRD 和 HRBP head
+  // ============================================================
+  {
+    id: 'approval_delay_notify_hrd_hrbp_head',
+    phase: '试用期评价',
+    title: '【转正流程延迟】{员工姓名} 转正流程尚未发起',
+    role: 'HRD, HRBP head',
+    trigger: '员工入职满 5.5 个月且仍未发起转正流程',
+    action: '推动 HRBP 发起转正流程',
+    defaultVars: {
+      recipient_name: '张总',
+      employee_name: '王明辉',
+      hire_date: '2025-02-01',
+      hrbp_name: '刘建国',
+      login_url: `${baseUrl}/auth/token?token=mock_token_hrd&redirect=/hrd/dashboard`
+    },
+    renderBody: (vars) => `
+      <p>亲爱的 <strong>${vars.recipient_name}</strong>，</p>
+      <p>员工 <strong>${vars.employee_name}</strong> 已入职超过 5.5 个月（入职日期：${vars.hire_date}），但转正流程尚未发起。</p>
+      <p>请及时关注并推动 HRBP（${vars.hrbp_name}）发起该员工的转正流程，避免影响员工转正进度。</p>
+      <div style="text-align: center;">
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往推动流程</a>
+      </div>
+    `
+  },
+  // ============================================================
+  // 阶段四：转正审批流程
+  // ============================================================
+  {
+    id: '15_approval_todo_approver',
+    phase: '转正审批流程',
+    title: '【待办】请处理转正审批',
+    role: '审批人',
+    trigger: 'HRBP 发起转正流程后，系统实时生成审批待办',
+    action: '登录系统，查看审批单并给出审批意见',
+    defaultVars: {
+      approver_name: '赵总',
+      employee_name: '王明辉',
+      hrbp_name: '刘建国',
+      login_url: `${baseUrl}/auth/token?token=mock_token_approver&redirect=/approver/center`
+    },
+    renderBody: (vars) => `
+      <p>亲爱的 <strong>${vars.approver_name}</strong>，</p>
+      <p>HRBP（${vars.hrbp_name}）已为员工 <strong>${vars.employee_name}</strong> 发起转正流程。</p>
+      <p>请您登录试用期管理系统，查看审批单并处理。</p>
+      <div style="text-align: center;">
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往审批</a>
+      </div>
+    `
+  },
+  {
+    id: '16_approval_done_notify_hrbp',
+    phase: '转正审批流程',
+    title: '【通知】转正审批已通过',
+    role: 'HRBP',
+    trigger: '审批人通过转正审批后，系统实时通知 HRBP',
+    action: '登录系统，发布转正结果',
+    defaultVars: {
+      hrbp_name: '刘建国',
+      employee_name: '王明辉',
+      login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
+    },
+    renderBody: (vars) => `
+      <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
+      <p>员工 <strong>${vars.employee_name}</strong> 的转正审批已通过。</p>
+      <p>请及时登录系统发布转正结果。</p>
+      <div style="text-align: center;">
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往发布结果</a>
+      </div>
+    `
+  },
+  {
+    id: '17_approval_reject_notify_hrbp',
+    phase: '转正审批流程',
+    title: '【通知】转正审批已驳回',
+    role: 'HRBP',
+    trigger: '审批人驳回转正审批后，系统实时通知 HRBP',
+    action: '登录系统，查看驳回原因并跟进处理',
+    defaultVars: {
+      hrbp_name: '刘建国',
+      employee_name: '王明辉',
+      approver_name: '赵总',
+      login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
+    },
+    renderBody: (vars) => `
+      <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
+      <p>员工 <strong>${vars.employee_name}</strong> 的转正审批已被 <strong>${vars.approver_name}</strong> 驳回。</p>
+      <p>请登录系统查看驳回原因并跟进处理。</p>
+      <div style="text-align: center;">
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>
+      </div>
+    `
+  },
+  {
+    id: '18_approval_result_notify_manager',
+    phase: '转正审批流程',
+    title: '【通知】转正审批结果通知',
+    role: '上级',
+    trigger: '审批完成后，系统实时通知直属上级审批结果',
+    action: '知悉审批结果',
+    defaultVars: {
+      manager_name: '陈思远',
+      employee_name: '王明辉',
+      result: '通过',
+      login_url: `${baseUrl}/auth/token?token=mock_token_mgr&redirect=/manager/dashboard`
+    },
+    renderBody: (vars) => `
+      <p>亲爱的 <strong>${vars.manager_name}</strong>，</p>
+      <p>您团队成员 <strong>${vars.employee_name}</strong> 的转正审批已 <strong>${vars.result}</strong>。</p>
+      <p>详情请登录系统查看。</p>
+      <div style="text-align: center;">
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>
+      </div>
+    `
+  },
+  {
+    id: '19_publish_remind_hrbp',
+    phase: '转正审批流程',
+    title: '【催办】请尽快发布转正结果',
+    role: 'HRBP',
+    trigger: '试用期结束前 3 个工作日仍未发布结果',
+    action: '登录系统，发布转正结果',
+    defaultVars: {
+      hrbp_name: '刘建国',
+      employee_name: '王明辉',
+      deadline: '2026-06-30',
+      login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
+    },
+    renderBody: (vars) => `
+      <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
+      <p>员工 <strong>${vars.employee_name}</strong> 的试用期即将结束（截止日期：${vars.deadline}），但转正结果尚未发布。</p>
+      <p>请尽快登录系统发布转正结果。员工的试用期结束日期超过 3 天后，系统将自动通知员工结果。</p>
+      <div style="text-align: center;">
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往发布结果</a>
+      </div>
+    `
+  },
+  {
+    id: '20_result_notify_employee',
+    phase: '转正审批流程',
+    title: '【通知】您的转正结果已发布',
+    role: '员工',
+    trigger: 'HRBP 发布转正结果后，系统实时通知员工',
+    action: '登录系统，查看试用期结果',
+    defaultVars: {
+      employee_name: '王明辉',
+      login_url: `${baseUrl}/auth/token?token=mock_token_emp&redirect=/employee/dashboard`
+    },
+    renderBody: (vars) => `
+      <p>亲爱的 <strong>${vars.employee_name}</strong>，</p>
+      <p>您的试用期已通过。</p>
+      <p>详情请登录系统查看。</p>
+      <div style="text-align: center;">
+        <a href="${vars.login_url}" target="_blank" class="email-button">查看转正结果</a>
       </div>
     `
   }
@@ -446,5 +652,6 @@ export const emailTemplates: EmailTemplate[] = [
 export const phaseGroups: { phase: Phase; description: string }[] = [
   { phase: '目标设定', description: '员工提交目标 → 上级确认 → HRBP 跟进' },
   { phase: '开启试用期评价', description: 'HRBP 开启试用期评价 → 员工自评 → 上级知晓' },
-  { phase: '试用期评估', description: '上级评价 → HRBP 跟进 → 逾期提醒' }
+  { phase: '试用期评价', description: '上级评价 → HRBP 跟进 → 逾期提醒' },
+  { phase: '转正审批流程', description: 'HRBP 发起审批 → 审批人处理 → 结果发布' }
 ];

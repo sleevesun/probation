@@ -81,9 +81,9 @@
           <section class="ps-sheet__section">
             <div class="ps-section-title">单据概览</div>
             <div class="ps-form-grid">
-              <div class="ps-field"><label>单据标题</label><div>关于 {{ currentRecord.emp_name }} 的试用期转正申请</div></div>
+              <div class="ps-field"><label>流程名称</label><div>{{ currentRecord.emp_name }} 的试用期转正审批流程</div></div>
               <div class="ps-field"><label>发起人</label><div>{{ currentRecord.hrbp_name }}（HRBP）</div></div>
-              <div class="ps-field"><label>建议结论</label><div>{{ currentRecord.final_decision || '待明确' }}</div></div>
+              <div class="ps-field"><label>上级评价结果</label><div>{{ formatDecisionLabel(currentRecord.final_decision) }}</div></div>
               <div class="ps-field"><label>姓名</label><div>{{ currentRecord.emp_name }}</div></div>
               <div class="ps-field"><label>工号</label><div>{{ currentRecord.emp_id }}</div></div>
               <div class="ps-field"><label>岗位</label><div>{{ currentRecord.position }}</div></div>
@@ -94,35 +94,47 @@
           </section>
 
           <section class="ps-sheet__section">
-            <div class="ps-section-title">目标摘要</div>
+            <div class="ps-section-title">试用期目标</div>
             <table class="ps-table">
-              <thead><tr><th>维度</th><th>目标内容</th><th>衡量方式</th><th>目标回顾</th></tr></thead>
               <tbody>
                 <tr v-if="!currentRecord.goals.length">
-                  <td colspan="4">暂无目标数据</td>
+                  <td>暂无目标数据</td>
                 </tr>
-                <tr v-for="goal in currentRecord.goals" :key="goal.goal_id">
-                  <td>{{ goal.dimension }}</td>
-                  <td>{{ goal.content }}</td>
-                  <td>{{ goal.measure }}</td>
-                  <td>{{ goal.goal_review || '暂无目标回顾' }}</td>
+                <tr v-for="(goal, idx) in currentRecord.goals" :key="goal.goal_id">
+                  <td>
+                    <div class="ps-goal-title">{{ idx + 1 }}. {{ goal.content }}</div>
+                    <div class="ps-stacked-row"><label>预期结果</label><span>{{ goal.measure }}</span></div>
+                    <div class="ps-stacked-row"><label>目标回顾</label><span>{{ goal.goal_review || '暂无目标回顾' }}</span></div>
+                  </td>
                 </tr>
               </tbody>
             </table>
           </section>
 
           <section class="ps-sheet__section">
-            <div class="ps-section-title">评价摘要</div>
+            <div class="ps-section-title">评价详情</div>
+            <div v-if="(currentRecord.stage_evaluations || []).length" class="ps-subsection-title">阶段性评价</div>
             <table class="ps-table">
-              <thead><tr><th style="width: 100px">评价类型</th><th style="width: 90px">评价人</th><th>内容摘要</th></tr></thead>
               <tbody>
-                <tr v-for="item in evaluationRows" :key="item.key">
-                  <td>{{ item.label }}</td>
-                  <td>{{ item.owner }}</td>
-                  <td style="white-space: pre-wrap; min-width: 280px;">{{ item.content }}</td>
+                <tr v-for="item in currentRecord.stage_evaluations || []" :key="item.stage_eval_id">
+                  <td>
+                    <div class="ps-meta-line">{{ item.evaluator_name }}-{{ item.evaluator_role }} <span>{{ item.create_time }}</span></div>
+                    <div class="ps-content-line">{{ item.content }}</div>
+                  </td>
                 </tr>
               </tbody>
             </table>
+            <div class="ps-eval-block">
+              <div class="ps-subsection-title">员工自评</div>
+              <div class="ps-text-block">{{ selfEval?.content || '暂无员工自评' }}</div>
+            </div>
+            <div class="ps-eval-block">
+              <div class="ps-subsection-title">上级评价</div>
+              <div class="ps-text-block">
+                <div class="ps-stacked-row"><label>评价结果</label><span>{{ formatDecisionLabel(currentRecord.final_decision) }}</span></div>
+                <div class="ps-stacked-row"><label>评价内容</label><span>{{ normalizeEvalContent(managerEval?.content, currentRecord.final_decision) }}</span></div>
+              </div>
+            </div>
           </section>
 
           <section class="ps-sheet__section">
@@ -149,9 +161,9 @@
             <a-textarea v-model:value="comment" :rows="4" placeholder="请输入审批意见，退回时必填" />
             <div class="ps-toolbar" style="margin-top: 16px">
               <div class="ps-toolbar__spacer"></div>
-              <a-button size="small" @click="detailVisible = false">取消</a-button>
-              <a-button danger size="small" @click="rejectRecord">退回</a-button>
-              <a-button type="primary" size="small" @click="approveRecord">同意</a-button>
+              <a-button size="small" @click="detailVisible = false">返回</a-button>
+              <a-button danger size="small" @click="rejectRecord">驳回</a-button>
+              <a-button type="primary" size="small" @click="approveRecord">通过</a-button>
             </div>
           </section>
         </div>
@@ -192,16 +204,16 @@
                 <div class="mobile-detail-card">
                   <div class="mobile-detail-card__title">单据概览</div>
                   <div class="mobile-field">
-                    <span class="mobile-field__label">单据标题</span>
-                    <span class="mobile-field__value">关于 {{ currentRecord.emp_name }} 的试用期转正申请</span>
+                    <span class="mobile-field__label">流程名称</span>
+                    <span class="mobile-field__value">{{ currentRecord.emp_name }} 的试用期转正审批流程</span>
                   </div>
                   <div class="mobile-field">
                     <span class="mobile-field__label">发起人</span>
                     <span class="mobile-field__value">{{ currentRecord.hrbp_name }}（HRBP）</span>
                   </div>
                   <div class="mobile-field">
-                    <span class="mobile-field__label">建议结论</span>
-                    <span class="mobile-field__value" :style="{ color: psDecisionColor(currentRecord.final_decision), fontWeight: 600 }">{{ currentRecord.final_decision || '待明确' }}</span>
+                    <span class="mobile-field__label">上级评价结果</span>
+                    <span class="mobile-field__value" :style="{ color: psDecisionColor(currentRecord.final_decision), fontWeight: 600 }">{{ formatDecisionLabel(currentRecord.final_decision) }}</span>
                   </div>
                   <div class="mobile-field">
                     <span class="mobile-field__label">姓名</span>
@@ -231,13 +243,13 @@
 
                 <!-- 目标摘要卡片 -->
                 <div class="mobile-detail-card">
-                  <div class="mobile-detail-card__title">目标摘要</div>
+                  <div class="mobile-detail-card__title">试用期目标</div>
                   <div v-if="!currentRecord.goals.length" class="mobile-empty-inline">暂无目标数据</div>
-                  <div v-for="goal in currentRecord.goals" :key="goal.goal_id" class="mobile-goal-item">
-                    <div class="mobile-goal-item__tag">{{ goal.dimension }}</div>
+                  <div v-for="(goal, idx) in currentRecord.goals" :key="goal.goal_id" class="mobile-goal-item">
+                    <div class="mobile-goal-item__tag">目标 {{ idx + 1 }}</div>
                     <div class="mobile-goal-item__content">{{ goal.content }}</div>
                     <div class="mobile-goal-item__measure">
-                      <span class="mobile-field__label">衡量方式：</span>{{ goal.measure }}
+                      <span class="mobile-field__label">预期结果：</span>{{ goal.measure }}
                     </div>
                     <div class="mobile-goal-item__review">
                       <span class="mobile-field__label">目标回顾：</span>{{ goal.goal_review || '暂无目标回顾' }}
@@ -247,13 +259,21 @@
 
                 <!-- 评价摘要卡片 -->
                 <div class="mobile-detail-card">
-                  <div class="mobile-detail-card__title">评价摘要</div>
-                  <div v-for="item in evaluationRows" :key="item.key" class="mobile-eval-item">
+                  <div class="mobile-detail-card__title">评价详情</div>
+                  <div class="mobile-eval-item">
                     <div class="mobile-eval-item__header">
-                      <span class="mobile-eval-item__type">{{ item.label }}</span>
-                      <span class="mobile-eval-item__owner">{{ item.owner }}</span>
+                      <span class="mobile-eval-item__type">员工自评</span>
+                      <span class="mobile-eval-item__owner">{{ selfEval?.evaluator_name || '-' }}</span>
                     </div>
-                    <div class="mobile-eval-item__content">{{ item.content }}</div>
+                    <div class="mobile-eval-item__content">{{ selfEval?.content || '暂无员工自评' }}</div>
+                  </div>
+                  <div class="mobile-eval-item">
+                    <div class="mobile-eval-item__header">
+                      <span class="mobile-eval-item__type">上级评价</span>
+                      <span class="mobile-eval-item__owner">{{ managerEval?.evaluator_name || '-' }}</span>
+                    </div>
+                    <div class="mobile-eval-item__content">评价结果：{{ formatDecisionLabel(currentRecord.final_decision) }}</div>
+                    <div class="mobile-eval-item__content">评价内容：{{ normalizeEvalContent(managerEval?.content, currentRecord.final_decision) }}</div>
                   </div>
                 </div>
 
@@ -300,8 +320,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { message } from 'ant-design-vue'
-import { useProbationStore, type ProbationMaster } from '@/store/probation'
-import { psDecisionColor, psEvalTypeLabel } from '@/views/ps/shared/PSHelpers'
+import { useProbationStore, type ProbationMaster, formatDecisionLabel } from '@/store/probation'
+import { psDecisionColor } from '@/views/ps/shared/PSHelpers'
 
 const store = useProbationStore()
 const activeTab = ref<'todo' | 'done'>('todo')
@@ -316,19 +336,18 @@ const list = computed(() => activeTab.value === 'todo' ? todoList.value : doneLi
 const todoCount = computed(() => todoList.value.length)
 const doneCount = computed(() => doneList.value.length)
 
-const evaluationRows = computed(() => {
-  if (!currentRecord.value) return []
-  const makeRow = (type: string, label?: string) => {
-    const evalItem = currentRecord.value!.evaluations.find(item => item.eval_type === type)
-    return {
-      key: type,
-      label: label || psEvalTypeLabel(type),
-      owner: evalItem?.evaluator_name || '-',
-      content: evalItem?.content || '暂无'
-    }
+const selfEval = computed(() => currentRecord.value?.evaluations.find(item => item.eval_type === 'self'))
+const managerEval = computed(() => currentRecord.value?.evaluations.find(item => item.eval_type === 'manager'))
+
+function normalizeEvalContent(content?: string, decision?: string) {
+  if (!content) return '暂无上级评价'
+  const label = formatDecisionLabel(decision)
+  const normalized = content.trim()
+  if (label !== '-' && normalized.startsWith(label)) {
+    return normalized.slice(label.length).replace(/^\s*[-－—]\s*/, '') || normalized
   }
-  return [makeRow('self'), makeRow('manager'), makeRow('hrbp', 'HRBP发起说明')]
-})
+  return normalized.replace(/^(超出预期|符合预期|不符合转正条件|不通过)\s*[-－—]\s*/, '')
+}
 
 function openDetail(record: ProbationMaster) {
   currentRecord.value = record
@@ -356,6 +375,85 @@ function rejectRecord() {
 </script>
 
 <style scoped>
+.ps-stacked-row {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 8px 12px;
+  padding: 7px 0;
+  border-top: 1px dashed #d9d9d9;
+  white-space: pre-wrap;
+}
+
+.ps-stacked-row:first-child {
+  border-top: none;
+}
+
+.ps-stacked-row label {
+  color: #666;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ps-stacked-row span {
+  color: #111;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
+.ps-goal-title {
+  padding-bottom: 7px;
+  color: #111;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.ps-meta-line {
+  display: flex;
+  gap: 24px;
+  padding-bottom: 7px;
+  color: #111;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.7;
+}
+
+.ps-meta-line > span {
+  color: #666;
+  font-weight: 400;
+}
+
+.ps-content-line {
+  padding-top: 7px;
+  border-top: 1px dashed #d9d9d9;
+  color: #111;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ps-subsection-title {
+  margin: 10px 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #111;
+}
+
+.ps-eval-block {
+  margin-top: 12px;
+}
+
+.ps-text-block {
+  padding: 10px 12px;
+  border: 1px solid #d9d9d9;
+  background: #fbfcfe;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .ps-page__header {
   display: flex;
   justify-content: space-between;

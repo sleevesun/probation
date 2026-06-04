@@ -1,18 +1,18 @@
 <template>
   <div class="employee-switcher">
-    <span class="employee-switcher__label">切换演示员工：</span>
+    <span class="employee-switcher__label">演示状态切换：</span>
     <a-select
       :value="store.currentEmpId"
       style="width: 280px"
       @change="handleChange"
-      placeholder="请选择员工"
+      placeholder="请选择状态"
     >
       <a-select-option
         v-for="emp in employeeOptions"
         :key="emp.emp_id"
         :value="emp.emp_id"
       >
-        {{ emp.emp_name }}（{{ emp.statusLabel }}）
+        {{ emp.statusLabel }}
       </a-select-option>
     </a-select>
   </div>

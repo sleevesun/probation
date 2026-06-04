@@ -4,11 +4,10 @@
 
     <a-alert
       v-if="record?.probation_status !== '05'"
-      message="提示"
-      :description="record?.probation_status === '06' ? '您的自评已提交，正在等待上级和HRBP评价。' : '当前不在自评阶段，仅供查阅。'"
+      :message="record?.probation_status === '06' ? '提示：您的自评已提交，正在等待上级评价。' : '提示：当前不在自评阶段，仅供查阅。'"
       type="warning"
       show-icon
-      style="margin-bottom: 16px"
+      class="compact-self-alert"
     />
 
     <!-- 逐目标自评 -->
@@ -18,9 +17,8 @@
       :title="`目标 ${index + 1}：${goal.content}`"
       style="margin-bottom: 16px"
     >
-      <a-descriptions :column="2" size="small" bordered style="margin-bottom: 16px">
-        <a-descriptions-item label="目标维度">{{ goal.dimension }}</a-descriptions-item>
-        <a-descriptions-item label="衡量方式/预期结果">{{ goal.measure }}</a-descriptions-item>
+      <a-descriptions :column="1" size="small" bordered style="margin-bottom: 16px">
+        <a-descriptions-item label="预期结果">{{ goal.measure }}</a-descriptions-item>
       </a-descriptions>
 
       <!-- 目标回顾（必填） -->
@@ -159,3 +157,18 @@ const handleSubmit = () => {
   }, 800);
 };
 </script>
+
+<style scoped>
+.compact-self-alert {
+  margin-bottom: 16px;
+}
+
+.compact-self-alert :deep(.ant-alert-message) {
+  font-size: 13px;
+  line-height: 22px;
+}
+
+.compact-self-alert :deep(.ant-alert-content) {
+  min-height: 22px;
+}
+</style>

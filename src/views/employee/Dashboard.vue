@@ -17,7 +17,7 @@
 
     <!-- 员工信息 -->
     <a-card title="我的信息" :bordered="false" style="margin-top: 24px">
-      <a-descriptions :column="2">
+      <a-descriptions :column="3">
          <a-descriptions-item label="姓名">{{ record?.emp_name }}</a-descriptions-item>
          <a-descriptions-item label="工号">{{ record?.emp_id }}</a-descriptions-item>
          <a-descriptions-item label="岗位">{{ record?.position }}</a-descriptions-item>

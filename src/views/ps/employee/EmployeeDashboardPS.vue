@@ -8,42 +8,63 @@
       <div class="ps-badge">当前状态：{{ statusText }}</div>
     </div>
 
-    <div class="ps-grid ps-grid--2">
-      <section class="ps-panel">
-        <div class="ps-section-title">当前进展</div>
-        <table class="ps-table">
-          <thead>
-            <tr>
-              <th>事项</th>
-              <th>说明</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="item in todoRows" :key="item.title">
-              <td>{{ item.title }}</td>
-              <td style="white-space: pre-line">{{ item.desc }}</td>
-              <td>
-                <a-button v-if="item.path" size="small" type="primary" @click="router.push(item.path)">{{ item.actionText || '进入' }}</a-button>
-                <span v-else>-</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
+    <section class="ps-panel">
+      <div class="ps-section-title">员工信息</div>
+      <div class="ps-form-grid">
+        <div class="ps-field"><label>姓名</label><div>{{ record?.emp_name }}</div></div>
+        <div class="ps-field"><label>工号</label><div>{{ record?.emp_id }}</div></div>
+        <div class="ps-field"><label>岗位</label><div>{{ record?.position }}</div></div>
+        <div class="ps-field"><label>部门</label><div>{{ record?.parent_dept }}\{{ record?.dept_name }}</div></div>
+        <div class="ps-field"><label>直属主管</label><div>{{ record?.manager_name }}</div></div>
+        <div class="ps-field"><label>入职日期</label><div>{{ record?.hire_date }}</div></div>
+      </div>
+    </section>
 
-      <section class="ps-panel">
-        <div class="ps-section-title">员工信息</div>
-        <div class="ps-form-grid">
-          <div class="ps-field"><label>姓名</label><div>{{ record?.emp_name }}</div></div>
-          <div class="ps-field"><label>工号</label><div>{{ record?.emp_id }}</div></div>
-          <div class="ps-field"><label>岗位</label><div>{{ record?.position }}</div></div>
-          <div class="ps-field"><label>部门</label><div>{{ record?.parent_dept }}\{{ record?.dept_name }}</div></div>
-          <div class="ps-field"><label>直属主管</label><div>{{ record?.manager_name }}</div></div>
-          <div class="ps-field"><label>入职日期</label><div>{{ record?.hire_date }}</div></div>
-        </div>
-      </section>
-    </div>
+    <section class="ps-panel">
+      <div class="ps-section-title">当前进展</div>
+      <table class="ps-table">
+        <thead>
+          <tr>
+            <th>事项</th>
+            <th>说明</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in todoRows" :key="item.title">
+            <td>{{ item.title }}</td>
+            <td style="white-space: pre-line">{{ item.desc }}</td>
+            <td>
+              <a-button v-if="item.path" size="small" type="primary" @click="router.push(item.path)">{{ item.actionText || '进入' }}</a-button>
+              <span v-else>-</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="ps-panel" style="margin-top: 16px">
+      <div class="ps-section-title">阶段性评价记录</div>
+      <table v-if="stageEvaluations.length > 0" class="ps-table">
+        <thead>
+          <tr>
+            <th style="width: 80px">填写人</th>
+            <th style="width: 80px">角色</th>
+            <th>评价内容</th>
+            <th style="width: 150px">时间</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="item in stageEvaluations" :key="item.stage_eval_id">
+            <td>{{ item.evaluator_name }}</td>
+            <td>{{ item.evaluator_role }}</td>
+            <td>{{ item.content }}</td>
+            <td>{{ item.create_time }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div v-else style="text-align: center; color: #999; padding: 24px 0">暂无阶段性评价记录</div>
+    </section>
   </div>
 </template>
 
@@ -65,6 +86,8 @@ const daysSinceHire = computed(() => {
 })
 
 const statusText = computed(() => psEmployeeStatusText(record.value?.probation_status || '01'))
+
+const stageEvaluations = computed(() => record.value?.stage_evaluations || [])
 
 const todoRows = computed(() => {
   const status = record.value?.probation_status

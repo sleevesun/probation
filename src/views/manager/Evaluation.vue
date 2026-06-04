@@ -1,7 +1,7 @@
 <template>
   <div style="padding-bottom: 50px">
     <a-page-header
-      title="试用期评价与转正决策"
+      title="试用期评价"
       :sub-title="`员工：${record?.emp_name} (${record?.emp_id}) | 岗位：${record?.position} | ${record?.parent_dept}\\${record?.dept_name}`"
       @back="() => router.back()"
     />
@@ -69,34 +69,37 @@
           />
 
           <a-form layout="vertical">
-            <a-form-item label="建议转正结论" required>
+            <a-form-item label="结论" required>
               <a-radio-group v-model:value="decision" button-style="solid" :disabled="cannotEval">
-                <a-radio-button value="超出预期">超出预期</a-radio-button>
-                <a-radio-button value="符合预期">符合预期</a-radio-button>
-                <a-radio-button value="不符合转正条件">不符合</a-radio-button>
+                <a-radio-button value="超出预期">通过（超出预期）</a-radio-button>
+                <a-radio-button value="符合预期">通过（符合预期）</a-radio-button>
+                <a-radio-button value="不符合转正条件">不通过</a-radio-button>
               </a-radio-group>
             </a-form-item>
 
-            <a-form-item label="评价意见与客观事实" :required="decision === '不符合转正条件'">
+            <a-form-item label="评价意见" required>
               <a-textarea
                 v-model:value="reason"
                 :rows="6"
-                placeholder="请填写评价意见。如选择不符合条件，此处为必填项。"
+                placeholder="请填写评价意见。"
                 :disabled="cannotEval"
               />
             </a-form-item>
 
-            <div style="margin-top: 24px">
+            <div style="margin-top: 24px; text-align: right">
+              <a-space>
+                <a-button @click="router.push('/manager/team')">返回</a-button>
               <a-button
-                type="primary" block size="large"
+                type="primary"
                 :disabled="cannotEval"
                 @click="handleSubmit"
                 :loading="saving"
               >
-                提交上级评价
+                提交评价
               </a-button>
+              </a-space>
               <div style="text-align: center; margin-top: 8px; color: #999; font-size: 12px" v-if="!cannotEval">
-                提交后将由 HRBP 发起转正审批流程流程
+                提交后将由 HRBP 发起转正审批流程
               </div>
             </div>
           </a-form>
@@ -109,7 +112,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { useProbationStore, getDetailedStatusText, getMonthsSinceHire, EvaluationItem } from '@/store/probation';
+import { useProbationStore, getDetailedStatusText, getMonthsSinceHire, EvaluationItem, isFailedDecision } from '@/store/probation';
 import { message } from 'ant-design-vue';
 
 const route = useRoute();
@@ -126,9 +129,9 @@ const cannotEval = computed(() => {
 });
 
 const goalColumns = [
-  { title: '目标维度', dataIndex: 'dimension', width: 100 },
+  { title: '序号', dataIndex: 'seq', width: 60, customRender: ({ index }: any) => index + 1 },
   { title: '目标内容', dataIndex: 'content' },
-  { title: '衡量方式/预期结果', dataIndex: 'measure' },
+  { title: '预期结果', dataIndex: 'measure' },
   { title: '目标回顾', dataIndex: 'goal_review', customRender: ({ text }: any) => text || '暂无目标回顾' }
 ];
 
@@ -148,13 +151,13 @@ const decision = ref<'超出预期' | '符合预期' | '不符合转正条件'>(
 const reason = ref('');
 
 const handleSubmit = () => {
-  if (decision.value === '不符合转正条件' && !reason.value.trim()) {
-    message.error('结论为"不符合"时，评价意见为必填项'); return;
+  if (!reason.value.trim()) {
+    message.error('请填写评价意见'); return;
   }
   saving.value = true;
   setTimeout(() => {
-    store.submitManagerEval(record.value!.master_id, reason.value || '上级评价通过', decision.value);
-    message.success('上级评价提交成功！等待 HRBP 发起转正审批流程流程。');
+    store.submitManagerEval(record.value!.master_id, reason.value, decision.value);
+    message.success(isFailedDecision(decision.value) ? '评价已提交，该员工已进入不开启/终止状态。' : '评价提交成功！等待 HRBP 发起转正审批流程。');
     saving.value = false;
     router.push('/manager/team');
   }, 800);

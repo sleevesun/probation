@@ -17,11 +17,7 @@
       <table class="ps-table" style="margin-bottom: 16px">
         <tbody>
           <tr>
-            <th style="width: 100px">目标维度</th>
-            <td>{{ goal.dimension }}</td>
-          </tr>
-          <tr>
-            <th>衡量方式/预期结果</th>
+            <th style="width: 100px">预期结果</th>
             <td>{{ goal.measure }}</td>
           </tr>
         </tbody>

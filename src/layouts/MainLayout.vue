@@ -33,22 +33,22 @@
         </a-menu-item-group>
       </a-menu>
 
-      <!-- 员工切换组件（仅员工角色可见） -->
+      <!-- 演示状态切换组件（仅员工角色可见） -->
       <div v-if="role === 'Employee'" class="sidebar-employee-switcher">
-        <div class="sidebar-switcher-label">演示员工</div>
+        <div class="sidebar-switcher-label">演示状态切换</div>
         <a-select
           :value="store.currentEmpId"
           size="small"
           style="width: 100%"
           @change="handleEmpChange"
-          placeholder="请选择员工"
+          placeholder="请选择状态"
         >
           <a-select-option
             v-for="emp in employeeOptions"
             :key="emp.emp_id"
             :value="emp.emp_id"
           >
-            {{ emp.emp_name }}（{{ emp.statusLabel }}）
+            {{ emp.statusLabel }}
           </a-select-option>
         </a-select>
       </div>
@@ -115,7 +115,9 @@ const employeeOptions = computed(() => {
   return store.records.map(r => ({
     emp_id: r.emp_id,
     emp_name: r.emp_name,
-    statusLabel: STATUS_MAP[r.probation_status] || r.probation_status
+    statusLabel: r.return_comment && r.probation_status === '01'
+      ? '目标被退回'
+      : (STATUS_MAP[r.probation_status] || r.probation_status)
   }))
 })
 
@@ -160,41 +162,41 @@ const goHome = () => {
 <style scoped>
 .logo {
   height: 36px;
-  background: #f5f8ff;
-  margin: 16px 14px;
-  border-radius: 8px;
+  background: var(--modern-bg-surface);
+  margin: var(--modern-spacing-md) var(--modern-spacing-md);
+  border-radius: var(--modern-radius-md);
   overflow: hidden;
 }
 
 .sidebar-employee-switcher {
-  padding: 12px 14px;
-  border-top: 1px solid #edf1f7;
-  margin-top: 8px;
+  padding: var(--modern-spacing-md);
+  border-top: 1px solid var(--modern-border-light);
+  margin-top: var(--modern-spacing-sm);
 }
 
 .sidebar-switcher-label {
   font-size: 12px;
-  color: #8a97a8;
-  margin-bottom: 6px;
+  color: var(--modern-text-muted);
+  margin-bottom: var(--modern-spacing-xs);
   font-weight: 600;
 }
 
 /* [UI/UX 修复] 将内联样式抽取为 scoped 样式类 */
 .main-layout {
   min-height: 100vh;
-  background: #f5f7fb;
+  background: var(--modern-bg-page);
 }
 
 .main-layout :deep(.ant-layout-sider) {
-  background: #ffffff;
-  border-right: 1px solid #edf1f7;
+  background: var(--modern-bg-card);
+  border-right: 1px solid var(--modern-border-light);
   box-shadow: none;
 }
 
 .main-layout :deep(.ant-layout-sider-trigger) {
-  background: #ffffff;
-  color: #64748b;
-  border-top: 1px solid #edf1f7;
+  background: var(--modern-bg-card);
+  color: var(--modern-text-muted);
+  border-top: 1px solid var(--modern-border-light);
 }
 
 .main-layout :deep(.ant-menu-light) {
@@ -203,71 +205,76 @@ const goHome = () => {
 
 .main-layout :deep(.ant-menu-item),
 .main-layout :deep(.ant-menu-submenu-title) {
-  border-radius: 8px;
-  margin-inline: 10px;
-  width: calc(100% - 20px);
+  border-radius: var(--modern-radius-md);
+  margin-inline: var(--modern-spacing-sm);
+  width: calc(100% - 16px);
+  padding-inline: var(--modern-spacing-md);
 }
 
 .main-layout :deep(.ant-menu-item-selected) {
-  background: #eef5ff;
-  color: #2563eb;
+  background: var(--color-primary-bg);
+  color: var(--color-primary);
 }
 
 .logo-title {
-  color: #1f2a44;
+  color: var(--modern-text-primary);
   margin: 0;
-  padding-left: 14px;
+  padding-left: var(--modern-spacing-md);
   line-height: 36px;
   font-size: 15px;
   font-weight: 700;
 }
 
 .app-header {
-  background: rgba(255, 255, 255, 0.92);
-  padding: 0 24px;
+  background: var(--modern-bg-card);
+  padding: 0 var(--modern-spacing-lg);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #edf1f7;
+  border-bottom: 1px solid var(--modern-border-light);
   box-shadow: none;
   backdrop-filter: blur(12px);
 }
 
 .back-home-btn {
   font-size: 14px;
-  color: #64748b;
+  color: var(--modern-text-muted);
 }
 
 .back-home-btn:hover {
-  color: #2563eb;
+  color: var(--color-primary);
 }
 
 .role-switcher {
-  margin-right: 16px;
+  margin-right: var(--modern-spacing-md);
+  color: var(--modern-text-secondary);
+  font-size: 14px;
 }
 
 .role-name {
-  color: #2563eb;
+  color: var(--color-primary);
   font-size: 14px;
 }
 
 .header-avatar {
-  background-color: #e8f1ff;
-  color: #2563eb;
+  background-color: var(--color-primary-bg);
+  color: var(--color-primary);
 }
 
 .app-content {
   margin: 0;
-  background: #f5f7fb;
-  padding: 24px;
+  background: var(--modern-bg-page);
+  padding: var(--modern-spacing-lg);
   min-height: 280px;
   overflow: auto;
+  max-width: 1400px;
+  width: 100%;
 }
 
 .app-footer {
   text-align: center;
-  background: #f5f7fb;
-  color: #94a3b8;
+  background: var(--modern-bg-page);
+  color: var(--modern-text-muted);
 }
 
 .fade-enter-active,
@@ -278,5 +285,24 @@ const goHome = () => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* 响应式支持 */
+@media (max-width: 768px) {
+  .main-layout :deep(.ant-layout-sider) {
+    position: fixed;
+    z-index: 1000;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .main-layout :deep(.ant-layout-sider.ant-layout-sider-collapsed) {
+    transform: translateX(0);
+  }
+
+  .app-content {
+    padding: var(--modern-spacing-md);
+  }
 }
 </style>

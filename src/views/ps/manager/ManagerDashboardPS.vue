@@ -35,35 +35,40 @@
         <a-button size="small" @click="resetFilters">重置</a-button>
       </div>
 
-      <table class="ps-table">
+      <table class="ps-table manager-main-table">
         <thead>
           <tr>
             <th>员工</th>
             <th>工号</th>
             <th>部门</th>
             <th>岗位</th>
+            <th>入职时长</th>
             <th>当前状态</th>
             <th>当前处理人</th>
+            <th>查看详情</th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="!tableData.length">
-            <td colspan="7">暂无符合条件的数据</td>
+            <td colspan="9">暂无符合条件的数据</td>
           </tr>
           <tr v-for="item in tableData" :key="item.master_id">
             <td>{{ item.emp_name }}</td>
             <td>{{ item.emp_id }}</td>
             <td>{{ item.parent_dept }}\{{ item.dept_name }}</td>
             <td>{{ item.position }}</td>
+            <td><span :style="parseFloat(getMonthsSinceHire(item.hire_date)) > 6 ? 'color: #ff4d4f; font-weight: 500' : ''">{{ getMonthsSinceHire(item.hire_date) }} 个月</span></td>
             <td>{{ getDetailedStatusText(item) }}</td>
             <td>{{ getCurrentHandler(item) }}</td>
-            <td class="ps-table__actions">
+            <td class="ps-table__detail">
               <a-button size="small" @click="openDetailModal(item)">查看详情</a-button>
+            </td>
+            <td class="ps-table__actions">
               <a-button v-if="item.probation_status === '02'" size="small" type="primary" @click="openActionModal(item, 'manager-goal-review')">确认目标</a-button>
-              <a-button v-if="item.probation_status === '03'" size="small" danger @click="openActionModal(item, 'manager-force-adjust')">退回调整</a-button>
-              <a-button v-if="item.probation_status === '06' && !item.manager_eval_done" size="small" type="primary" @click="openActionModal(item, 'manager-evaluation')">转正评估</a-button>
-              <a-button v-if="['01','02','03','04'].includes(item.probation_status)" size="small" @click="openStageEvalModal(item)">阶段性评价</a-button>
+              <a-button v-if="item.probation_status === '03'" size="small" danger @click="openActionModal(item, 'manager-force-adjust')">目标退回调整</a-button>
+              <a-button v-if="item.probation_status === '06' && !item.manager_eval_done" size="small" type="primary" @click="openActionModal(item, 'manager-evaluation')">试用期评价</a-button>
+              <a-button v-if="['02','03','04'].includes(item.probation_status)" size="small" @click="openStageEvalModal(item)">阶段性评价</a-button>
             </td>
           </tr>
         </tbody>
@@ -83,13 +88,13 @@
 
         <div class="ps-section-title" style="margin-top: 16px">考核目标</div>
         <table class="ps-table">
-          <thead><tr><th>维度</th><th>目标内容</th><th>衡量方式/预期结果</th><th>目标回顾</th></tr></thead>
+          <thead><tr><th style="width: 60px">序号</th><th>目标内容</th><th>预期结果</th><th>目标回顾</th></tr></thead>
           <tbody>
             <tr v-if="!detailModalRecord.goals.length">
               <td colspan="4">暂无目标</td>
             </tr>
-            <tr v-for="goal in detailModalRecord.goals" :key="goal.goal_id">
-              <td>{{ goal.dimension }}</td>
+            <tr v-for="(goal, idx) in detailModalRecord.goals" :key="goal.goal_id">
+              <td style="text-align: center">{{ idx + 1 }}</td>
               <td>{{ goal.content }}</td>
               <td>{{ goal.measure }}</td>
               <td>{{ goal.goal_review || '暂无目标回顾' }}</td>
@@ -112,6 +117,25 @@
             </tr>
           </tbody>
         </table>
+
+        <!-- 审批记录 -->
+        <div v-if="['08', '09', '10'].includes(detailModalRecord.probation_status)" class="approval-records-section">
+          <div class="approval-records-title">审批记录</div>
+          <div v-if="detailModalRecord.approval_logs && detailModalRecord.approval_logs.length > 0">
+            <div v-for="log in detailModalRecord.approval_logs" :key="log.log_id" class="approval-record-item">
+              <div class="approval-record-item__header">
+                <span class="approval-record-item__node">{{ log.node_name }}</span>
+                <span class="approval-record-item__action" :class="{ 'approval-record-item__action--agree': log.action === '同意', 'approval-record-item__action--reject': log.action === '拒绝' }">{{ log.action }}</span>
+              </div>
+              <div class="approval-record-item__info">
+                <span>{{ log.approver_name }}</span>
+                <span class="approval-record-item__time">{{ log.action_time }}</span>
+              </div>
+              <div v-if="log.comment && log.comment !== '-'" class="approval-record-item__comment">{{ log.comment }}</div>
+            </div>
+          </div>
+          <div v-else class="approval-record-empty">暂无审批记录</div>
+        </div>
       </div>
     </a-modal>
 
@@ -126,13 +150,12 @@
           </div>
           <div class="ps-section-title" style="margin-top: 16px">目标明细</div>
           <table class="ps-table">
-            <thead><tr><th>维度</th><th>目标内容</th><th>衡量方式/预期结果</th><th>目标回顾</th></tr></thead>
+            <thead><tr><th style="width: 60px">序号</th><th>目标内容</th><th>预期结果</th></tr></thead>
             <tbody>
-              <tr v-for="goal in actionModalRecord.goals" :key="goal.goal_id">
-                <td>{{ goal.dimension }}</td>
+              <tr v-for="(goal, idx) in actionModalRecord.goals" :key="goal.goal_id">
+                <td style="text-align: center">{{ idx + 1 }}</td>
                 <td>{{ goal.content }}</td>
                 <td>{{ goal.measure }}</td>
-                <td>{{ goal.goal_review || '暂无目标回顾' }}</td>
               </tr>
             </tbody>
           </table>
@@ -154,10 +177,10 @@
           </div>
           <div class="ps-section-title" style="margin-top: 16px">当前目标明细</div>
           <table class="ps-table">
-            <thead><tr><th>维度</th><th>目标内容</th><th>衡量方式/预期结果</th><th>目标回顾</th></tr></thead>
+            <thead><tr><th style="width: 60px">序号</th><th>目标内容</th><th>预期结果</th><th>目标回顾</th></tr></thead>
             <tbody>
-              <tr v-for="goal in actionModalRecord.goals" :key="goal.goal_id">
-                <td>{{ goal.dimension }}</td>
+              <tr v-for="(goal, idx) in actionModalRecord.goals" :key="goal.goal_id">
+                <td style="text-align: center">{{ idx + 1 }}</td>
                 <td>{{ goal.content }}</td>
                 <td>{{ goal.measure }}</td>
                 <td>{{ goal.goal_review || '暂无目标回顾' }}</td>
@@ -182,10 +205,10 @@
           </div>
           <div class="ps-section-title" style="margin-top: 16px">目标内容</div>
           <table class="ps-table">
-            <thead><tr><th>维度</th><th>内容</th><th>衡量方式/预期结果</th><th>目标回顾</th></tr></thead>
+            <thead><tr><th style="width: 60px">序号</th><th>内容</th><th>预期结果</th><th>目标回顾</th></tr></thead>
             <tbody>
-              <tr v-for="goal in actionModalRecord.goals" :key="goal.goal_id">
-                <td>{{ goal.dimension }}</td>
+              <tr v-for="(goal, idx) in actionModalRecord.goals" :key="goal.goal_id">
+                <td style="text-align: center">{{ idx + 1 }}</td>
                 <td>{{ goal.content }}</td>
                 <td>{{ goal.measure }}</td>
                 <td>{{ goal.goal_review || '暂无目标回顾' }}</td>
@@ -210,16 +233,17 @@
           <div class="ps-filter-bar" style="margin-top: 16px">
             <label>结论</label>
             <a-radio-group v-model:value="decision">
-              <a-radio value="超出预期">超出预期</a-radio>
-              <a-radio value="符合预期">符合预期</a-radio>
-              <a-radio value="不符合转正条件">不符合转正条件</a-radio>
+              <a-radio value="超出预期">通过（超出预期）</a-radio>
+              <a-radio value="符合预期">通过（符合预期）</a-radio>
+              <a-radio value="不符合转正条件">不通过</a-radio>
             </a-radio-group>
           </div>
-          <a-textarea v-model:value="reason" :rows="5" placeholder="填写上级评估意见" />
+          <div class="ps-section-title" style="margin-top: 12px">评价意见 <span style="color: #d14343">*</span></div>
+          <a-textarea v-model:value="reason" :rows="5" placeholder="请填写评价意见" />
           <div class="ps-toolbar" style="margin-top: 16px">
             <div class="ps-toolbar__spacer"></div>
-            <a-button size="small" @click="closeActionModal">取消</a-button>
-            <a-button size="small" type="primary" @click="handleSubmitEvaluation">提交评估</a-button>
+            <a-button size="small" @click="closeActionModal">返回</a-button>
+            <a-button size="small" type="primary" @click="handleSubmitEvaluation">提交评价</a-button>
           </div>
         </template>
       </div>
@@ -236,10 +260,10 @@
         </div>
         <div class="ps-section-title" style="margin-top: 16px">目标信息</div>
         <table v-if="stageEvalRecord.goals.length > 0" class="ps-table">
-          <thead><tr><th>维度</th><th>目标内容</th><th>衡量方式/预期结果</th></tr></thead>
+          <thead><tr><th style="width: 60px">序号</th><th>目标内容</th><th>预期结果</th></tr></thead>
           <tbody>
-            <tr v-for="goal in stageEvalRecord.goals" :key="goal.goal_id">
-              <td>{{ goal.dimension }}</td>
+            <tr v-for="(goal, idx) in stageEvalRecord.goals" :key="goal.goal_id">
+              <td style="text-align: center">{{ Number(idx) + 1 }}</td>
               <td>{{ goal.content }}</td>
               <td>{{ goal.measure }}</td>
             </tr>
@@ -274,10 +298,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { message } from 'ant-design-vue'
-import { useProbationStore, getCurrentHandler, getDetailedStatusText, type ProbationMaster } from '@/store/probation'
+import { useProbationStore, getCurrentHandler, getDetailedStatusText, getMonthsSinceHire, isFailedDecision, type ProbationMaster } from '@/store/probation'
 
 type MainTab = 'todo' | 'unfinished' | 'finished'
-type StageFilter = '01' | '02_03' | '05' | '06' | '07' | '08' | '09'
+type StageFilter = '01' | '02_03' | '05' | '06' | '08' | '09'
 type ActionModalType = 'manager-goal-review' | 'manager-force-adjust' | 'manager-evaluation'
 
 const store = useProbationStore()
@@ -301,8 +325,7 @@ const stageOptions = [
   { value: '01', label: '待设定目标' },
   { value: '02_03', label: '已设定目标' },
   { value: '05', label: '待员工自评' },
-  { value: '06', label: '待上级评价' },
-  { value: '07', label: '待发起转正审批流程' },
+  { value: '06', label: '上级评价' },
   { value: '08', label: '审批中' },
   { value: '09', label: '待发布' }
 ] satisfies { value: StageFilter; label: string }[]
@@ -342,6 +365,7 @@ const actionModalTitle = computed(() => {
 function matchesStage(record: ProbationMaster, stages: StageFilter[]) {
   return stages.some(stage => {
     if (stage === '02_03') return ['02', '03'].includes(record.probation_status)
+    if (stage === '06') return ['06', '07'].includes(record.probation_status)
     return record.probation_status === stage
   })
 }
@@ -411,12 +435,12 @@ function handleForceAdjust() {
 
 function handleSubmitEvaluation() {
   if (!actionModalRecord.value) return
-  if (decision.value === '不符合转正条件' && !reason.value.trim()) {
-    message.error('不符合转正条件时必须填写说明')
+  if (!reason.value.trim()) {
+    message.error('请填写评价意见')
     return
   }
-  store.submitManagerEval(actionModalRecord.value.master_id, reason.value || '上级评估通过', decision.value)
-  message.success('上级评估已提交')
+  store.submitManagerEval(actionModalRecord.value.master_id, reason.value, decision.value)
+  message.success(isFailedDecision(decision.value) ? '评价已提交，该员工已进入不开启/终止状态。' : '评价提交成功，等待 HRBP 发起转正审批流程。')
   closeActionModal()
 }
 
@@ -439,3 +463,139 @@ function handleStageEvalSubmit() {
   stageEvalContent.value = ''
 }
 </script>
+
+<style scoped>
+/* B4-PS-LIST-001: 主列表表格改为按内容自适应列宽 */
+.manager-main-table {
+  table-layout: auto;
+}
+
+/* 员工 — 短字段，紧凑 */
+.manager-main-table th:nth-child(1),
+.manager-main-table td:nth-child(1) {
+  width: 70px;
+  min-width: 60px;
+  max-width: 90px;
+}
+
+/* 工号 — 短字段，紧凑 */
+.manager-main-table th:nth-child(2),
+.manager-main-table td:nth-child(2) {
+  width: 80px;
+  min-width: 70px;
+  max-width: 100px;
+}
+
+/* 部门 — 内容较长，给予更多空间 */
+.manager-main-table th:nth-child(3),
+.manager-main-table td:nth-child(3) {
+  min-width: 150px;
+}
+
+/* 岗位 */
+.manager-main-table th:nth-child(4),
+.manager-main-table td:nth-child(4) {
+  min-width: 100px;
+}
+
+/* 入职时间 */
+.manager-main-table th:nth-child(5),
+.manager-main-table td:nth-child(5) {
+  width: 100px;
+  min-width: 90px;
+  max-width: 120px;
+}
+
+/* 当前状态 — 内容较长 */
+.manager-main-table th:nth-child(6),
+.manager-main-table td:nth-child(6) {
+  min-width: 120px;
+}
+
+/* 当前处理人 */
+.manager-main-table th:nth-child(7),
+.manager-main-table td:nth-child(7) {
+  width: 80px;
+  min-width: 70px;
+  max-width: 100px;
+}
+
+/* B4-PS-LIST-002: 查看详情 — 独立列，紧凑居中 */
+.manager-main-table th:nth-child(8),
+.manager-main-table td:nth-child(8) {
+  width: 80px;
+  min-width: 70px;
+  max-width: 90px;
+  text-align: center;
+}
+
+/* 操作列 */
+.manager-main-table th:nth-child(9),
+.manager-main-table td:nth-child(9) {
+  min-width: 200px;
+}
+
+/* 查看详情单元格居中对齐 */
+.ps-table__detail {
+  text-align: center;
+}
+
+/* 审批记录 */
+.approval-records-section {
+  margin-top: 16px;
+}
+.approval-records-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+.approval-record-item {
+  padding: 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+.approval-record-item__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.approval-record-item__node {
+  font-weight: 500;
+  color: #1f2329;
+}
+.approval-record-item__action {
+  font-weight: 500;
+}
+.approval-record-item__action--agree {
+  color: #52c41a;
+}
+.approval-record-item__action--reject {
+  color: #ff4d4f;
+}
+.approval-record-item__info {
+  font-size: 13px;
+  color: #646a73;
+  display: flex;
+  gap: 12px;
+}
+.approval-record-item__time {
+  color: #8f959e;
+}
+.approval-record-item__comment {
+  margin-top: 8px;
+  font-size: 13px;
+  color: #333;
+  padding: 8px 12px;
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid #f0f1f3;
+}
+.approval-record-empty {
+  color: #8f959e;
+  font-size: 13px;
+  text-align: center;
+  padding: 16px;
+}
+</style>

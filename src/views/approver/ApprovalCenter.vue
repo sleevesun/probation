@@ -28,7 +28,7 @@
             <template #bodyCell="{ column, record }">
               <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
               <template v-if="column.dataIndex === 'final_decision'">
-                <a-tag :color="['不符合转正条件', '离职'].includes(record.final_decision) ? 'error' : 'success'">{{ record.final_decision || '-' }}</a-tag>
+                <a-tag :color="isFailedDecision(record.final_decision) || record.final_decision === '离职' ? 'error' : 'success'">{{ formatDecisionLabel(record.final_decision) }}</a-tag>
               </template>
               <template v-if="column.key === 'action'">
                 <a-button size="small" @click="openModal(record)">审批</a-button>
@@ -56,17 +56,17 @@
           <div v-if="!todoList.length" class="mobile-empty">暂无待审批单据</div>
           <div v-for="record in todoList" :key="record.master_id" class="mobile-card" @click="openModal(record)">
             <div class="mobile-card__header">
-              <span class="mobile-card__name">{{ record.emp_name }}</span>
-              <span class="mobile-card__dept">{{ record.parent_dept }}\{{ record.dept_name }}</span>
+              <span class="mobile-card__title">{{ record.emp_name }} 的试用期转正审批流程</span>
             </div>
             <div class="mobile-card__body">
-              <div class="mobile-card__title">关于 {{ record.emp_name }} 的试用期转正申请</div>
               <div class="mobile-card__meta">
+                <span>员工：{{ record.emp_name }}（{{ record.emp_id }}）</span>
+                <span>部门：{{ record.parent_dept }}\{{ record.dept_name }}</span>
                 <span>发起人：{{ record.hrbp_name }}</span>
               </div>
             </div>
             <div class="mobile-card__footer">
-              <a-button type="primary" block @click.stop="openModal(record)">查看审批单</a-button>
+              <a-button type="primary" block @click.stop="openModal(record)">审批</a-button>
             </div>
           </div>
         </template>
@@ -76,17 +76,18 @@
           <div v-if="!doneList.length" class="mobile-empty">暂无已审批单据</div>
           <div v-for="record in doneList" :key="record.master_id" class="mobile-card" @click="openModal(record)">
             <div class="mobile-card__header">
-              <span class="mobile-card__name">{{ record.emp_name }}</span>
-              <a-tag :color="record.final_decision === '不符合转正条件' ? 'error' : 'success'" size="small">{{ record.final_decision || '-' }}</a-tag>
+              <span class="mobile-card__title">{{ record.emp_name }} 的试用期转正审批流程</span>
+              <a-tag :color="isFailedDecision(record.final_decision) ? 'error' : 'success'" size="small">{{ formatDecisionLabel(record.final_decision) }}</a-tag>
             </div>
             <div class="mobile-card__body">
-              <div class="mobile-card__title">关于 {{ record.emp_name }} 的试用期转正申请</div>
               <div class="mobile-card__meta">
-                <span>{{ record.parent_dept }}\{{ record.dept_name }}</span>
+                <span>员工：{{ record.emp_name }}（{{ record.emp_id }}）</span>
+                <span>部门：{{ record.parent_dept }}\{{ record.dept_name }}</span>
+                <span>发起人：{{ record.hrbp_name }}</span>
               </div>
             </div>
             <div class="mobile-card__footer">
-              <a-button block @click.stop="openModal(record)">查看审批单</a-button>
+              <a-button block @click.stop="openModal(record)">审批</a-button>
             </div>
           </div>
         </template>
@@ -98,7 +99,7 @@
       <div v-if="currentRecord" class="approval-sheet">
         <section class="approval-sheet__section">
           <div class="approval-sheet__title">单据概览</div>
-          <a-descriptions bordered size="small" :column="2">
+          <a-descriptions size="small" :column="2" class="approval-summary">
             <a-descriptions-item label="流程名称" :span="2">{{ currentRecord.emp_name }} 的试用期转正审批流程</a-descriptions-item>
             <a-descriptions-item label="发起人">{{ currentRecord.hrbp_name }}（HRBP）</a-descriptions-item>
             <a-descriptions-item label="姓名">{{ currentRecord.emp_name }}</a-descriptions-item>
@@ -108,46 +109,62 @@
             <a-descriptions-item label="直属主管">{{ currentRecord.manager_name }}</a-descriptions-item>
             <a-descriptions-item label="HRBP">{{ currentRecord.hrbp_name }}</a-descriptions-item>
             <a-descriptions-item label="入职时间">{{ currentRecord.hire_date }}</a-descriptions-item>
-            <a-descriptions-item label="建议结论">
-              <b :style="{ color: currentRecord.final_decision === '不符合转正条件' ? '#f5222d' : '#1890ff' }">
-                {{ currentRecord.final_decision || '待明确' }}
+            <a-descriptions-item label="上级评价结果">
+              <b :style="{ color: isFailedDecision(currentRecord.final_decision) ? '#f5222d' : '#1890ff' }">
+                {{ formatDecisionLabel(currentRecord.final_decision) }}
               </b>
             </a-descriptions-item>
           </a-descriptions>
         </section>
 
         <section class="approval-sheet__section">
-          <div class="approval-sheet__title">目标摘要</div>
-          <a-table :dataSource="currentRecord.goals" :pagination="false" rowKey="goal_id" size="small" bordered>
-            <a-table-column title="维度" data-index="dimension" width="80" />
-            <a-table-column title="目标内容" data-index="content" />
-            <a-table-column title="衡量方式/预期结果" data-index="measure" />
-            <a-table-column title="目标回顾" data-index="goal_review">
-              <template #bodyCell="{ record }">
-                <span>{{ record.goal_review || '暂无目标回顾' }}</span>
-              </template>
-            </a-table-column>
-          </a-table>
+          <div class="approval-sheet__title">试用期目标</div>
+          <div class="stacked-list">
+            <div v-for="(goal, index) in currentRecord.goals" :key="goal.goal_id" class="stacked-item">
+              <div class="stacked-goal-title">
+                {{ index + 1 }}. {{ goal.content }}
+              </div>
+              <div class="stacked-row">
+                <span class="stacked-label">预期结果</span>
+                <span class="stacked-value">{{ goal.measure }}</span>
+              </div>
+              <div class="stacked-row">
+                <span class="stacked-label">目标回顾</span>
+                <span class="stacked-value">{{ goal.goal_review || '暂无目标回顾' }}</span>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section class="approval-sheet__section">
-          <div class="approval-sheet__title">评价摘要</div>
+          <div class="approval-sheet__title">评价详情</div>
           <!-- 阶段性评价 -->
           <div v-if="(currentRecord.stage_evaluations || []).length > 0" style="margin-bottom: 12px">
             <div style="font-weight: 600; margin-bottom: 8px; font-size: 13px">阶段性评价</div>
-            <a-table :dataSource="currentRecord.stage_evaluations || []" :pagination="false" rowKey="stage_eval_id" size="small" bordered>
-              <a-table-column title="填写人" data-index="evaluator_name" width="80" />
-              <a-table-column title="角色" data-index="evaluator_role" width="80" />
-              <a-table-column title="评价内容" data-index="content" />
-              <a-table-column title="时间" data-index="create_time" width="150" />
-            </a-table>
+            <div class="stacked-list">
+              <div v-for="item in currentRecord.stage_evaluations || []" :key="item.stage_eval_id" class="stacked-item">
+                <div class="stacked-meta-line">{{ item.evaluator_name }}-{{ item.evaluator_role }} <span>{{ item.create_time }}</span></div>
+                <div class="stacked-content">{{ item.content }}</div>
+              </div>
+            </div>
           </div>
-          <!-- 员工自评、上级评价等 -->
-          <a-table :dataSource="evaluationRows" :pagination="false" rowKey="key" size="small" bordered>
-            <a-table-column title="评价类型" data-index="label" width="100" />
-            <a-table-column title="评价人" data-index="owner" width="90" />
-            <a-table-column title="内容摘要" data-index="content" />
-          </a-table>
+          <div class="approval-eval-section">
+            <div class="approval-eval-section__title">员工自评</div>
+            <div class="approval-eval-section__body">{{ selfEval?.content || '暂无员工自评' }}</div>
+          </div>
+          <div class="approval-eval-section">
+            <div class="approval-eval-section__title">上级评价</div>
+            <div class="manager-eval-block">
+              <div class="manager-eval-block__result">
+                <span>评价结果</span>
+                <div>{{ formatDecisionLabel(currentRecord.final_decision) }}</div>
+              </div>
+              <div class="manager-eval-block__content">
+                <span>评价内容</span>
+                <div>{{ normalizeEvalContent(managerEval?.content, currentRecord.final_decision) }}</div>
+              </div>
+            </div>
+          </div>
         </section>
 
         <section class="approval-sheet__section">
@@ -168,9 +185,9 @@
               <a-textarea v-model:value="approvalComment" :rows="4" placeholder="请输入您的审批意见，同意可不填，退回必填" />
             </a-form-item>
             <a-space>
-              <a-button @click="modalVisible = false">取消返回</a-button>
-              <a-button danger @click="handleReject" :loading="saving">退回/拒绝</a-button>
-              <a-button type="primary" @click="handleApprove" :loading="saving">同意</a-button>
+              <a-button @click="modalVisible = false">返回</a-button>
+              <a-button danger @click="handleReject" :loading="saving">驳回</a-button>
+              <a-button type="primary" @click="handleApprove" :loading="saving">通过</a-button>
             </a-space>
           </a-form>
         </section>
@@ -211,8 +228,8 @@
                 <div class="mobile-detail-card">
                   <div class="mobile-detail-card__title">单据概览</div>
                   <div class="mobile-field">
-                    <span class="mobile-field__label">单据标题</span>
-                    <span class="mobile-field__value">关于 {{ currentRecord.emp_name }} 的试用期转正申请</span>
+                    <span class="mobile-field__label">流程名称</span>
+                    <span class="mobile-field__value">{{ currentRecord.emp_name }} 的试用期转正审批流程</span>
                   </div>
                   <div class="mobile-field">
                     <span class="mobile-field__label">发起人</span>
@@ -246,23 +263,17 @@
                     <span class="mobile-field__label">入职时间</span>
                     <span class="mobile-field__value">{{ currentRecord.hire_date }}</span>
                   </div>
-                  <div class="mobile-field">
-                    <span class="mobile-field__label">建议结论</span>
-                    <span class="mobile-field__value" :style="{ color: currentRecord.final_decision === '不符合转正条件' ? '#f5222d' : '#1890ff', fontWeight: 600 }">
-                      {{ currentRecord.final_decision || '待明确' }}
-                    </span>
-                  </div>
                 </div>
 
                 <!-- 目标摘要卡片 -->
                 <div class="mobile-detail-card">
-                  <div class="mobile-detail-card__title">目标摘要</div>
+                  <div class="mobile-detail-card__title">试用期目标</div>
                   <div v-if="currentRecord.goals.length === 0" class="mobile-empty-inline">暂无目标数据</div>
-                  <div v-for="goal in currentRecord.goals" :key="goal.goal_id" class="mobile-goal-item">
-                    <div class="mobile-goal-item__tag">{{ goal.dimension }}</div>
+                  <div v-for="(goal, idx) in currentRecord.goals" :key="goal.goal_id" class="mobile-goal-item">
+                    <div class="mobile-goal-item__tag">目标 {{ idx + 1 }}</div>
                     <div class="mobile-goal-item__content">{{ goal.content }}</div>
                     <div class="mobile-goal-item__measure">
-                      <span class="mobile-field__label">衡量方式：</span>{{ goal.measure }}
+                      <span class="mobile-field__label">预期结果：</span>{{ goal.measure }}
                     </div>
                     <div class="mobile-goal-item__review">
                       <span class="mobile-field__label">目标回顾：</span>{{ goal.goal_review || '暂无目标回顾' }}
@@ -272,13 +283,21 @@
 
                 <!-- 评价摘要卡片 -->
                 <div class="mobile-detail-card">
-                  <div class="mobile-detail-card__title">评价摘要</div>
-                  <div v-for="row in evaluationRows" :key="row.key" class="mobile-eval-item">
+                  <div class="mobile-detail-card__title">评价详情</div>
+                  <div class="mobile-eval-item">
                     <div class="mobile-eval-item__header">
-                      <span class="mobile-eval-item__type">{{ row.label }}</span>
-                      <span class="mobile-eval-item__owner">{{ row.owner }}</span>
+                      <span class="mobile-eval-item__type">员工自评</span>
+                      <span class="mobile-eval-item__owner">{{ selfEval?.evaluator_name || '-' }}</span>
                     </div>
-                    <div class="mobile-eval-item__content">{{ row.content }}</div>
+                    <div class="mobile-eval-item__content">{{ selfEval?.content || '暂无员工自评' }}</div>
+                  </div>
+                  <div class="mobile-eval-item">
+                    <div class="mobile-eval-item__header">
+                      <span class="mobile-eval-item__type">上级评价</span>
+                      <span class="mobile-eval-item__owner">{{ managerEval?.evaluator_name || '-' }}</span>
+                    </div>
+                    <div class="mobile-eval-item__content">评价结果：{{ formatDecisionLabel(currentRecord.final_decision) }}</div>
+                    <div class="mobile-eval-item__content">评价内容：{{ normalizeEvalContent(managerEval?.content, currentRecord.final_decision) }}</div>
                   </div>
                 </div>
 
@@ -324,7 +343,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { useProbationStore, type ProbationMaster } from '@/store/probation'
+import { useProbationStore, type ProbationMaster, formatDecisionLabel, isFailedDecision } from '@/store/probation'
 import { message } from 'ant-design-vue'
 
 const store = useProbationStore()
@@ -350,7 +369,7 @@ const doneColumns = [
   { title: '工号', dataIndex: 'emp_id', width: 80 },
   { title: '部门', dataIndex: 'dept_display', width: 160 },
   { title: '入职日期', dataIndex: 'hire_date', width: 110 },
-  { title: '结论', dataIndex: 'final_decision', width: 130 },
+  { title: '上级评价结果', dataIndex: 'final_decision', width: 160 },
   { title: '操作', key: 'action', width: 80 }
 ]
 
@@ -359,14 +378,8 @@ const currentRecord = ref<ProbationMaster | null>(null)
 const approvalComment = ref('')
 const saving = ref(false)
 
-const evaluationRows = computed(() => {
-  if (!currentRecord.value) return []
-  return [
-    formatEvalRow('员工自评', 'self'),
-    formatEvalRow('直属主管评价', 'manager'),
-    formatEvalRow('HRBP发起说明', 'hrbp')
-  ]
-})
+const selfEval = computed(() => currentRecord.value?.evaluations.find(e => e.eval_type === 'self'))
+const managerEval = computed(() => currentRecord.value?.evaluations.find(e => e.eval_type === 'manager'))
 
 const approvalLogRows = computed(() => {
   if (!currentRecord.value || currentRecord.value.approval_logs.length === 0) {
@@ -385,19 +398,14 @@ function openModal(record: ProbationMaster) {
   modalVisible.value = true
 }
 
-function getEval(record: ProbationMaster, type: string) {
-  return record.evaluations?.find(e => e.eval_type === type)
-}
-
-function formatEvalRow(label: string, type: string) {
-  const current = currentRecord.value!
-  const evalItem = getEval(current, type)
-  return {
-    key: type,
-    label,
-    owner: evalItem?.evaluator_name || '-',
-    content: evalItem?.content || '暂无'
+function normalizeEvalContent(content?: string, decision?: string) {
+  if (!content) return '暂无上级评价';
+  const label = formatDecisionLabel(decision);
+  const normalized = content.trim();
+  if (label !== '-' && normalized.startsWith(label)) {
+    return normalized.slice(label.length).replace(/^\s*[-－—]\s*/, '') || normalized;
   }
+  return normalized.replace(/^(超出预期|符合预期|不符合转正条件|不通过)\s*[-－—]\s*/, '');
 }
 
 function handleApprove() {
@@ -428,6 +436,182 @@ function handleReject() {
 </script>
 
 <style scoped>
+/* ====== PC 审批单：去框化分区 + 多行表单 ====== */
+.approval-sheet {
+  color: #1f2937;
+}
+
+.approval-sheet__section {
+  padding: 4px 0 18px;
+  margin-bottom: 18px;
+  border: none;
+  border-bottom: 1px solid #eef0f4;
+  background: transparent;
+}
+
+.approval-sheet__section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.approval-sheet__title {
+  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.approval-summary :deep(.ant-descriptions-view) {
+  border: none;
+}
+
+.approval-summary :deep(.ant-descriptions-row > th),
+.approval-summary :deep(.ant-descriptions-row > td) {
+  border: none;
+  padding: 6px 10px 6px 0;
+  background: transparent;
+}
+
+.approval-summary :deep(.ant-descriptions-item-label) {
+  width: 96px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.stacked-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.stacked-item {
+  padding: 10px 12px;
+  border: 1px solid #edf0f5;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.stacked-row {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 8px 12px;
+  padding: 6px 0;
+  border-top: 1px dashed #e7eaf0;
+}
+
+.stacked-row:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.stacked-row:last-child {
+  padding-bottom: 0;
+}
+
+.stacked-label {
+  color: #6b7280;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.stacked-value {
+  color: #1f2937;
+  line-height: 1.7;
+  word-break: break-word;
+}
+
+.stacked-value--index {
+  font-weight: 700;
+  color: #1677ff;
+}
+
+.stacked-goal-title {
+  padding-bottom: 6px;
+  color: #1f2937;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.stacked-meta-line {
+  display: flex;
+  gap: 24px;
+  padding-bottom: 6px;
+  color: #1f2937;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.7;
+}
+
+.stacked-meta-line > span {
+  color: #667085;
+  font-weight: 500;
+}
+
+.stacked-content {
+  padding-top: 6px;
+  border-top: 1px dashed #e7eaf0;
+  color: #1f2937;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.approval-eval-section {
+  margin-top: 12px;
+}
+
+.approval-eval-section__title {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.approval-eval-section__body {
+  padding: 10px 12px;
+  border: 1px solid #edf0f5;
+  border-radius: 8px;
+  background: #fbfcfe;
+  color: #1f2937;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.manager-eval-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #edf0f5;
+  border-radius: 8px;
+  background: #fbfcfe;
+}
+
+.manager-eval-block__result,
+.manager-eval-block__content {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.manager-eval-block__result > span,
+.manager-eval-block__content > span {
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.manager-eval-block__result > div,
+.manager-eval-block__content > div {
+  color: #1f2937;
+  font-size: 13px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
 /* ====== 移动端容器 ====== */
 .approval-page--mobile {
   max-width: 375px;
