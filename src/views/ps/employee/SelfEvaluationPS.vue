@@ -1,6 +1,5 @@
 <template>
   <div class="ps-page">
-    <EmployeeSwitcher />
     <div class="ps-page__header">
       <div>
         <div class="ps-page__title">试用期自我评价</div>
@@ -87,7 +86,6 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { useProbationStore } from '@/store/probation'
-import EmployeeSwitcher from '@/components/EmployeeSwitcher.vue'
 
 const router = useRouter()
 const store = useProbationStore()

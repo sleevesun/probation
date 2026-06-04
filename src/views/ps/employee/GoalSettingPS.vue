@@ -1,6 +1,5 @@
 <template>
   <div class="ps-page">
-    <EmployeeSwitcher />
     <div class="ps-page__header">
       <div>
         <div class="ps-page__title">试用期目标设定</div>
@@ -22,6 +21,7 @@
             <th style="width: 100px">目标维度</th>
             <th>目标内容</th>
             <th>衡量方式/预期结果</th>
+            <th style="width: 110px">权重</th>
             <th style="width: 70px">操作</th>
           </tr>
         </thead>
@@ -41,6 +41,9 @@
               <a-textarea v-model:value="goal.measure" :rows="2" :disabled="locked" placeholder="请输入衡量方式或预期结果" />
             </td>
             <td>
+              <a-input-number v-model:value="goal.weight" :min="1" :max="100" :disabled="locked" placeholder="%" size="small" style="width: 80px" addonAfter="%" />
+            </td>
+            <td>
               <a-button type="link" danger size="small" @click="removeGoal(index)" :disabled="locked">删除</a-button>
             </td>
           </tr>
@@ -55,7 +58,6 @@ import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { useProbationStore, type GoalItem } from '@/store/probation'
-import EmployeeSwitcher from '@/components/EmployeeSwitcher.vue'
 
 const router = useRouter()
 const store = useProbationStore()
@@ -85,7 +87,8 @@ function addGoal() {
     goal_id: `G${Date.now()}`,
     dimension: '业绩',
     content: '',
-    measure: ''
+    measure: '',
+    weight: undefined
   })
 }
 
@@ -110,6 +113,19 @@ function handleSubmit() {
   if (formState.goals.some(item => !item.measure.trim())) {
     message.error('请补充完整衡量方式/预期结果')
     return
+  }
+  // 权重校验
+  const goalsWithWeight = formState.goals.filter(g => g.weight != null && g.weight > 0)
+  if (goalsWithWeight.length > 0) {
+    if (goalsWithWeight.length !== formState.goals.length) {
+      message.error('若填写权重，请为所有目标均填写权重')
+      return
+    }
+    const totalWeight = formState.goals.reduce((sum, g) => sum + (g.weight || 0), 0)
+    if (totalWeight !== 100) {
+      message.error(`权重合计必须为 100%，当前合计 ${totalWeight}%`)
+      return
+    }
   }
   saving.value = true
   setTimeout(() => {

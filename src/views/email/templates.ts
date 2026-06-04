@@ -1,4 +1,4 @@
-export type Phase = '目标设定' | '开启评估' | '试用期评估';
+export type Phase = '目标设定' | '开启试用期评价' | '试用期评估';
 
 export interface EmailTemplate {
   id: string;
@@ -283,11 +283,11 @@ export const emailTemplates: EmailTemplate[] = [
   },
 
   // ============================================================
-  // 阶段二：开启评估
+  // 阶段二：开启试用期评价
   // ============================================================
   {
     id: '08_eval_trigger_hrbp',
-    phase: '开启评估',
+    phase: '开启试用期评价',
     title: '【待办】请开启试用期评估',
     role: 'HRBP',
     trigger: '入职满 4.5 个月，且试用期目标已确认',
@@ -303,16 +303,16 @@ export const emailTemplates: EmailTemplate[] = [
       <p>员工 <strong>${vars.employee_name}</strong> 入职已满 4.5 个月（入职日期：${vars.hire_date}），且试用期目标已确认。</p>
       <p>请及时登录试用期管理系统，开启其试用期评估流程。</p>
       <div style="text-align: center;">
-        <a href="${vars.login_url}" target="_blank" class="email-button">前往开启评估</a>
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往开启试用期评价</a>
       </div>
     `
   },
   {
     id: '09_eval_start_employee',
-    phase: '开启评估',
+    phase: '开启试用期评价',
     title: '【待办】请完成试用期自评',
     role: '员工',
-    trigger: 'HRBP 开启评估后，系统实时生成自评待办',
+    trigger: 'HRBP 开启试用期评价后，系统实时生成自评待办',
     action: '登录系统，完成试用期自评并提交',
     defaultVars: {
       employee_name: '王明辉',
@@ -330,10 +330,10 @@ export const emailTemplates: EmailTemplate[] = [
   },
   {
     id: '10_eval_notify_manager',
-    phase: '开启评估',
+    phase: '开启试用期评价',
     title: '【通知】试用期评估已开启',
     role: '上级',
-    trigger: 'HRBP 开启评估后，系统实时通知上级（仅知晓，无待办）',
+    trigger: 'HRBP 开启试用期评价后，系统实时通知上级（仅知晓，无待办）',
     action: '知悉评估已开启，待员工自评完成后将收到评价待办',
     defaultVars: {
       manager_name: '陈思远',
@@ -445,6 +445,6 @@ export const emailTemplates: EmailTemplate[] = [
 /** 按阶段分组，供页面侧边栏使用 */
 export const phaseGroups: { phase: Phase; description: string }[] = [
   { phase: '目标设定', description: '员工提交目标 → 上级确认 → HRBP 跟进' },
-  { phase: '开启评估', description: 'HRBP 开启评估 → 员工自评 → 上级知晓' },
+  { phase: '开启试用期评价', description: 'HRBP 开启试用期评价 → 员工自评 → 上级知晓' },
   { phase: '试用期评估', description: '上级评价 → HRBP 跟进 → 逾期提醒' }
 ];

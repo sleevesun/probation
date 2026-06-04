@@ -1,6 +1,5 @@
 <template>
   <div style="padding-bottom: 50px">
-    <EmployeeSwitcher />
     <a-page-header title="试用期自评" @back="() => router.back()" />
 
     <a-alert
@@ -88,7 +87,6 @@ import { useRouter } from 'vue-router';
 import { useProbationStore } from '@/store/probation';
 import { message } from 'ant-design-vue';
 import { UserOutlined } from '@ant-design/icons-vue';
-import EmployeeSwitcher from '@/components/EmployeeSwitcher.vue';
 
 const router = useRouter();
 const store = useProbationStore();
@@ -113,7 +111,7 @@ watch(() => store.currentEmpId, () => {
   initForm();
 });
 
-const historyEvals = computed(() => record.value?.evaluations || []);
+const historyEvals = computed(() => (record.value?.evaluations || []).filter(e => e.eval_type !== 'manager'));
 
 const evalTypeLabel = (type: string) => {
   const map: Record<string, string> = { 'self': '自评', 'manager': '上级评价', 'hrbp': 'HRBP评价', 'invited': '受邀评价' };

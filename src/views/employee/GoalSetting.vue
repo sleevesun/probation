@@ -1,6 +1,5 @@
 <template>
   <div>
-    <EmployeeSwitcher />
     <a-page-header title="试用期目标设定" @back="() => router.back()" />
 
     <a-alert
@@ -35,6 +34,9 @@
              <template v-if="column.dataIndex === 'measure'">
                 <a-textarea v-model:value="row.measure" :rows="2" :disabled="isLock" placeholder="请输入衡量方式或预期结果" />
              </template>
+             <template v-if="column.dataIndex === 'weight'">
+                <a-input-number v-model:value="row.weight" :min="1" :max="100" :disabled="isLock" placeholder="%" style="width: 80px" addonAfter="%" />
+             </template>
              <template v-if="column.key === 'action'">
                 <a-button type="link" danger @click="removeGoal(index)" :disabled="isLock">删除</a-button>
              </template>
@@ -65,7 +67,6 @@ import { ref, computed, reactive, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProbationStore, GoalItem } from '@/store/probation';
 import { message, Modal } from 'ant-design-vue';
-import EmployeeSwitcher from '@/components/EmployeeSwitcher.vue';
 
 const router = useRouter();
 const store = useProbationStore();
@@ -104,6 +105,7 @@ const columns = [
   { title: '目标维度', dataIndex: 'dimension', width: 120 },
   { title: '目标内容', dataIndex: 'content' },
   { title: '衡量方式/预期结果', dataIndex: 'measure' },
+  { title: '权重', dataIndex: 'weight', width: 110 },
   { title: '操作', key: 'action', width: 80 }
 ];
 
@@ -113,7 +115,8 @@ const addGoal = () => {
       goal_id: 'G' + Date.now(),
       dimension: '业绩',
       content: '',
-      measure: ''
+      measure: '',
+      weight: undefined
     });
   }
 };
@@ -151,6 +154,20 @@ const handleSubmit = () => {
   if (hasEmptyMeasure) {
     message.error('请填写完整所有的衡量方式/预期结果');
     return;
+  }
+
+  // 权重校验：若任一目标填写权重，则全部目标均需填写，且合计 100%
+  const goalsWithWeight = formState.goals.filter(g => g.weight != null && g.weight > 0);
+  if (goalsWithWeight.length > 0) {
+    if (goalsWithWeight.length !== formState.goals.length) {
+      message.error('若填写权重，请为所有目标均填写权重');
+      return;
+    }
+    const totalWeight = formState.goals.reduce((sum, g) => sum + (g.weight || 0), 0);
+    if (totalWeight !== 100) {
+      message.error(`权重合计必须为 100%，当前合计 ${totalWeight}%`);
+      return;
+    }
   }
 
   saving.value = true;

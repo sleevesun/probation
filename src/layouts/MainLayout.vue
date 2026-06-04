@@ -19,19 +19,39 @@
 
         <a-menu-item-group key="group-manager" v-if="role === 'Manager'">
           <template #title><team-outlined /> 上级</template>
-          <a-menu-item key="/manager/team">团队管理看板</a-menu-item>
+          <a-menu-item key="/manager/team">试用期管理</a-menu-item>
         </a-menu-item-group>
 
         <a-menu-item-group key="group-hrbp" v-if="role === 'HRBP'">
           <template #title><safety-certificate-outlined /> HRBP</template>
-          <a-menu-item key="/hrbp/panorama">试用期全景看板</a-menu-item>
+          <a-menu-item key="/hrbp/panorama">试用期管理</a-menu-item>
         </a-menu-item-group>
 
         <a-menu-item-group key="group-approver" v-if="role === 'Approver'">
           <template #title><check-square-outlined /> 审批</template>
-          <a-menu-item key="/approver/center">我的审批待办</a-menu-item>
+          <a-menu-item key="/approver/center">试用期转正审批</a-menu-item>
         </a-menu-item-group>
       </a-menu>
+
+      <!-- 员工切换组件（仅员工角色可见） -->
+      <div v-if="role === 'Employee'" class="sidebar-employee-switcher">
+        <div class="sidebar-switcher-label">演示员工</div>
+        <a-select
+          :value="store.currentEmpId"
+          size="small"
+          style="width: 100%"
+          @change="handleEmpChange"
+          placeholder="请选择员工"
+        >
+          <a-select-option
+            v-for="emp in employeeOptions"
+            :key="emp.emp_id"
+            :value="emp.emp_id"
+          >
+            {{ emp.emp_name }}（{{ emp.statusLabel }}）
+          </a-select-option>
+        </a-select>
+      </div>
     </a-layout-sider>
     
     <a-layout>
@@ -77,7 +97,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { useProbationStore } from '@/store/probation';
+import { useProbationStore, STATUS_MAP } from '@/store/probation';
 import {
   UserOutlined,
   TeamOutlined,
@@ -90,6 +110,18 @@ import {
 const router = useRouter();
 const route = useRoute();
 const store = useProbationStore();
+
+const employeeOptions = computed(() => {
+  return store.records.map(r => ({
+    emp_id: r.emp_id,
+    emp_name: r.emp_name,
+    statusLabel: STATUS_MAP[r.probation_status] || r.probation_status
+  }))
+})
+
+function handleEmpChange(empId: string) {
+  store.setCurrentEmpId(empId)
+}
 
 const collapsed = ref<boolean>(false);
 const selectedKeys = ref<string[]>([route.path]);
@@ -132,6 +164,19 @@ const goHome = () => {
   margin: 16px 14px;
   border-radius: 8px;
   overflow: hidden;
+}
+
+.sidebar-employee-switcher {
+  padding: 12px 14px;
+  border-top: 1px solid #edf1f7;
+  margin-top: 8px;
+}
+
+.sidebar-switcher-label {
+  font-size: 12px;
+  color: #8a97a8;
+  margin-bottom: 6px;
+  font-weight: 600;
 }
 
 /* [UI/UX 修复] 将内联样式抽取为 scoped 样式类 */

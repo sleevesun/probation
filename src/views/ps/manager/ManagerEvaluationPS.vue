@@ -10,7 +10,7 @@
 
     <section class="ps-panel">
       <div class="ps-alert" :class="cannotEval ? 'ps-alert--warning' : 'ps-alert--info'">
-        {{ cannotEval ? readonlyHint : '当前记录可进行上级评估，提交后将由 HRBP 发起审批流程。' }}
+        {{ cannotEval ? readonlyHint : '当前记录可进行上级评估，提交后将由 HRBP 发起转正审批流程流程。' }}
       </div>
     </section>
 
@@ -47,7 +47,7 @@
           <tr v-for="item in record?.evaluations || []" :key="item.eval_id">
             <td>{{ psEvalTypeLabel(item.eval_type) }}</td>
             <td>{{ item.evaluator_name }}</td>
-            <td>{{ item.content }}</td>
+            <td style="white-space: pre-wrap; min-width: 280px;">{{ item.content }}</td>
             <td>{{ item.create_time }}</td>
           </tr>
         </tbody>
@@ -61,7 +61,7 @@
         <a-radio-group v-model:value="decision" :disabled="cannotEval">
           <a-radio value="超出预期">超出预期</a-radio>
           <a-radio value="符合预期">符合预期</a-radio>
-          <a-radio value="不符合录用条件">不符合录用条件</a-radio>
+          <a-radio value="不符合转正条件">不符合转正条件</a-radio>
         </a-radio-group>
       </div>
       <a-textarea v-model:value="reason" :rows="6" :disabled="cannotEval" placeholder="填写上级评估意见" />
@@ -93,12 +93,12 @@ const readonlyHint = computed(() => {
   if (record.value.manager_eval_done) return '该记录已完成上级评估，目前为只读状态。'
   return `当前状态为 ${record.value.probation_status}，暂不可提交上级评估。`
 })
-const decision = ref<'超出预期' | '符合预期' | '不符合录用条件'>('符合预期')
+const decision = ref<'超出预期' | '符合预期' | '不符合转正条件'>('符合预期')
 const reason = ref('')
 
 function handleSubmit() {
-  if (decision.value === '不符合录用条件' && !reason.value.trim()) {
-    message.error('不符合录用条件时必须填写说明')
+  if (decision.value === '不符合转正条件' && !reason.value.trim()) {
+    message.error('不符合转正条件时必须填写说明')
     return
   }
   saving.value = true

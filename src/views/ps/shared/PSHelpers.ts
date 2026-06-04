@@ -1,5 +1,5 @@
 export const psDecisionColor = (decision?: string) => {
-  if (decision === '不符合录用条件') return '#d14343'
+  if (decision === '不符合转正条件') return '#d14343'
   if (decision === '超出预期') return '#2f6f58'
   return '#b36a00'
 }
@@ -19,10 +19,10 @@ export const psStatusText = (status: string) => {
     '01': '待设定目标',
     '02': '目标待确认',
     '03': '目标已确认',
-    '04': '待开启评估',
+    '04': '待开启试用期评价',
     '05': '待员工自评',
     '06': '待上级评价',
-    '07': '待发起审批',
+    '07': '待发起转正审批流程',
     '08': '审批中',
     '09': '待发布结果',
     '10': '已完成',

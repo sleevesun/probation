@@ -2,7 +2,7 @@
   <div class="ps-page" :class="{ 'ps-page--mobile': isMobile }">
     <div class="ps-page__header">
       <div>
-        <div class="ps-page__title">审批中心</div>
+        <div class="ps-page__title">试用期转正审批</div>
         <div class="ps-page__subtitle" v-if="!isMobile">以 PeopleSoft 风格展示待审批列表与审批单详情。</div>
       </div>
       <div class="ps-page__header-extra">
@@ -114,12 +114,12 @@
           <section class="ps-sheet__section">
             <div class="ps-section-title">评价摘要</div>
             <table class="ps-table">
-              <thead><tr><th>评价类型</th><th>评价人</th><th>内容摘要</th></tr></thead>
+              <thead><tr><th style="width: 100px">评价类型</th><th style="width: 90px">评价人</th><th>内容摘要</th></tr></thead>
               <tbody>
                 <tr v-for="item in evaluationRows" :key="item.key">
                   <td>{{ item.label }}</td>
                   <td>{{ item.owner }}</td>
-                  <td>{{ item.content }}</td>
+                  <td style="white-space: pre-wrap; min-width: 280px;">{{ item.content }}</td>
                 </tr>
               </tbody>
             </table>
@@ -128,7 +128,7 @@
           <section class="ps-sheet__section">
             <div class="ps-section-title">审批历史</div>
             <table class="ps-table">
-              <thead><tr><th>节点</th><th>审批人</th><th>动作</th><th>意见</th><th>时间</th></tr></thead>
+              <thead><tr><th>节点</th><th>审批人</th><th>审批结果</th><th>意见</th><th>时间</th></tr></thead>
               <tbody>
                 <tr v-if="!currentRecord.approval_logs.length">
                   <td colspan="5">暂无审批历史</td>

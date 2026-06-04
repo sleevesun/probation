@@ -73,11 +73,11 @@
               <a-radio-group v-model:value="decision" button-style="solid" :disabled="cannotEval">
                 <a-radio-button value="超出预期">超出预期</a-radio-button>
                 <a-radio-button value="符合预期">符合预期</a-radio-button>
-                <a-radio-button value="不符合录用条件">不符合</a-radio-button>
+                <a-radio-button value="不符合转正条件">不符合</a-radio-button>
               </a-radio-group>
             </a-form-item>
 
-            <a-form-item label="评价意见与客观事实" :required="decision === '不符合录用条件'">
+            <a-form-item label="评价意见与客观事实" :required="decision === '不符合转正条件'">
               <a-textarea
                 v-model:value="reason"
                 :rows="6"
@@ -96,7 +96,7 @@
                 提交上级评价
               </a-button>
               <div style="text-align: center; margin-top: 8px; color: #999; font-size: 12px" v-if="!cannotEval">
-                提交后将由 HRBP 发起审批流程
+                提交后将由 HRBP 发起转正审批流程流程
               </div>
             </div>
           </a-form>
@@ -144,17 +144,17 @@ const evalTypeColor = (type: string) => {
   return map[type] || 'default';
 };
 
-const decision = ref<'超出预期' | '符合预期' | '不符合录用条件'>('符合预期');
+const decision = ref<'超出预期' | '符合预期' | '不符合转正条件'>('符合预期');
 const reason = ref('');
 
 const handleSubmit = () => {
-  if (decision.value === '不符合录用条件' && !reason.value.trim()) {
+  if (decision.value === '不符合转正条件' && !reason.value.trim()) {
     message.error('结论为"不符合"时，评价意见为必填项'); return;
   }
   saving.value = true;
   setTimeout(() => {
     store.submitManagerEval(record.value!.master_id, reason.value || '上级评价通过', decision.value);
-    message.success('上级评价提交成功！等待 HRBP 发起审批流程。');
+    message.success('上级评价提交成功！等待 HRBP 发起转正审批流程流程。');
     saving.value = false;
     router.push('/manager/team');
   }, 800);

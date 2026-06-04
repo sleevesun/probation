@@ -49,6 +49,26 @@
             {{ item.label }}
           </button>
         </div>
+
+        <!-- 员工切换组件（仅员工角色可见） -->
+        <div v-if="role === 'Employee'" class="ps-sidebar-employee-switcher">
+          <div class="ps-sidebar-switcher-label">演示员工</div>
+          <a-select
+            :value="probationStore.currentEmpId"
+            size="small"
+            style="width: 100%"
+            @change="handleEmpChange"
+            placeholder="请选择员工"
+          >
+            <a-select-option
+              v-for="emp in employeeOptions"
+              :key="emp.emp_id"
+              :value="emp.emp_id"
+            >
+              {{ emp.emp_name }}（{{ emp.statusLabel }}）
+            </a-select-option>
+          </a-select>
+        </div>
       </aside>
 
       <main class="ps-layout__main">
@@ -72,13 +92,25 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useProbationStore } from '@/store/probation'
+import { useProbationStore, STATUS_MAP } from '@/store/probation'
 
 type RoleKey = 'Employee' | 'Manager' | 'HRBP' | 'Approver'
 
 const router = useRouter()
 const route = useRoute()
 const probationStore = useProbationStore()
+
+const employeeOptions = computed(() => {
+  return probationStore.records.map(r => ({
+    emp_id: r.emp_id,
+    emp_name: r.emp_name,
+    statusLabel: STATUS_MAP[r.probation_status] || r.probation_status
+  }))
+})
+
+function handleEmpChange(empId: string) {
+  probationStore.setCurrentEmpId(empId)
+}
 
 const role = computed(() => probationStore.currentUserRole)
 
@@ -115,7 +147,7 @@ const menuByRole: Record<RoleKey, Array<{ title: string; items: Array<{ label: s
     {
       title: '流程审批',
       items: [
-        { label: '团队试用期看板', path: '/manager/team' },
+        { label: '试用期管理', path: '/manager/team' },
         { label: '转正评估', path: '/manager/evaluation/M005' }
       ]
     }
@@ -124,7 +156,7 @@ const menuByRole: Record<RoleKey, Array<{ title: string; items: Array<{ label: s
     {
       title: 'HRG自助',
       items: [
-        { label: '转正管理', path: '/hrbp/panorama' }
+        { label: '试用期管理', path: '/hrbp/panorama' }
       ]
     }
   ],
@@ -132,7 +164,7 @@ const menuByRole: Record<RoleKey, Array<{ title: string; items: Array<{ label: s
     {
       title: '流程审批',
       items: [
-        { label: '审批中心', path: '/approver/center' }
+        { label: '试用期转正审批', path: '/approver/center' }
       ]
     }
   ]
@@ -159,3 +191,18 @@ function goHome() {
   router.push('/')
 }
 </script>
+
+<style scoped>
+.ps-sidebar-employee-switcher {
+  padding: 12px 22px;
+  border-top: 1px solid var(--ps-border);
+  margin-top: 16px;
+}
+
+.ps-sidebar-switcher-label {
+  font-size: 12px;
+  color: var(--ps-muted);
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+</style>

@@ -1,33 +1,10 @@
 <template>
   <div class="workbench-page">
-    <a-page-header title="团队试用期管理" />
+    <a-page-header title="试用期管理" />
 
     <!-- Tabs -->
     <a-card class="workbench-card">
       <a-tabs v-model:activeKey="activeTab" class="workbench-tabs">
-        <a-tab-pane key="todo" tab="待办">
-          <a-table :dataSource="todoRecords" :columns="todoColumns" rowKey="master_id" size="middle" :pagination="false" class="light-table">
-            <template #bodyCell="{ column, record }">
-              <template v-if="column.dataIndex === 'todo_type'">
-                <a-tag :color="record.probation_status === '02' ? 'gold' : 'blue'">
-                  {{ record.probation_status === '02' ? '目标确认' : '转正评价' }}
-                </a-tag>
-              </template>
-              <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
-              <template v-if="column.dataIndex === 'tenure'">{{ getMonthsSinceHire(record.hire_date) }} 个月</template>
-              <template v-if="column.key === 'action'">
-                <a-space>
-                  <a-button v-if="record.probation_status === '02'" type="primary" size="small" @click="openGoalModal(record)">确认目标</a-button>
-                  <a-button v-if="record.probation_status === '06' && !record.manager_eval_done" type="primary" size="small" @click="openEvalModal(record)">去评价</a-button>
-                  <a-button type="link" size="small" @click="openEvalModal(record)">查看详情</a-button>
-                </a-space>
-              </template>
-            </template>
-          </a-table>
-
-          <a-empty v-if="todoRecords.length === 0" description="当前没有待办" />
-        </a-tab-pane>
-
         <!-- 未转正 Tab -->
         <a-tab-pane key="unfinished" tab="未转正">
           <!-- 流程轴过滤 -->
@@ -38,13 +15,16 @@
               <a-step :title="`已设定目标(${stepCounts.s02_03})`" />
               <a-step :title="`待员工自评(${stepCounts.s05})`" />
               <a-step :title="`待上级评价(${stepCounts.s06})`" />
-              <a-step :title="`待发起审批(${stepCounts.s07})`" />
+              <a-step :title="`待发起转正审批流程(${stepCounts.s07})`" />
               <a-step :title="`审批中(${stepCounts.s08})`" />
               <a-step :title="`待发布(${stepCounts.s09})`" />
             </a-steps>
           </div>
 
           <a-form layout="inline" style="margin-bottom: 16px; flex-wrap: wrap; gap: 8px">
+            <a-form-item>
+              <a-checkbox v-model:checked="onlyMyTodo">待我处理</a-checkbox>
+            </a-form-item>
             <a-form-item label="搜索">
               <a-input v-model:value="searchText" placeholder="姓名 / 工号" allow-clear style="width: 180px" />
             </a-form-item>
@@ -76,23 +56,26 @@
                   <a-button v-if="record.probation_status === '06' && !record.manager_eval_done" type="primary" size="small" @click="openEvalModal(record)">转正评价</a-button>
                   <a-button v-if="record.probation_status === '06' && record.manager_eval_done" type="text" size="small" @click="openEvalModal(record)">已完成评价</a-button>
                   <a-button v-if="['03'].includes(record.probation_status)" type="text" danger size="small" @click="forceReturn(record)">退回调整</a-button>
-                  <a-button type="link" size="small" @click="openEvalModal(record)">查看详情</a-button>
+                  <a-button v-if="['01','02','03','04'].includes(record.probation_status)" size="small" @click="openStageEvalModal(record)">阶段性评价</a-button>
                 </a-space>
+              </template>
+              <template v-if="column.key === 'detail'">
+                <a-button type="link" size="small" @click="openEvalModal(record)">查看详情</a-button>
               </template>
             </template>
           </a-table>
         </a-tab-pane>
 
-        <!-- 已转正 Tab -> 已完成 Tab -->
-        <a-tab-pane key="finished" tab="已完成">
+        <!-- 已结束 Tab -->
+        <a-tab-pane key="finished" tab="已结束">
           <a-table :dataSource="finishedList" :columns="finishedColumns" rowKey="master_id" bordered size="middle">
             <template #bodyCell="{ column, record }">
               <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
               <template v-if="column.dataIndex === 'tenure'">{{ getMonthsSinceHire(record.hire_date) }} 个月</template>
               <template v-if="column.dataIndex === 'final_decision'">
-                <a-tag :color="record.final_decision === '不符合录用条件' ? 'error' : 'success'">{{ record.final_decision || '-' }}</a-tag>
+                <a-tag :color="['不符合转正条件', '离职'].includes(record.final_decision) ? 'error' : 'success'">{{ record.final_decision || '-' }}</a-tag>
               </template>
-              <template v-if="column.key === 'action'">
+              <template v-if="column.key === 'detail'">
                 <a-button type="link" size="small" @click="openEvalModal(record)">查看详情</a-button>
               </template>
             </template>
@@ -160,6 +143,11 @@
         <div style="font-weight: 600; margin: 16px 0 8px; font-size: 14px">试用期考核目标</div>
         <a-table :dataSource="evalModalRecord.goals" :columns="goalColumns" :pagination="false" rowKey="goal_id" size="small" bordered />
 
+        <!-- 阶段性评价 -->
+        <div style="font-weight: 600; margin: 16px 0 8px; font-size: 14px">阶段性评价</div>
+        <a-table v-if="(evalModalRecord.stage_evaluations || []).length > 0" :dataSource="evalModalRecord.stage_evaluations || []" :columns="stageEvalColumns" :pagination="false" rowKey="stage_eval_id" size="small" bordered style="margin-bottom: 8px" />
+        <a-empty v-else description="暂无阶段性评价记录" :image-style="{ height: '40px' }" />
+
         <!-- 员工自评与总结 -->
         <div style="font-weight: 600; margin: 16px 0 8px; font-size: 14px">员工自评与总结</div>
         <div v-if="evalSelfEval" style="white-space: pre-wrap; background: #fafafa; padding: 12px; border-radius: 4px; font-size: 13px">
@@ -181,11 +169,11 @@
             <a-radio-group v-model:value="evalDecision" button-style="solid" :disabled="evalCannotEval">
               <a-radio-button value="超出预期">超出预期</a-radio-button>
               <a-radio-button value="符合预期">符合预期</a-radio-button>
-              <a-radio-button value="不符合录用条件">不符合</a-radio-button>
+              <a-radio-button value="不符合转正条件">不符合</a-radio-button>
             </a-radio-group>
           </a-form-item>
 
-          <a-form-item label="评价意见与客观事实" :required="evalDecision === '不符合录用条件'">
+          <a-form-item label="评价意见与客观事实" :required="evalDecision === '不符合转正条件'">
             <a-textarea
               v-model:value="evalReason"
               :rows="4"
@@ -204,8 +192,42 @@
               提交上级评价
             </a-button>
             <div style="text-align: center; margin-top: 8px; color: #999; font-size: 12px" v-if="!evalCannotEval">
-              提交后将由 HRBP 发起审批流程
+              提交后将由 HRBP 发起转正审批流程流程
             </div>
+          </div>
+        </a-form>
+      </div>
+    </a-modal>
+
+    <!-- 阶段性评价弹窗 -->
+    <a-modal v-model:open="stageEvalModalVisible" title="填写阶段性评价" width="700px" :footer="null">
+      <div v-if="stageEvalRecord">
+        <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
+          <a-descriptions-item label="员工">{{ stageEvalRecord.emp_name }} ({{ stageEvalRecord.emp_id }})</a-descriptions-item>
+          <a-descriptions-item label="岗位">{{ stageEvalRecord.position }}</a-descriptions-item>
+          <a-descriptions-item label="部门">{{ stageEvalRecord.parent_dept }}\{{ stageEvalRecord.dept_name }}</a-descriptions-item>
+          <a-descriptions-item label="直属主管">{{ stageEvalRecord.manager_name }}</a-descriptions-item>
+          <a-descriptions-item label="入职日期">{{ stageEvalRecord.hire_date }}</a-descriptions-item>
+          <a-descriptions-item label="当前状态">{{ getDetailedStatusText(stageEvalRecord) }}</a-descriptions-item>
+        </a-descriptions>
+
+        <div style="font-weight: 600; margin-bottom: 8px">目标信息</div>
+        <a-table v-if="stageEvalRecord.goals.length > 0" :dataSource="stageEvalRecord.goals" :columns="stageGoalColumns" :pagination="false" rowKey="goal_id" size="small" bordered style="margin-bottom: 16px" />
+        <a-alert v-else type="info" message="暂未完成试用期目标制定" style="margin-bottom: 16px" />
+
+        <div style="font-weight: 600; margin-bottom: 8px">历史阶段性评价</div>
+        <a-table v-if="(stageEvalRecord.stage_evaluations || []).length > 0" :dataSource="stageEvalRecord.stage_evaluations || []" :columns="stageEvalHistoryColumns" :pagination="false" rowKey="stage_eval_id" size="small" bordered style="margin-bottom: 16px" />
+        <a-empty v-else description="暂无阶段性评价记录" :image-style="{ height: '40px' }" style="margin-bottom: 16px" />
+
+        <a-form layout="vertical">
+          <a-form-item label="评价内容" required>
+            <a-textarea v-model:value="stageEvalContent" :rows="4" placeholder="请输入阶段性评价内容" />
+          </a-form-item>
+          <div style="text-align: right">
+            <a-space>
+              <a-button @click="stageEvalModalVisible = false">取消</a-button>
+              <a-button type="primary" @click="handleStageEvalSubmit" :disabled="!stageEvalContent.trim()">提交评价</a-button>
+            </a-space>
           </div>
         </a-form>
       </div>
@@ -219,7 +241,7 @@ import { useProbationStore, ProbationMaster, STATUS_COLOR, getDetailedStatusText
 import { message } from 'ant-design-vue';
 const store = useProbationStore();
 
-const activeTab = ref('todo');
+const activeTab = ref('unfinished');
 const searchText = ref('');
 const filterDept = ref<string | undefined>(undefined);
 const activeTodoFilter = ref<string>('');
@@ -227,9 +249,11 @@ const activeTodoFilter = ref<string>('');
 const currentStepIndex = ref<number>(0);
 const activeStepFilter = ref<string>('all');
 
-// 已转正 = 结果已发布 (10)
-const unfinishedRecords = computed(() => store.records.filter(r => r.probation_status !== '10'));
-const finishedList = computed(() => store.records.filter(r => r.probation_status === '10'));
+// 未转正：排除已结束状态(10/88/99)
+const unfinishedRecords = computed(() => store.records.filter(r => !['10', '88', '99'].includes(r.probation_status)));
+// 已结束：结果已发布(10) + 未转正离职(88) + 暂不发起/终止(99)
+const finishedList = computed(() => store.records.filter(r => ['10', '88', '99'].includes(r.probation_status)));
+const onlyMyTodo = ref(false);
 
 const formatCount = (count: number) => count > 0 ? count : '-';
 
@@ -260,24 +284,32 @@ const onStepChange = (current: number) => {
   activeTodoFilter.value = '';
 };
 
-const todoRecords = computed(() => store.records.filter(r => r.probation_status === '02' || (r.probation_status === '06' && !r.manager_eval_done)));
-
 const deptOptions = computed(() => {
   const depts = new Set(store.records.map(r => `${r.parent_dept}\\${r.dept_name}`));
   return Array.from(depts);
 });
 
-const resetFilters = () => { 
-  searchText.value = ''; 
-  filterDept.value = undefined; 
+const resetFilters = () => {
+  searchText.value = '';
+  filterDept.value = undefined;
   activeTodoFilter.value = '';
   activeStepFilter.value = 'all';
   currentStepIndex.value = 0;
+  onlyMyTodo.value = false;
 };
 
 const filteredUnfinished = computed(() => {
   let list = unfinishedRecords.value;
-  
+
+  // 待我处理筛选
+  if (onlyMyTodo.value) {
+    list = list.filter(r =>
+      (r.probation_status === '02') ||
+      (r.probation_status === '06' && !r.manager_eval_done) ||
+      (r.probation_status === '03')
+    );
+  }
+
   // 1. 流程轴过滤
   if (activeStepFilter.value !== 'all') {
     if (activeStepFilter.value === '02_03') {
@@ -326,16 +358,8 @@ const columns = [
   { title: '入职时长', dataIndex: 'tenure', width: 100 },
   { title: '当前处理人', dataIndex: 'current_handler', width: 120 },
   { title: '当前状态', dataIndex: 'probation_status', width: 150 },
-  { title: '操作', key: 'action', width: 240 }
-];
-
-const todoColumns = [
-  { title: '待办类型', dataIndex: 'todo_type', width: 100 },
-  { title: '姓名', dataIndex: 'emp_name', width: 90 },
-  { title: '岗位', dataIndex: 'position', width: 140 },
-  { title: '直属部门', dataIndex: 'dept_display' },
-  { title: '入职时长', dataIndex: 'tenure', width: 100 },
-  { title: '操作', key: 'action', width: 190 }
+  { title: '操作', key: 'action', width: 200 },
+  { title: '详情', key: 'detail', width: 80 }
 ];
 
 const finishedColumns = [
@@ -346,7 +370,7 @@ const finishedColumns = [
   { title: '入职日期', dataIndex: 'hire_date', width: 110 },
   { title: '入职时长', dataIndex: 'tenure', width: 100 },
   { title: '结论', dataIndex: 'final_decision', width: 130 },
-  { title: '操作', key: 'action', width: 100 }
+  { title: '详情', key: 'detail', width: 80 }
 ];
 
 const goalColumns = [
@@ -354,6 +378,13 @@ const goalColumns = [
   { title: '目标内容', dataIndex: 'content' },
   { title: '衡量方式/预期结果', dataIndex: 'measure' },
   { title: '目标回顾', dataIndex: 'goal_review', customRender: ({ text }: any) => text || '暂无目标回顾' }
+];
+
+const stageEvalColumns = [
+  { title: '填写人', dataIndex: 'evaluator_name', width: 80 },
+  { title: '角色', dataIndex: 'evaluator_role', width: 80 },
+  { title: '评价内容', dataIndex: 'content' },
+  { title: '时间', dataIndex: 'create_time', width: 150 }
 ];
 
 const goalModalVisible = ref(false);
@@ -398,7 +429,7 @@ const handleForceReturn = () => {
 // 评价弹窗
 const evalModalVisible = ref(false);
 const evalModalRecord = ref<ProbationMaster | null>(null);
-const evalDecision = ref<'超出预期' | '符合预期' | '不符合录用条件'>('符合预期');
+const evalDecision = ref<'超出预期' | '符合预期' | '不符合转正条件'>('符合预期');
 const evalReason = ref('');
 const evalSaving = ref(false);
 
@@ -420,17 +451,49 @@ const openEvalModal = (record: ProbationMaster) => {
 };
 
 const handleEvalSubmit = () => {
-  if (evalDecision.value === '不符合录用条件' && !evalReason.value.trim()) {
+  if (evalDecision.value === '不符合转正条件' && !evalReason.value.trim()) {
     message.error('结论为"不符合"时，评价意见为必填项');
     return;
   }
   evalSaving.value = true;
   setTimeout(() => {
     store.submitManagerEval(evalModalRecord.value!.master_id, evalReason.value || '上级评价通过', evalDecision.value);
-    message.success('上级评价提交成功！等待 HRBP 发起审批流程。');
+    message.success('上级评价提交成功！等待 HRBP 发起转正审批流程流程。');
     evalSaving.value = false;
     evalModalVisible.value = false;
   }, 800);
+};
+
+// 阶段性评价弹窗
+const stageEvalModalVisible = ref(false);
+const stageEvalRecord = ref<ProbationMaster | null>(null);
+const stageEvalContent = ref('');
+
+const stageGoalColumns = [
+  { title: '维度', dataIndex: 'dimension', width: 80 },
+  { title: '目标内容', dataIndex: 'content' },
+  { title: '衡量方式/预期结果', dataIndex: 'measure', width: 200 }
+];
+
+const stageEvalHistoryColumns = [
+  { title: '填写人', dataIndex: 'evaluator_name', width: 80 },
+  { title: '角色', dataIndex: 'evaluator_role', width: 80 },
+  { title: '评价内容', dataIndex: 'content' },
+  { title: '时间', dataIndex: 'create_time', width: 150 }
+];
+
+const openStageEvalModal = (record: ProbationMaster) => {
+  stageEvalRecord.value = record;
+  stageEvalContent.value = '';
+  stageEvalModalVisible.value = true;
+};
+
+const handleStageEvalSubmit = () => {
+  if (!stageEvalRecord.value || !stageEvalContent.value.trim()) return;
+  store.addStageEvaluation(stageEvalRecord.value.master_id, '陈思远', '直属上级', stageEvalContent.value);
+  message.success('阶段性评价已提交');
+  stageEvalModalVisible.value = false;
+  stageEvalContent.value = '';
 };
 </script>
 

@@ -1,6 +1,5 @@
 <template>
   <div class="ps-page">
-    <EmployeeSwitcher />
     <div class="ps-page__header">
       <div>
         <div class="ps-page__title">我的试用期</div>
@@ -53,7 +52,6 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useProbationStore } from '@/store/probation'
 import { psEmployeeStatusText } from '@/views/ps/shared/PSHelpers'
-import EmployeeSwitcher from '@/components/EmployeeSwitcher.vue'
 
 const router = useRouter()
 const store = useProbationStore()
@@ -104,7 +102,7 @@ const todoRows = computed(() => {
         { title: '【进行中】试用期评估中', desc: '您的试用期评估正在进行中，请耐心等待结果。', path: '', actionText: '进入' }
       ]
     case '10': {
-      const isPassed = record.value?.final_decision !== '不符合录用条件'
+      const isPassed = record.value?.final_decision !== '不符合转正条件'
       return [
         { title: isPassed ? '转正通过' : '转正未通过', desc: isPassed ? '恭喜您通过试用期转正！' : '很遗憾，您未通过试用期转正。', path: '', actionText: '进入' }
       ]

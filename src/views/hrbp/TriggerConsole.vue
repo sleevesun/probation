@@ -9,7 +9,7 @@
             批量开启转正
           </a-button>
           <a-button danger :disabled="!hasSelected" @click="batchTrigger(false)">
-            批量挂起暂不开启
+            批量挂起不开启
           </a-button>
         </a-space>
         <span style="margin-left: 8px">
@@ -36,8 +36,8 @@
           <template v-if="column.key === 'action'">
              <a-space>
                 <a-button v-if="record.probation_status === '04'" type="primary" size="small" @click="handleRun(record.master_id)">开启转正流程</a-button>
-                <a-button v-if="record.probation_status === '04'" type="dashed" danger size="small" @click="handleHold(record.master_id)">暂不开启(挂起)</a-button>
-                <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="handleTriggerApproval(record.master_id)">发起审批</a-button>
+                <a-button v-if="record.probation_status === '04'" type="dashed" danger size="small" @click="handleHold(record.master_id)">不开启(挂起)</a-button>
+                <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="handleTriggerApproval(record.master_id)">发起转正审批流程</a-button>
                 <a-button v-if="record.probation_status === '07'" danger size="small" @click="handleTerminate(record.master_id)">终止转正</a-button>
              </a-space>
           </template>
@@ -74,7 +74,7 @@ const onSelectChange = (keys: string[]) => { selectedRowKeys.value = keys; };
 
 const handleRun = (id: string) => {
   store.triggerProbation(id);
-  message.success('已开启评估');
+  message.success('已开启试用期评价');
 };
 
 const handleHold = (id: string) => {

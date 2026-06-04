@@ -1,7 +1,10 @@
 <template>
   <div>
-    <EmployeeSwitcher />
-    <a-page-header title="我的试用期" :sub-title="`已入职 ${daysSinceHire} 天`" />
+    <a-page-header title="我的试用期" :sub-title="`已入职 ${daysSinceHire} 天`">
+      <template #tags>
+        <a-tag :color="STATUS_COLOR[record?.probation_status || '01']">{{ currentStatusText }}</a-tag>
+      </template>
+    </a-page-header>
 
     <a-card style="margin-top: 16px">
       <a-steps :current="currentStep" size="small" :status="stepStatus">
@@ -12,9 +15,20 @@
       </a-steps>
     </a-card>
 
-    <a-row :gutter="16" style="margin-top: 24px">
-      <a-col :span="12">
-        <a-card title="当前进展" :bordered="false">
+    <!-- 员工信息 -->
+    <a-card title="我的信息" :bordered="false" style="margin-top: 24px">
+      <a-descriptions :column="2">
+         <a-descriptions-item label="姓名">{{ record?.emp_name }}</a-descriptions-item>
+         <a-descriptions-item label="工号">{{ record?.emp_id }}</a-descriptions-item>
+         <a-descriptions-item label="岗位">{{ record?.position }}</a-descriptions-item>
+         <a-descriptions-item label="部门">{{ record?.parent_dept }}\{{ record?.dept_name }}</a-descriptions-item>
+         <a-descriptions-item label="直属主管">{{ record?.manager_name }}</a-descriptions-item>
+         <a-descriptions-item label="入职日期">{{ record?.hire_date }}</a-descriptions-item>
+      </a-descriptions>
+    </a-card>
+
+    <!-- 当前进展 -->
+    <a-card title="当前进展" :bordered="false" style="margin-top: 16px">
           <template #extra>
             <a-space v-if="todoList.length > 1">
               <a-button type="text" size="small" :disabled="currentTodoIndex === 0" @click="prevTodo">
@@ -71,42 +85,34 @@
             </a-list-item>
           </a-list>
 
-          <!-- 状态10: 如果 HRBP 开放了评价，展示评价内容 -->
-          <div style="margin-top: 16px" v-if="record?.probation_status === '10' && record?.allow_employee_view_eval">
-            <a-card title="上级评价" size="small" :bordered="true" style="background: #f6ffed">
-              <p>该员工在试用期内表现优异，专业能力强，团队协作意识好，建议按期转正。</p>
-            </a-card>
-          </div>
         </a-card>
-      </a-col>
 
-      <a-col :span="12">
-        <a-card title="我的信息" :bordered="false">
-          <a-descriptions :column="1">
-             <a-descriptions-item label="姓名">{{ record?.emp_name }}</a-descriptions-item>
-             <a-descriptions-item label="工号">{{ record?.emp_id }}</a-descriptions-item>
-             <a-descriptions-item label="岗位">{{ record?.position }}</a-descriptions-item>
-             <a-descriptions-item label="部门">{{ record?.parent_dept }}\{{ record?.dept_name }}</a-descriptions-item>
-             <a-descriptions-item label="直属主管">{{ record?.manager_name }}</a-descriptions-item>
-             <a-descriptions-item label="入职日期">{{ record?.hire_date }}</a-descriptions-item>
-          </a-descriptions>
-        </a-card>
-      </a-col>
-    </a-row>
+    <!-- 阶段性评价记录 -->
+    <a-card title="阶段性评价记录" :bordered="false" style="margin-top: 16px">
+      <a-table v-if="(record?.stage_evaluations || []).length > 0" :dataSource="record?.stage_evaluations || []" :columns="stageEvalColumns" :pagination="false" rowKey="stage_eval_id" size="small" bordered />
+      <a-empty v-else description="暂无阶段性评价记录" />
+    </a-card>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useProbationStore } from '@/store/probation';
+import { useProbationStore, STATUS_COLOR, getDetailedStatusText } from '@/store/probation';
 import { ExceptionOutlined, FormOutlined, ClockCircleOutlined, LoadingOutlined, CheckOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
-import EmployeeSwitcher from '@/components/EmployeeSwitcher.vue';
 
 const router = useRouter();
 const store = useProbationStore();
 
 const record = computed(() => store.records.find(r => r.emp_id === store.currentEmpId));
+const currentStatusText = computed(() => record.value ? getDetailedStatusText(record.value) : '');
+
+const stageEvalColumns = [
+  { title: '填写人', dataIndex: 'evaluator_name', width: 80 },
+  { title: '角色', dataIndex: 'evaluator_role', width: 80 },
+  { title: '评价内容', dataIndex: 'content' },
+  { title: '时间', dataIndex: 'create_time', width: 150 }
+];
 
 const daysSinceHire = computed(() => {
   if (!record.value) return 0;
@@ -183,7 +189,7 @@ const todoList = computed(() => {
       });
       break;
     case '10': {
-      const isPassed = record.value?.final_decision !== '不符合录用条件';
+      const isPassed = record.value?.final_decision !== '不符合转正条件';
       items.push({
         id: '10',
         type: 'result',
@@ -233,7 +239,7 @@ const currentStep = computed(() => {
 });
 
 const stepStatus = computed(() => {
-  if (record.value?.probation_status === '10' && record.value.final_decision === '不符合录用条件') return 'error';
+  if (record.value?.probation_status === '10' && record.value.final_decision === '不符合转正条件') return 'error';
   if (record.value?.probation_status === '10') return 'finish';
   return 'process';
 });

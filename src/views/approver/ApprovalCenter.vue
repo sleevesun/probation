@@ -1,6 +1,6 @@
 <template>
   <div class="approval-page" :class="{ 'approval-page--mobile': isMobile }">
-    <a-page-header title="审批中心" :sub-title="isMobile ? '' : '您的待办与已办审批单据'">
+    <a-page-header title="试用期转正审批" :sub-title="isMobile ? '' : '您的待办与已办审批单据'">
       <template #extra>
         <a-space>
           <span style="font-size: 13px; color: #666;">{{ isMobile ? '移动端视图' : 'PC端视图' }}</span>
@@ -17,7 +17,7 @@
             <template #bodyCell="{ column, record }">
               <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
               <template v-if="column.key === 'action'">
-                <a-button type="primary" size="small" @click="openModal(record)">查看审批单</a-button>
+                <a-button type="primary" size="small" @click="openModal(record)">审批</a-button>
               </template>
             </template>
           </a-table>
@@ -28,10 +28,10 @@
             <template #bodyCell="{ column, record }">
               <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
               <template v-if="column.dataIndex === 'final_decision'">
-                <a-tag :color="record.final_decision === '不符合录用条件' ? 'error' : 'success'">{{ record.final_decision || '-' }}</a-tag>
+                <a-tag :color="['不符合转正条件', '离职'].includes(record.final_decision) ? 'error' : 'success'">{{ record.final_decision || '-' }}</a-tag>
               </template>
               <template v-if="column.key === 'action'">
-                <a-button size="small" @click="openModal(record)">查看审批单</a-button>
+                <a-button size="small" @click="openModal(record)">审批</a-button>
               </template>
             </template>
           </a-table>
@@ -77,7 +77,7 @@
           <div v-for="record in doneList" :key="record.master_id" class="mobile-card" @click="openModal(record)">
             <div class="mobile-card__header">
               <span class="mobile-card__name">{{ record.emp_name }}</span>
-              <a-tag :color="record.final_decision === '不符合录用条件' ? 'error' : 'success'" size="small">{{ record.final_decision || '-' }}</a-tag>
+              <a-tag :color="record.final_decision === '不符合转正条件' ? 'error' : 'success'" size="small">{{ record.final_decision || '-' }}</a-tag>
             </div>
             <div class="mobile-card__body">
               <div class="mobile-card__title">关于 {{ record.emp_name }} 的试用期转正申请</div>
@@ -99,7 +99,7 @@
         <section class="approval-sheet__section">
           <div class="approval-sheet__title">单据概览</div>
           <a-descriptions bordered size="small" :column="2">
-            <a-descriptions-item label="单据标题" :span="2">关于 {{ currentRecord.emp_name }} 的试用期转正申请</a-descriptions-item>
+            <a-descriptions-item label="流程名称" :span="2">{{ currentRecord.emp_name }} 的试用期转正审批流程</a-descriptions-item>
             <a-descriptions-item label="发起人">{{ currentRecord.hrbp_name }}（HRBP）</a-descriptions-item>
             <a-descriptions-item label="姓名">{{ currentRecord.emp_name }}</a-descriptions-item>
             <a-descriptions-item label="工号">{{ currentRecord.emp_id }}</a-descriptions-item>
@@ -109,7 +109,7 @@
             <a-descriptions-item label="HRBP">{{ currentRecord.hrbp_name }}</a-descriptions-item>
             <a-descriptions-item label="入职时间">{{ currentRecord.hire_date }}</a-descriptions-item>
             <a-descriptions-item label="建议结论">
-              <b :style="{ color: currentRecord.final_decision === '不符合录用条件' ? '#f5222d' : '#1890ff' }">
+              <b :style="{ color: currentRecord.final_decision === '不符合转正条件' ? '#f5222d' : '#1890ff' }">
                 {{ currentRecord.final_decision || '待明确' }}
               </b>
             </a-descriptions-item>
@@ -132,9 +132,20 @@
 
         <section class="approval-sheet__section">
           <div class="approval-sheet__title">评价摘要</div>
+          <!-- 阶段性评价 -->
+          <div v-if="(currentRecord.stage_evaluations || []).length > 0" style="margin-bottom: 12px">
+            <div style="font-weight: 600; margin-bottom: 8px; font-size: 13px">阶段性评价</div>
+            <a-table :dataSource="currentRecord.stage_evaluations || []" :pagination="false" rowKey="stage_eval_id" size="small" bordered>
+              <a-table-column title="填写人" data-index="evaluator_name" width="80" />
+              <a-table-column title="角色" data-index="evaluator_role" width="80" />
+              <a-table-column title="评价内容" data-index="content" />
+              <a-table-column title="时间" data-index="create_time" width="150" />
+            </a-table>
+          </div>
+          <!-- 员工自评、上级评价等 -->
           <a-table :dataSource="evaluationRows" :pagination="false" rowKey="key" size="small" bordered>
-            <a-table-column title="评价类型" data-index="label" />
-            <a-table-column title="评价人" data-index="owner" />
+            <a-table-column title="评价类型" data-index="label" width="100" />
+            <a-table-column title="评价人" data-index="owner" width="90" />
             <a-table-column title="内容摘要" data-index="content" />
           </a-table>
         </section>
@@ -144,7 +155,7 @@
           <a-table :dataSource="approvalLogRows" :pagination="false" rowKey="key" size="small" bordered>
             <a-table-column title="节点" data-index="node_name" />
             <a-table-column title="审批人" data-index="approver_name" />
-            <a-table-column title="动作" data-index="action" />
+            <a-table-column title="审批结果" data-index="action" />
             <a-table-column title="意见" data-index="comment" />
             <a-table-column title="时间" data-index="action_time" />
           </a-table>
@@ -237,7 +248,7 @@
                   </div>
                   <div class="mobile-field">
                     <span class="mobile-field__label">建议结论</span>
-                    <span class="mobile-field__value" :style="{ color: currentRecord.final_decision === '不符合录用条件' ? '#f5222d' : '#1890ff', fontWeight: 600 }">
+                    <span class="mobile-field__value" :style="{ color: currentRecord.final_decision === '不符合转正条件' ? '#f5222d' : '#1890ff', fontWeight: 600 }">
                       {{ currentRecord.final_decision || '待明确' }}
                     </span>
                   </div>
@@ -324,17 +335,23 @@ const todoList = computed(() => store.records.filter(r => r.probation_status ===
 const doneList = computed(() => store.records.filter(r => ['09', '10'].includes(r.probation_status) && r.approval_logs.length > 0))
 
 const columns = [
-  { title: '标题', customRender: ({ record }: any) => `关于 ${record.emp_name} 的试用期转正申请` },
-  { title: '部门', dataIndex: 'dept_display', width: 180 },
-  { title: '发起人', dataIndex: 'hrbp_name' },
-  { title: '操作', key: 'action', width: 140 }
+  { title: '流程名称', customRender: ({ record }: any) => `${record.emp_name} 的试用期转正审批流程`, width: 200 },
+  { title: '员工姓名', dataIndex: 'emp_name', width: 90 },
+  { title: '工号', dataIndex: 'emp_id', width: 80 },
+  { title: '部门', dataIndex: 'dept_display', width: 160 },
+  { title: '入职日期', dataIndex: 'hire_date', width: 110 },
+  { title: '流程发起人', dataIndex: 'hrbp_name', width: 100 },
+  { title: '操作', key: 'action', width: 80 }
 ]
 
 const doneColumns = [
-  { title: '标题', customRender: ({ record }: any) => `关于 ${record.emp_name} 的试用期转正申请` },
-  { title: '部门', dataIndex: 'dept_display', width: 180 },
-  { title: '结论', dataIndex: 'final_decision', width: 150 },
-  { title: '操作', key: 'action', width: 140 }
+  { title: '流程名称', customRender: ({ record }: any) => `${record.emp_name} 的试用期转正审批流程`, width: 200 },
+  { title: '员工姓名', dataIndex: 'emp_name', width: 90 },
+  { title: '工号', dataIndex: 'emp_id', width: 80 },
+  { title: '部门', dataIndex: 'dept_display', width: 160 },
+  { title: '入职日期', dataIndex: 'hire_date', width: 110 },
+  { title: '结论', dataIndex: 'final_decision', width: 130 },
+  { title: '操作', key: 'action', width: 80 }
 ]
 
 const modalVisible = ref(false)
