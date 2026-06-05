@@ -2,7 +2,7 @@
   <div class="ps-page">
     <div class="ps-page__header">
       <div>
-        <div class="ps-page__title">转正评估</div>
+        <div class="ps-page__title">试用期评价</div>
         <div class="ps-page__subtitle">列表进入详情页的传统评估模式，按信息区块展示考核依据与上级决策。</div>
       </div>
       <a-button size="small" @click="router.push('/manager/team')">返回列表</a-button>
@@ -105,7 +105,7 @@ function handleSubmit() {
   saving.value = true
   setTimeout(() => {
     store.submitManagerEval(record.value!.master_id, reason.value, decision.value)
-    message.success(isFailedDecision(decision.value) ? '评价已提交，该员工已进入不开启/终止状态。' : '评价提交成功，等待 HRBP 发起转正审批流程。')
+    message.success(isFailedDecision(decision.value) ? '评价已提交，该员工已进入终止转正状态。' : '评价提交成功，等待 HRBP 发起转正审批流程。')
     saving.value = false
     router.push('/manager/team')
   }, 350)

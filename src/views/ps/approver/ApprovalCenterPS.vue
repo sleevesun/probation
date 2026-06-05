@@ -113,7 +113,7 @@
 
           <section class="ps-sheet__section">
             <div class="ps-section-title">评价详情</div>
-            <div v-if="(currentRecord.stage_evaluations || []).length" class="ps-subsection-title">阶段性评价</div>
+            <div v-if="(currentRecord.stage_evaluations || []).length" class="ps-subsection-title">阶段性反馈</div>
             <table class="ps-table">
               <tbody>
                 <tr v-for="item in currentRecord.stage_evaluations || []" :key="item.stage_eval_id">

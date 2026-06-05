@@ -73,8 +73,8 @@
             </td>
             <td class="ps-table__actions">
               <a-button v-if="canTriggerProbation(item)" size="small" type="primary" @click="handleTriggerConfirm(item)">开启试用期评价</a-button>
-              <a-button v-if="['01','02','03','04'].includes(item.probation_status)" size="small" danger @click="openActionModal(item, 'hrbp-hold')">不开启</a-button>
-              <a-button v-if="['02','03','04'].includes(item.probation_status)" size="small" @click="openStageEvalModal(item)">阶段性评价</a-button>
+              <a-button v-if="['01','02','03','04'].includes(item.probation_status)" size="small" danger @click="openActionModal(item, 'hrbp-hold')">终止转正</a-button>
+              <a-button v-if="['02','03','04'].includes(item.probation_status)" size="small" @click="openStageEvalModal(item)">阶段性反馈</a-button>
               <a-button v-if="['05','06'].includes(item.probation_status)" size="small" danger @click="handleTerminate(item.master_id)">终止转正</a-button>
               <a-button v-if="item.probation_status === '07'" size="small" type="primary" @click="openApprovalPreview(item)">发起转正审批流程</a-button>
               <a-button v-if="item.probation_status === '07'" size="small" danger @click="handleTerminate(item.master_id)">终止转正</a-button>
@@ -169,7 +169,7 @@
         </template>
 
         <template v-if="actionModalType === 'hrbp-hold'">
-          <div class="ps-alert ps-alert--warning" style="margin-top: 16px">该员工将进入「不开启/终止」状态，不再继续转正流程。</div>
+          <div class="ps-alert ps-alert--warning" style="margin-top: 16px">该员工将进入「终止转正/终止」状态，不再继续转正流程。</div>
           <div class="ps-toolbar" style="margin-top: 16px">
             <div class="ps-toolbar__spacer"></div>
             <a-button size="small" @click="closeActionModal">取消</a-button>
@@ -232,16 +232,16 @@
           <a-empty v-else description="暂无目标" :image-style="{ height: '40px' }" />
         </div>
 
-        <!-- 阶段性评价 -->
+        <!-- 阶段性反馈 -->
         <div class="approval-detail-section" style="margin-top: 16px">
-          <div class="approval-detail-section__title">阶段性评价</div>
+          <div class="approval-detail-section__title">阶段性反馈</div>
           <div v-if="(approvalPreviewRecord.stage_evaluations || []).length > 0">
             <div class="approval-detail-item" v-for="stageEval in approvalPreviewRecord.stage_evaluations || []" :key="stageEval.stage_eval_id">
               <div class="approval-detail-item__title">{{ stageEval.evaluator_name }}-{{ stageEval.evaluator_role }} {{ stageEval.create_time }}</div>
               <div class="approval-detail-item__content">{{ stageEval.content }}</div>
             </div>
           </div>
-          <a-empty v-else description="暂无阶段性评价记录" :image-style="{ height: '40px' }" />
+          <a-empty v-else description="暂无阶段性反馈记录" :image-style="{ height: '40px' }" />
         </div>
 
         <!-- 员工自评 -->
@@ -274,8 +274,8 @@
       </div>
     </a-modal>
 
-    <!-- 阶段性评价弹窗 -->
-    <a-modal v-model:open="stageEvalModalVisible" title="填写阶段性评价" width="700px" :footer="null" wrap-class-name="ps-modal-wrap">
+    <!-- 阶段性反馈弹窗 -->
+    <a-modal v-model:open="stageEvalModalVisible" title="填写阶段性反馈" width="700px" :footer="null" wrap-class-name="ps-modal-wrap">
       <div v-if="stageEvalRecord" class="ps-modal-content">
         <div class="ps-form-grid">
           <div class="ps-field"><label>员工姓名</label><div>{{ stageEvalRecord.emp_name }}</div></div>
@@ -295,7 +295,7 @@
           </tbody>
         </table>
         <a-alert v-else type="info" message="暂未完成试用期目标制定" style="margin-top: 8px" />
-        <div class="ps-section-title" style="margin-top: 16px">历史阶段性评价</div>
+        <div class="ps-section-title" style="margin-top: 16px">历史阶段性反馈</div>
         <table v-if="(stageEvalRecord.stage_evaluations || []).length > 0" class="ps-table">
           <thead><tr><th>填写人</th><th>角色</th><th>评价内容</th><th>时间</th></tr></thead>
           <tbody>
@@ -307,9 +307,9 @@
             </tr>
           </tbody>
         </table>
-        <a-empty v-else description="暂无阶段性评价记录" style="margin-top: 8px" />
+        <a-empty v-else description="暂无阶段性反馈记录" style="margin-top: 8px" />
         <div class="ps-section-title" style="margin-top: 16px">评价内容</div>
-        <a-textarea v-model:value="stageEvalContent" :rows="4" placeholder="请输入阶段性评价内容" />
+        <a-textarea v-model:value="stageEvalContent" :rows="4" placeholder="请输入阶段性反馈内容" />
         <div class="ps-toolbar" style="margin-top: 16px">
           <div class="ps-toolbar__spacer"></div>
           <a-button size="small" @click="stageEvalModalVisible = false">取消</a-button>
@@ -419,7 +419,7 @@ const rows = computed(() => {
 
 const actionModalTitle = computed(() => {
   if (actionModalType.value === 'hrbp-trigger') return '开启试用期评价'
-  if (actionModalType.value === 'hrbp-hold') return '不开启'
+  if (actionModalType.value === 'hrbp-hold') return '终止转正'
   return '发布结果'
 })
 
@@ -542,7 +542,7 @@ function confirmPublish(record: ProbationMaster) {
 function handleTerminate(masterId: string) {
   Modal.confirm({
     title: '确认终止转正',
-    content: '该员工将进入「不开启/终止」状态，不再继续转正流程。',
+    content: '该员工将进入「终止转正/终止」状态，不再继续转正流程。',
     width: 560,
     class: 'terminate-confirm-modal',
     okText: '确认终止',
@@ -552,7 +552,7 @@ function handleTerminate(masterId: string) {
   })
 }
 
-// 阶段性评价弹窗
+// 阶段性反馈弹窗
 const stageEvalModalVisible = ref(false)
 const stageEvalRecord = ref<any>(null)
 const stageEvalContent = ref('')
@@ -566,7 +566,7 @@ function openStageEvalModal(record: any) {
 function handleStageEvalSubmit() {
   if (!stageEvalRecord.value || !stageEvalContent.value.trim()) return
   store.addStageEvaluation(stageEvalRecord.value.master_id, '刘建国', 'HRBP', stageEvalContent.value)
-  message.success('阶段性评价已提交')
+  message.success('阶段性反馈已提交')
   stageEvalModalVisible.value = false
   stageEvalContent.value = ''
 }

@@ -88,7 +88,7 @@ export const STATUS_MAP: Record<string, string> = {
     '09': '待发布结果',
     '10': '结果已发布',
     '88': '未转正离职',
-    '99': '暂不发起/终止'
+    '99': '终止转正'
 };
 
 export const STATUS_COLOR: Record<string, string> = {

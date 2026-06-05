@@ -15,7 +15,7 @@
         <div class="ps-field"><label>工号</label><div>{{ record?.emp_id }}</div></div>
         <div class="ps-field"><label>岗位</label><div>{{ record?.position }}</div></div>
         <div class="ps-field"><label>部门</label><div>{{ record?.parent_dept }}\{{ record?.dept_name }}</div></div>
-        <div class="ps-field"><label>直属主管</label><div>{{ record?.manager_name }}</div></div>
+        <div class="ps-field"><label>直属上级</label><div>{{ record?.manager_name }}</div></div>
         <div class="ps-field"><label>入职日期</label><div>{{ record?.hire_date }}</div></div>
       </div>
     </section>
@@ -44,7 +44,7 @@
     </section>
 
     <section class="ps-panel" style="margin-top: 16px">
-      <div class="ps-section-title">阶段性评价记录</div>
+      <div class="ps-section-title">阶段性反馈记录</div>
       <table v-if="stageEvaluations.length > 0" class="ps-table">
         <thead>
           <tr>
@@ -63,7 +63,7 @@
           </tr>
         </tbody>
       </table>
-      <div v-else style="text-align: center; color: #999; padding: 24px 0">暂无阶段性评价记录</div>
+      <div v-else style="text-align: center; color: #999; padding: 24px 0">暂无阶段性反馈记录</div>
     </section>
   </div>
 </template>
@@ -99,7 +99,7 @@ const todoRows = computed(() => {
         title: isReturned ? '目标被退回，请修改后重新提交' : '填写试用期目标',
         desc: isReturned
           ? `退回意见：${record.value.return_comment}\n请根据上级意见调整目标内容，修改完成后重新提交。`
-          : '请在入职 2 周内完成试用期目标的设定并提交上级确认。',
+          : '请与上级沟通后完成试用期目标设定，并提交上级确认。',
         path: '/employee/goals',
         actionText: isReturned ? '去修改' : '进入'
       }]
@@ -115,7 +115,7 @@ const todoRows = computed(() => {
       ]
     case '05':
       return [
-        { title: '填写试用期自评', desc: '转正流程已开启，请尽快完成转正自评。', path: '/employee/self-eval', actionText: '进入' }
+        { title: '填写试用期评价', desc: '转正流程已开启，请尽快完成试用期评价。', path: '/employee/self-eval', actionText: '进入' }
       ]
     case '06':
     case '07':

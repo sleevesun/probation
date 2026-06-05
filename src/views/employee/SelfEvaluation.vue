@@ -1,6 +1,6 @@
 <template>
   <div style="padding-bottom: 50px">
-    <a-page-header title="试用期自评" @back="() => router.back()" />
+    <a-page-header title="试用期评价" @back="() => router.back()" />
 
     <a-alert
       v-if="record?.probation_status !== '05'"
@@ -47,6 +47,7 @@
             placeholder="请从工作产出、能力成长、团队协作等方面进行总体自评..."
             :disabled="record?.probation_status !== '05'"
           />
+          <div style="color: #999; font-size: 12px; margin-top: 4px">注：如有工作成果需要展示，可将WOA文档、飞书文档等链接粘贴至总结内。</div>
         </a-form-item>
       </a-form>
     </a-card>

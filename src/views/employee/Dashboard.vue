@@ -87,10 +87,10 @@
 
         </a-card>
 
-    <!-- 阶段性评价记录 -->
-    <a-card title="阶段性评价记录" :bordered="false" style="margin-top: 16px">
+    <!-- 阶段性反馈记录 -->
+    <a-card title="阶段性反馈记录" :bordered="false" style="margin-top: 16px">
       <a-table v-if="(record?.stage_evaluations || []).length > 0" :dataSource="record?.stage_evaluations || []" :columns="stageEvalColumns" :pagination="false" rowKey="stage_eval_id" size="small" bordered />
-      <a-empty v-else description="暂无阶段性评价记录" />
+      <a-empty v-else description="暂无阶段性反馈记录" />
     </a-card>
   </div>
 </template>
@@ -136,7 +136,7 @@ const todoList = computed(() => {
         title: isReturned ? '目标被退回，请修改后重新提交' : '【待办】填写试用期目标',
         desc: isReturned
           ? `退回意见：${record.value.return_comment}\n请根据上级意见调整目标内容，修改完成后重新提交。`
-          : '请在入职 2 周内完成试用期目标的设定并提交上级确认。',
+          : '请与上级沟通后完成试用期目标设定，并提交上级确认。',
         icon: 'exception',
         color: '#f56a00',
         path: '/employee/goals'
@@ -168,7 +168,7 @@ const todoList = computed(() => {
       items.push({
         id: '05',
         type: 'action',
-        title: '【待办】填写试用期自评',
+        title: '【待办】填写试用期评价',
         desc: '转正流程已开启，请尽快完成转正自评。',
         icon: 'form',
         color: '#87d068',

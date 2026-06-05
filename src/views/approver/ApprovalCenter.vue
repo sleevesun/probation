@@ -138,9 +138,9 @@
 
         <section class="approval-sheet__section">
           <div class="approval-sheet__title">评价详情</div>
-          <!-- 阶段性评价 -->
+          <!-- 阶段性反馈 -->
           <div v-if="(currentRecord.stage_evaluations || []).length > 0" style="margin-bottom: 12px">
-            <div style="font-weight: 600; margin-bottom: 8px; font-size: 13px">阶段性评价</div>
+            <div style="font-weight: 600; margin-bottom: 8px; font-size: 13px">阶段性反馈</div>
             <div class="stacked-list">
               <div v-for="item in currentRecord.stage_evaluations || []" :key="item.stage_eval_id" class="stacked-item">
                 <div class="stacked-meta-line">{{ item.evaluator_name }}-{{ item.evaluator_role }} <span>{{ item.create_time }}</span></div>
@@ -252,7 +252,7 @@
                     <span class="mobile-field__value">{{ currentRecord.parent_dept }}\{{ currentRecord.dept_name }}</span>
                   </div>
                   <div class="mobile-field">
-                    <span class="mobile-field__label">直属主管</span>
+                    <span class="mobile-field__label">直属上级</span>
                     <span class="mobile-field__value">{{ currentRecord.manager_name }}</span>
                   </div>
                   <div class="mobile-field">

@@ -157,7 +157,7 @@ const handleSubmit = () => {
   saving.value = true;
   setTimeout(() => {
     store.submitManagerEval(record.value!.master_id, reason.value, decision.value);
-    message.success(isFailedDecision(decision.value) ? '评价已提交，该员工已进入不开启/终止状态。' : '评价提交成功！等待 HRBP 发起转正审批流程。');
+    message.success(isFailedDecision(decision.value) ? '评价已提交，该员工已进入终止转正状态。' : '评价提交成功！等待 HRBP 发起转正审批流程。');
     saving.value = false;
     router.push('/manager/team');
   }, 800);

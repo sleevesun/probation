@@ -7,7 +7,7 @@ export const psDecisionColor = (decision?: string) => {
 export const psEvalTypeLabel = (type: string) => {
   const map: Record<string, string> = {
     self: '员工自评',
-    manager: '直属主管评价',
+    manager: '直属上级评价',
     hrbp: 'HRBP评价',
     invited: '邀评记录'
   }
@@ -26,7 +26,7 @@ export const psStatusText = (status: string) => {
     '08': '审批中',
     '09': '待发布结果',
     '10': '已完成',
-    '99': '暂不发起/终止'
+    '99': '终止转正'
   }
   return map[status] || status
 }
@@ -38,13 +38,13 @@ export const psEmployeeStatusText = (status: string) => {
     '02': '目标待确认',
     '03': '目标已确认',
     '04': '目标已确认',
-    '05': '待填写试用期自评',
+    '05': '待填写试用期评价',
     '06': '试用期评估中',
     '07': '试用期评估中',
     '08': '试用期评估中',
     '09': '试用期评估中',
     '10': '已完成',
-    '99': '暂不发起/终止'
+    '99': '终止转正'
   }
   return map[status] || status
 }

@@ -52,7 +52,7 @@
                   <a-button v-if="record.probation_status === '06' && !record.manager_eval_done" type="primary" size="small" @click="openEvalModal(record)">试用期评价</a-button>
                   <a-button v-if="record.probation_status === '06' && record.manager_eval_done" type="text" size="small" @click="openEvalModal(record)">已完成评价</a-button>
                   <a-button v-if="['03'].includes(record.probation_status)" type="text" danger size="small" @click="forceReturn(record)">目标退回调整</a-button>
-                  <a-button v-if="['02','03','04'].includes(record.probation_status)" size="small" @click="openStageEvalModal(record)">阶段性评价</a-button>
+                  <a-button v-if="['02','03','04'].includes(record.probation_status)" size="small" @click="openStageEvalModal(record)">阶段性反馈</a-button>
                 </a-space>
               </template>
               <template v-if="column.key === 'detail'">
@@ -154,15 +154,15 @@
         </div>
         <a-empty v-else description="暂无目标" :image-style="{ height: '40px' }" />
 
-        <!-- 阶段性评价 -->
-        <div style="font-weight: 600; margin: 16px 0 8px; font-size: 14px">阶段性评价</div>
+        <!-- 阶段性反馈 -->
+        <div style="font-weight: 600; margin: 16px 0 8px; font-size: 14px">阶段性反馈</div>
         <div v-if="(evalModalRecord.stage_evaluations || []).length > 0" class="stacked-list" style="margin-bottom: 8px">
           <div v-for="item in evalModalRecord.stage_evaluations || []" :key="item.stage_eval_id" class="stacked-item">
             <div class="stacked-meta-line">{{ item.evaluator_name }}-{{ item.evaluator_role }} <span>{{ item.create_time }}</span></div>
             <div class="stacked-content">{{ item.content }}</div>
           </div>
         </div>
-        <a-empty v-else description="暂无阶段性评价记录" :image-style="{ height: '40px' }" />
+        <a-empty v-else description="暂无阶段性反馈记录" :image-style="{ height: '40px' }" />
 
         <!-- 员工自评 -->
         <div style="font-weight: 600; margin: 16px 0 8px; font-size: 14px">员工自评</div>
@@ -237,8 +237,8 @@
       </div>
     </a-modal>
 
-    <!-- 阶段性评价弹窗 -->
-    <a-modal v-model:open="stageEvalModalVisible" title="填写阶段性评价" width="700px" :footer="null">
+    <!-- 阶段性反馈弹窗 -->
+    <a-modal v-model:open="stageEvalModalVisible" title="填写阶段性反馈" width="700px" :footer="null">
       <div v-if="stageEvalRecord">
         <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
           <a-descriptions-item label="员工">{{ stageEvalRecord.emp_name }} ({{ stageEvalRecord.emp_id }})</a-descriptions-item>
@@ -253,13 +253,13 @@
         <a-table v-if="stageEvalRecord.goals.length > 0" :dataSource="stageEvalRecord.goals" :columns="stageGoalColumns" :pagination="false" rowKey="goal_id" size="small" bordered style="margin-bottom: 16px" />
         <a-alert v-else type="info" message="暂未完成试用期目标制定" style="margin-bottom: 16px" />
 
-        <div style="font-weight: 600; margin-bottom: 8px">历史阶段性评价</div>
+        <div style="font-weight: 600; margin-bottom: 8px">历史阶段性反馈</div>
         <a-table v-if="(stageEvalRecord.stage_evaluations || []).length > 0" :dataSource="stageEvalRecord.stage_evaluations || []" :columns="stageEvalHistoryColumns" :pagination="false" rowKey="stage_eval_id" size="small" bordered style="margin-bottom: 16px" />
-        <a-empty v-else description="暂无阶段性评价记录" :image-style="{ height: '40px' }" style="margin-bottom: 16px" />
+        <a-empty v-else description="暂无阶段性反馈记录" :image-style="{ height: '40px' }" style="margin-bottom: 16px" />
 
         <a-form layout="vertical">
           <a-form-item label="评价内容" required>
-            <a-textarea v-model:value="stageEvalContent" :rows="4" placeholder="请输入阶段性评价内容" />
+            <a-textarea v-model:value="stageEvalContent" :rows="4" placeholder="请输入阶段性反馈内容" />
           </a-form-item>
           <div style="text-align: right">
             <a-space>
@@ -485,13 +485,13 @@ const handleEvalSubmit = () => {
   evalSaving.value = true;
   setTimeout(() => {
     store.submitManagerEval(evalModalRecord.value!.master_id, evalReason.value, evalDecision.value);
-    message.success(isFailedDecision(evalDecision.value) ? '评价已提交，该员工已进入不开启/终止状态。' : '评价提交成功！等待 HRBP 发起转正审批流程。');
+    message.success(isFailedDecision(evalDecision.value) ? '评价已提交，该员工已进入终止转正状态。' : '评价提交成功！等待 HRBP 发起转正审批流程。');
     evalSaving.value = false;
     evalModalVisible.value = false;
   }, 800);
 };
 
-// 阶段性评价弹窗
+// 阶段性反馈弹窗
 const stageEvalModalVisible = ref(false);
 const stageEvalRecord = ref<ProbationMaster | null>(null);
 const stageEvalContent = ref('');
@@ -518,7 +518,7 @@ const openStageEvalModal = (record: ProbationMaster) => {
 const handleStageEvalSubmit = () => {
   if (!stageEvalRecord.value || !stageEvalContent.value.trim()) return;
   store.addStageEvaluation(stageEvalRecord.value.master_id, '陈思远', '直属上级', stageEvalContent.value);
-  message.success('阶段性评价已提交');
+  message.success('阶段性反馈已提交');
   stageEvalModalVisible.value = false;
   stageEvalContent.value = '';
 };

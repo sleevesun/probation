@@ -68,7 +68,7 @@
               <a-button v-if="item.probation_status === '02'" size="small" type="primary" @click="openActionModal(item, 'manager-goal-review')">确认目标</a-button>
               <a-button v-if="item.probation_status === '03'" size="small" danger @click="openActionModal(item, 'manager-force-adjust')">目标退回调整</a-button>
               <a-button v-if="item.probation_status === '06' && !item.manager_eval_done" size="small" type="primary" @click="openActionModal(item, 'manager-evaluation')">试用期评价</a-button>
-              <a-button v-if="['02','03','04'].includes(item.probation_status)" size="small" @click="openStageEvalModal(item)">阶段性评价</a-button>
+              <a-button v-if="['02','03','04'].includes(item.probation_status)" size="small" @click="openStageEvalModal(item)">阶段性反馈</a-button>
             </td>
           </tr>
         </tbody>
@@ -249,8 +249,8 @@
       </div>
     </a-modal>
 
-    <!-- 阶段性评价弹窗 -->
-    <a-modal v-model:open="stageEvalModalVisible" title="填写阶段性评价" width="700px" :footer="null" wrap-class-name="ps-modal-wrap">
+    <!-- 阶段性反馈弹窗 -->
+    <a-modal v-model:open="stageEvalModalVisible" title="填写阶段性反馈" width="700px" :footer="null" wrap-class-name="ps-modal-wrap">
       <div v-if="stageEvalRecord" class="ps-modal-content">
         <div class="ps-form-grid">
           <div class="ps-field"><label>员工姓名</label><div>{{ stageEvalRecord.emp_name }}</div></div>
@@ -270,7 +270,7 @@
           </tbody>
         </table>
         <a-alert v-else type="info" message="暂未完成试用期目标制定" style="margin-top: 8px" />
-        <div class="ps-section-title" style="margin-top: 16px">历史阶段性评价</div>
+        <div class="ps-section-title" style="margin-top: 16px">历史阶段性反馈</div>
         <table v-if="(stageEvalRecord.stage_evaluations || []).length > 0" class="ps-table">
           <thead><tr><th>填写人</th><th>角色</th><th>评价内容</th><th>时间</th></tr></thead>
           <tbody>
@@ -282,9 +282,9 @@
             </tr>
           </tbody>
         </table>
-        <a-empty v-else description="暂无阶段性评价记录" style="margin-top: 8px" />
+        <a-empty v-else description="暂无阶段性反馈记录" style="margin-top: 8px" />
         <div class="ps-section-title" style="margin-top: 16px">评价内容</div>
-        <a-textarea v-model:value="stageEvalContent" :rows="4" placeholder="请输入阶段性评价内容" />
+        <a-textarea v-model:value="stageEvalContent" :rows="4" placeholder="请输入阶段性反馈内容" />
         <div class="ps-toolbar" style="margin-top: 16px">
           <div class="ps-toolbar__spacer"></div>
           <a-button size="small" @click="stageEvalModalVisible = false">取消</a-button>
@@ -438,11 +438,11 @@ function handleSubmitEvaluation() {
     return
   }
   store.submitManagerEval(actionModalRecord.value.master_id, reason.value, decision.value)
-  message.success(isFailedDecision(decision.value) ? '评价已提交，该员工已进入不开启/终止状态。' : '评价提交成功，等待 HRBP 发起转正审批流程。')
+  message.success(isFailedDecision(decision.value) ? '评价已提交，该员工已进入终止转正状态。' : '评价提交成功，等待 HRBP 发起转正审批流程。')
   closeActionModal()
 }
 
-// 阶段性评价弹窗
+// 阶段性反馈弹窗
 const stageEvalModalVisible = ref(false)
 const stageEvalRecord = ref<any>(null)
 const stageEvalContent = ref('')
@@ -456,7 +456,7 @@ function openStageEvalModal(record: any) {
 function handleStageEvalSubmit() {
   if (!stageEvalRecord.value || !stageEvalContent.value.trim()) return
   store.addStageEvaluation(stageEvalRecord.value.master_id, '陈思远', '直属上级', stageEvalContent.value)
-  message.success('阶段性评价已提交')
+  message.success('阶段性反馈已提交')
   stageEvalModalVisible.value = false
   stageEvalContent.value = ''
 }
