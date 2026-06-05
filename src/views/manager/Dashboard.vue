@@ -11,12 +11,9 @@
           <div style="margin-bottom: 12px; padding: 6px 12px; background: #fafafa; border-radius: 8px;">
             <a-steps :current="currentStepIndex" @change="onStepChange" type="navigation" size="small" class="custom-steps">
               <a-step :title="`全部(${stepCounts.all})`" />
-              <a-step :title="`待设定目标(${stepCounts.s01})`" />
-              <a-step :title="`已设定目标(${stepCounts.s02_03})`" />
-              <a-step :title="`待员工自评(${stepCounts.s05})`" />
-              <a-step :title="`上级评价(${stepCounts.s06_07})`" />
-              <a-step :title="`审批中(${stepCounts.s08})`" />
-              <a-step :title="`待发布(${stepCounts.s09})`" />
+              <a-step :title="`目标设定(${stepCounts.goal_setting})`" />
+              <a-step :title="`试用期评价(${stepCounts.probation_eval})`" />
+              <a-step :title="`转正审批(${stepCounts.approval})`" />
             </a-steps>
           </div>
 
@@ -301,24 +298,20 @@ const formatCount = (count: number) => count > 0 ? count : '-';
 const stepCounts = computed(() => {
   // 只统计当前上级下属的数据
   // 这里简化处理，因为 mock 数据中 manager_name 都是 '陈思远'
-  const records = store.records;
+  const records = unfinishedRecords.value;
   return {
-    all: formatCount(unfinishedRecords.value.length),
-    s01: formatCount(records.filter(r => r.probation_status === '01').length),
-    s02_03: formatCount(records.filter(r => ['02', '03'].includes(r.probation_status)).length),
-    s04: formatCount(records.filter(r => r.probation_status === '04').length),
-    s05: formatCount(records.filter(r => r.probation_status === '05').length),
-    s06_07: formatCount(records.filter(r => ['06', '07'].includes(r.probation_status)).length),
-    s08: formatCount(records.filter(r => r.probation_status === '08').length),
-    s09: formatCount(records.filter(r => r.probation_status === '09').length)
+    all: formatCount(records.length),
+    goal_setting: formatCount(records.filter(r => ['01', '02', '03', '04'].includes(r.probation_status)).length),
+    probation_eval: formatCount(records.filter(r => ['05', '06', '07'].includes(r.probation_status)).length),
+    approval: formatCount(records.filter(r => ['08', '09'].includes(r.probation_status)).length)
   };
 });
 
 const onStepChange = (current: number) => {
   currentStepIndex.value = current;
-  const stepMap = ['all', '01', '02_03', '05', '06_07', '08', '09'];
+  const stepMap = ['all', 'goal_setting', 'probation_eval', 'approval'];
   const filterVal = stepMap[current];
-  
+
   activeTab.value = 'unfinished';
   activeStepFilter.value = filterVal;
   activeTodoFilter.value = '';
@@ -350,14 +343,14 @@ const filteredUnfinished = computed(() => {
     );
   }
 
-  // 1. 流程轴过滤
+  // 1. 流程概览过滤
   if (activeStepFilter.value !== 'all') {
-    if (activeStepFilter.value === '02_03') {
-      list = list.filter(r => ['02', '03'].includes(r.probation_status));
-    } else if (activeStepFilter.value === '06_07') {
-      list = list.filter(r => ['06', '07'].includes(r.probation_status));
-    } else {
-      list = list.filter(r => r.probation_status === activeStepFilter.value);
+    if (activeStepFilter.value === 'goal_setting') {
+      list = list.filter(r => ['01', '02', '03', '04'].includes(r.probation_status));
+    } else if (activeStepFilter.value === 'probation_eval') {
+      list = list.filter(r => ['05', '06', '07'].includes(r.probation_status));
+    } else if (activeStepFilter.value === 'approval') {
+      list = list.filter(r => ['08', '09'].includes(r.probation_status));
     }
   }
 

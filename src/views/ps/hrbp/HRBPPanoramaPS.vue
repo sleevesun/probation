@@ -160,7 +160,7 @@
         </div>
 
         <template v-if="actionModalType === 'hrbp-trigger'">
-          <div class="ps-alert ps-alert--info" style="margin-top: 16px">确认后将开启该员工的试用期评估。</div>
+          <div class="ps-alert ps-alert--info" style="margin-top: 16px">确认后将开启该员工的试用期评价。</div>
           <div class="ps-toolbar" style="margin-top: 16px">
             <div class="ps-toolbar__spacer"></div>
             <a-button size="small" @click="closeActionModal">返回</a-button>
@@ -269,7 +269,7 @@
         <div class="ps-toolbar" style="margin-top: 16px">
           <div class="ps-toolbar__spacer"></div>
           <a-button size="small" @click="approvalPreviewVisible = false">取消</a-button>
-          <a-button size="small" type="primary" @click="submitApproval">发起转正流程</a-button>
+          <a-button size="small" type="primary" @click="submitApproval">发起转正审批流程</a-button>
         </div>
       </div>
     </a-modal>
@@ -326,7 +326,7 @@ import { message, Modal, TreeSelect } from 'ant-design-vue'
 import { useProbationStore, getCurrentHandler, getDetailedStatusText, getMonthsSinceHire, canTriggerProbation, formatDecisionLabel, type ProbationMaster } from '@/store/probation'
 
 type MainTab = 'todo' | 'unfinished' | 'finished'
-type StageFilter = '01' | '02_03' | '04' | '05' | '06' | '08' | '09' | '99'
+type StageFilter = 'goal_setting' | 'probation_eval' | 'approval'
 type ActionModalType = 'hrbp-trigger' | 'hrbp-hold' | 'hrbp-publish'
 
 const store = useProbationStore()
@@ -364,13 +364,9 @@ const approvalManagerEvalResultText = computed(() => formatDecisionLabel(approva
 const approvalManagerEvalContentText = computed(() => normalizeEvalContent(approvalManagerEval.value?.content, approvalPreviewRecord.value?.final_decision))
 
 const stageOptions = [
-  { value: '01', label: '待设定目标' },
-  { value: '02_03', label: '已设定目标' },
-  { value: '05', label: '待员工自评' },
-  { value: '06', label: '上级评价' },
-  { value: '08', label: '审批中' },
-  { value: '09', label: '待发布' },
-  { value: '99', label: '不开启/终止' }
+  { value: 'goal_setting', label: '目标设定' },
+  { value: 'probation_eval', label: '试用期评价' },
+  { value: 'approval', label: '转正审批' }
 ] satisfies { value: StageFilter; label: string }[]
 
 const deptTreeData = computed(() => {
@@ -439,10 +435,10 @@ function getPriority(record: ProbationMaster) {
 
 function matchesStage(record: ProbationMaster, stages: StageFilter[]) {
   return stages.some(stage => {
-    if (stage === '02_03') return ['02', '03', '04'].includes(record.probation_status)
-    if (stage === '06') return ['06', '07'].includes(record.probation_status)
-    if (stage === '99') return record.probation_status === '99'
-    return record.probation_status === stage
+    if (stage === 'goal_setting') return ['01', '02', '03', '04'].includes(record.probation_status)
+    if (stage === 'probation_eval') return ['05', '06', '07'].includes(record.probation_status)
+    if (stage === 'approval') return ['08', '09'].includes(record.probation_status)
+    return false
   })
 }
 

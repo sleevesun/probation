@@ -10,7 +10,7 @@
       <a-steps :current="currentStep" size="small" :status="stepStatus">
         <a-step title="提交目标" />
         <a-step title="上级确认" />
-        <a-step title="试用期自评" />
+        <a-step title="试用期评价" />
         <a-step title="完成" />
       </a-steps>
     </a-card>
@@ -22,7 +22,7 @@
          <a-descriptions-item label="工号">{{ record?.emp_id }}</a-descriptions-item>
          <a-descriptions-item label="岗位">{{ record?.position }}</a-descriptions-item>
          <a-descriptions-item label="部门">{{ record?.parent_dept }}\{{ record?.dept_name }}</a-descriptions-item>
-         <a-descriptions-item label="直属主管">{{ record?.manager_name }}</a-descriptions-item>
+         <a-descriptions-item label="直属上级">{{ record?.manager_name }}</a-descriptions-item>
          <a-descriptions-item label="入职日期">{{ record?.hire_date }}</a-descriptions-item>
       </a-descriptions>
     </a-card>

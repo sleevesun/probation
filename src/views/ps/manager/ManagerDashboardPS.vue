@@ -301,7 +301,7 @@ import { message } from 'ant-design-vue'
 import { useProbationStore, getCurrentHandler, getDetailedStatusText, getMonthsSinceHire, isFailedDecision, type ProbationMaster } from '@/store/probation'
 
 type MainTab = 'todo' | 'unfinished' | 'finished'
-type StageFilter = '01' | '02_03' | '05' | '06' | '08' | '09'
+type StageFilter = 'goal_setting' | 'probation_eval' | 'approval'
 type ActionModalType = 'manager-goal-review' | 'manager-force-adjust' | 'manager-evaluation'
 
 const store = useProbationStore()
@@ -322,12 +322,9 @@ const decision = ref<'超出预期' | '符合预期' | '不符合转正条件'>(
 const reason = ref('')
 
 const stageOptions = [
-  { value: '01', label: '待设定目标' },
-  { value: '02_03', label: '已设定目标' },
-  { value: '05', label: '待员工自评' },
-  { value: '06', label: '上级评价' },
-  { value: '08', label: '审批中' },
-  { value: '09', label: '待发布' }
+  { value: 'goal_setting', label: '目标设定' },
+  { value: 'probation_eval', label: '试用期评价' },
+  { value: 'approval', label: '转正审批' }
 ] satisfies { value: StageFilter; label: string }[]
 
 const deptOptions = computed(() => Array.from(new Set(store.records.map(item => `${item.parent_dept}\\${item.dept_name}`))))
@@ -359,14 +356,15 @@ const tableData = computed(() => {
 const actionModalTitle = computed(() => {
   if (actionModalType.value === 'manager-goal-review') return '目标审核'
   if (actionModalType.value === 'manager-force-adjust') return '要求调整'
-  return '转正评估'
+  return '试用期评价'
 })
 
 function matchesStage(record: ProbationMaster, stages: StageFilter[]) {
   return stages.some(stage => {
-    if (stage === '02_03') return ['02', '03'].includes(record.probation_status)
-    if (stage === '06') return ['06', '07'].includes(record.probation_status)
-    return record.probation_status === stage
+    if (stage === 'goal_setting') return ['01', '02', '03', '04'].includes(record.probation_status)
+    if (stage === 'probation_eval') return ['05', '06', '07'].includes(record.probation_status)
+    if (stage === 'approval') return ['08', '09'].includes(record.probation_status)
+    return false
   })
 }
 
