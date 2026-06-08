@@ -27,6 +27,20 @@
       </div>
     </section>
 
+    <!-- 文档入口区 -->
+    <section class="home__section">
+      <div class="home__section-header">
+        <h2 class="home__section-title">📄 产品文档</h2>
+      </div>
+      <div class="home__demo-grid">
+        <button class="home__demo-card home__demo-card--prd" @click="openPrd">
+          <span class="home__demo-badge home__demo-badge--prd">PRD</span>
+          <h3>产品需求文档</h3>
+          <p>试用期管理及转正审批系统产品需求文档 (V4.19)</p>
+        </button>
+      </div>
+    </section>
+
     <!-- 底部说明 -->
     <footer class="home__footer">
       <p>数据均为模拟数据，仅供内部演示与讨论。</p>
@@ -50,6 +64,10 @@ function openEmailDemo() {
     themeStore.setTheme('modern')
   }
   router.push('/email-demo')
+}
+
+function openPrd() {
+  router.push('/prd')
 }
 </script>
 
@@ -132,6 +150,10 @@ function openEmailDemo() {
   border-left: 3px solid #52c41a;
 }
 
+.home__demo-card--prd {
+  border-left: 3px solid #722ed1;
+}
+
 .home__demo-badge {
   display: inline-block;
   margin-bottom: 14px;
@@ -146,6 +168,11 @@ function openEmailDemo() {
 .home__demo-card--email .home__demo-badge {
   background: #e8ffea;
   color: #389e0d;
+}
+
+.home__demo-badge--prd {
+  background: #f0e6ff !important;
+  color: #722ed1 !important;
 }
 
 .home__demo-card h3 {

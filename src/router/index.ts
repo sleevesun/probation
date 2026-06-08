@@ -105,6 +105,11 @@ const routes: RouteRecordRaw[] = [
     path: '/auth/token',
     name: 'TokenAuth',
     component: () => import('@/views/routes/TokenAuthRoute.vue')
+  },
+  {
+    path: '/prd',
+    name: 'PrdViewer',
+    component: () => import('@/views/PrdViewer.vue')
   }
 ]
 
