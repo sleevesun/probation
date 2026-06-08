@@ -110,6 +110,11 @@ const routes: RouteRecordRaw[] = [
     path: '/prd',
     name: 'PrdViewer',
     component: () => import('@/views/PrdViewer.vue')
+  },
+  {
+    path: '/notification',
+    name: 'NotificationViewer',
+    component: () => import('@/views/NotificationViewer.vue')
   }
 ]
 

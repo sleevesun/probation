@@ -38,6 +38,12 @@
           <h3>产品需求文档</h3>
           <p>试用期管理及转正审批系统产品需求文档 (V4.19)</p>
         </button>
+
+        <button class="home__demo-card home__demo-card--notification" @click="openNotification">
+          <span class="home__demo-badge home__demo-badge--notification">通知</span>
+          <h3>通知与待办梳理</h3>
+          <p>试用期管理通知矩阵与渠道规则 (V2.0)</p>
+        </button>
       </div>
     </section>
 
@@ -68,6 +74,10 @@ function openEmailDemo() {
 
 function openPrd() {
   router.push('/prd')
+}
+
+function openNotification() {
+  router.push('/notification')
 }
 </script>
 
@@ -154,6 +164,10 @@ function openPrd() {
   border-left: 3px solid #722ed1;
 }
 
+.home__demo-card--notification {
+  border-left: 3px solid #fa8c16;
+}
+
 .home__demo-badge {
   display: inline-block;
   margin-bottom: 14px;
@@ -173,6 +187,11 @@ function openPrd() {
 .home__demo-badge--prd {
   background: #f0e6ff !important;
   color: #722ed1 !important;
+}
+
+.home__demo-badge--notification {
+  background: #fff7e6 !important;
+  color: #fa8c16 !important;
 }
 
 .home__demo-card h3 {
