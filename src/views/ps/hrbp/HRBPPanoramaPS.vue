@@ -397,7 +397,6 @@ const actionModalTitle = computed(() => {
 })
 
 const detailRecordOverSixMonths = computed(() => detailModalRecord.value ? parseFloat(getMonthsSinceHire(detailModalRecord.value.hire_date)) >= 6 : false)
-const actionRecordOverSixMonths = computed(() => actionModalRecord.value ? parseFloat(getMonthsSinceHire(actionModalRecord.value.hire_date)) >= 6 : false)
 
 function getPriority(record: ProbationMaster) {
   if (record.probation_status === '04') return 0
@@ -509,12 +508,6 @@ function handleTerminate(masterId: string) {
 const stageEvalModalVisible = ref(false)
 const stageEvalRecord = ref<any>(null)
 const stageEvalContent = ref('')
-
-function openStageEvalModal(record: any) {
-  stageEvalRecord.value = record
-  stageEvalContent.value = ''
-  stageEvalModalVisible.value = true
-}
 
 function handleStageEvalSubmit() {
   if (!stageEvalRecord.value || !stageEvalContent.value.trim()) return

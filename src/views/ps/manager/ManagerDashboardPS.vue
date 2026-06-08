@@ -458,7 +458,7 @@ function openStageEvalModal(record: any) {
 
 function handleStageEvalSubmit() {
   if (!stageEvalRecord.value || !stageEvalContent.value.trim()) return
-  store.addStageEvaluation(stageEvalRecord.value.master_id, '陈思远', '直属上级', stageEvalContent.value)
+  store.addStageEvaluation(stageEvalRecord.value.master_id, '陈思远', stageEvalContent.value)
   message.success('阶段性反馈已提交')
   stageEvalModalVisible.value = false
   stageEvalContent.value = ''
