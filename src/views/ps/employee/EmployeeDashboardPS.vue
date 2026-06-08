@@ -87,7 +87,9 @@ const daysSinceHire = computed(() => {
 
 const statusText = computed(() => psEmployeeStatusText(record.value?.probation_status || '01'))
 
-const stageEvaluations = computed(() => record.value?.stage_evaluations || [])
+const stageEvaluations = computed(() =>
+  (record.value?.stage_evaluations || []).filter(item => item.evaluator_role === '直属上级')
+)
 
 const todoRows = computed(() => {
   const status = record.value?.probation_status

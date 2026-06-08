@@ -1,34 +1,39 @@
 <template>
   <div>
-    <a-page-header title="我的试用期" :sub-title="`已入职 ${daysSinceHire} 天`">
-      <template #tags>
-        <a-tag :color="STATUS_COLOR[record?.probation_status || '01']">{{ currentStatusText }}</a-tag>
-      </template>
-    </a-page-header>
+    <PrdAnnotation id="1">
+      <a-page-header title="我的试用期" :sub-title="`已入职 ${daysSinceHire} 天`">
+        <template #tags>
+          <a-tag :color="STATUS_COLOR[record?.probation_status || '01']">{{ currentStatusText }}</a-tag>
+        </template>
+      </a-page-header>
 
-    <a-card style="margin-top: 16px">
-      <a-steps :current="currentStep" size="small" :status="stepStatus">
-        <a-step title="提交目标" />
-        <a-step title="上级确认" />
-        <a-step title="试用期评价" />
-        <a-step title="完成" />
-      </a-steps>
-    </a-card>
+      <a-card style="margin-top: 16px">
+        <a-steps :current="currentStep" size="small" :status="stepStatus">
+          <a-step title="提交目标" />
+          <a-step title="上级确认" />
+          <a-step title="试用期评价" />
+          <a-step title="完成" />
+        </a-steps>
+      </a-card>
+    </PrdAnnotation>
 
     <!-- 员工信息 -->
-    <a-card title="我的信息" :bordered="false" style="margin-top: 24px">
-      <a-descriptions :column="3">
-         <a-descriptions-item label="姓名">{{ record?.emp_name }}</a-descriptions-item>
-         <a-descriptions-item label="工号">{{ record?.emp_id }}</a-descriptions-item>
-         <a-descriptions-item label="岗位">{{ record?.position }}</a-descriptions-item>
-         <a-descriptions-item label="部门">{{ record?.parent_dept }}\{{ record?.dept_name }}</a-descriptions-item>
-         <a-descriptions-item label="直属上级">{{ record?.manager_name }}</a-descriptions-item>
-         <a-descriptions-item label="入职日期">{{ record?.hire_date }}</a-descriptions-item>
-      </a-descriptions>
-    </a-card>
+    <PrdAnnotation id="3">
+      <a-card title="我的信息" :bordered="false" style="margin-top: 24px">
+        <a-descriptions :column="3">
+           <a-descriptions-item label="姓名">{{ record?.emp_name }}</a-descriptions-item>
+           <a-descriptions-item label="工号">{{ record?.emp_id }}</a-descriptions-item>
+           <a-descriptions-item label="岗位">{{ record?.position }}</a-descriptions-item>
+           <a-descriptions-item label="部门">{{ record?.parent_dept }}\{{ record?.dept_name }}</a-descriptions-item>
+           <a-descriptions-item label="直属上级">{{ record?.manager_name }}</a-descriptions-item>
+           <a-descriptions-item label="入职日期">{{ record?.hire_date }}</a-descriptions-item>
+        </a-descriptions>
+      </a-card>
+    </PrdAnnotation>
 
     <!-- 当前进展 -->
-    <a-card title="当前进展" :bordered="false" style="margin-top: 16px">
+    <PrdAnnotation id="2">
+      <a-card title="当前进展" :bordered="false" style="margin-top: 16px">
           <template #extra>
             <a-space v-if="todoList.length > 1">
               <a-button type="text" size="small" :disabled="currentTodoIndex === 0" @click="prevTodo">
@@ -80,18 +85,21 @@
                 </template>
               </a-list-item-meta>
               <template #actions v-if="currentTodo.path">
-                <a-button type="primary" size="small" @click="router.push(currentTodo.path)">去处理</a-button>
+                <a-button type="primary" size="small" @click="router.push(currentTodo.path)">去填写</a-button>
               </template>
             </a-list-item>
           </a-list>
 
         </a-card>
+    </PrdAnnotation>
 
     <!-- 阶段性反馈记录 -->
-    <a-card title="阶段性反馈记录" :bordered="false" style="margin-top: 16px">
-      <a-table v-if="(record?.stage_evaluations || []).length > 0" :dataSource="record?.stage_evaluations || []" :columns="stageEvalColumns" :pagination="false" rowKey="stage_eval_id" size="small" bordered />
-      <a-empty v-else description="暂无阶段性反馈记录" />
-    </a-card>
+    <PrdAnnotation id="4">
+      <a-card title="阶段性反馈记录" :bordered="false" style="margin-top: 16px">
+        <a-table v-if="managerStageEvaluations.length > 0" :dataSource="managerStageEvaluations" :columns="stageEvalColumns" :pagination="false" rowKey="stage_eval_id" size="small" bordered />
+        <a-empty v-else description="暂无阶段性反馈记录" />
+      </a-card>
+    </PrdAnnotation>
   </div>
 </template>
 
@@ -100,6 +108,7 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProbationStore, STATUS_COLOR, getDetailedStatusText } from '@/store/probation';
 import { ExceptionOutlined, FormOutlined, ClockCircleOutlined, LoadingOutlined, CheckOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
+import PrdAnnotation from '@/components/prd/PrdAnnotation.vue';
 
 const router = useRouter();
 const store = useProbationStore();
@@ -113,6 +122,10 @@ const stageEvalColumns = [
   { title: '评价内容', dataIndex: 'content' },
   { title: '时间', dataIndex: 'create_time', width: 150 }
 ];
+
+const managerStageEvaluations = computed(() =>
+  (record.value?.stage_evaluations || []).filter(item => item.evaluator_role === '直属上级')
+);
 
 const daysSinceHire = computed(() => {
   if (!record.value) return 0;

@@ -9,6 +9,8 @@ export interface EmailTemplate {
   trigger: string;
   /** 接收人需执行的动作说明 */
   action: string;
+  /** 触达渠道 */
+  channels: string[];
   defaultVars: Record<string, string>;
   renderBody: (vars: Record<string, string>) => string;
 }
@@ -116,8 +118,9 @@ export const emailTemplates: EmailTemplate[] = [
     phase: '目标设定',
     title: '【提醒】请提交试用期目标',
     role: '员工',
-    trigger: '入职满 1 个月，员工尚未提交试用期目标',
+    trigger: '入职满 1 周，员工尚未提交试用期目标',
     action: '登录系统，制定并提交试用期目标',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       employee_name: '王明辉',
       hire_date: '2025-02-01',
@@ -125,11 +128,12 @@ export const emailTemplates: EmailTemplate[] = [
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.employee_name}</strong>，</p>
-      <p>您已入职满 1 个月（入职日期：${vars.hire_date}），请及时登录试用期管理系统制定并提交您的试用期目标。</p>
+      <p>您已入职满 1 周（入职日期：${vars.hire_date}），请及时登录试用期管理系统制定并提交您的试用期目标。</p>
       <p>明确的目标有助于您更好地融入团队并在试用期内取得优异表现。</p>
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往提交试用期目标</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -139,6 +143,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: '上级',
     trigger: '员工提交试用期目标后，系统实时生成待办',
     action: '登录系统，审核目标内容并确认或退回',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       manager_name: '陈思远',
       employee_name: '王明辉',
@@ -151,6 +156,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往处理</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -160,6 +166,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: '员工',
     trigger: '上级退回试用期目标后，系统实时生成待办并通知',
     action: '查看退回原因，修改目标后重新提交',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       employee_name: '王明辉',
       manager_name: '陈思远',
@@ -173,6 +180,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往修改试用期目标</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -182,6 +190,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: 'HRBP',
     trigger: '入职满 3 个月，员工已提交目标但上级尚未确认',
     action: '联系直属上级，提醒其尽快确认员工目标',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       hrbp_name: '刘建国',
       employee_name: '王明辉',
@@ -195,6 +204,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -204,6 +214,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: '上级',
     trigger: '入职满 3 个月，员工尚未提交试用期目标',
     action: '联系员工，督促其尽快提交试用期目标',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       manager_name: '陈思远',
       employee_name: '王明辉',
@@ -216,6 +227,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -225,6 +237,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: 'HRBP',
     trigger: '入职满 3 个月，员工尚未提交试用期目标',
     action: '联系员工和上级，跟进目标提交进度',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       hrbp_name: '刘建国',
       employee_name: '王明辉',
@@ -237,6 +250,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -246,6 +260,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: '上级',
     trigger: '员工提交试用期目标后，系统实时通知',
     action: '登录系统，审核并确认员工目标',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       manager_name: '陈思远',
       employee_name: '王明辉',
@@ -258,6 +273,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往处理</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -267,6 +283,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: 'HRBP',
     trigger: '员工提交试用期目标后，系统实时通知',
     action: '知悉并跟进后续目标确认进度',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       hrbp_name: '刘建国',
       employee_name: '王明辉',
@@ -279,6 +296,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
 
@@ -292,6 +310,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: 'HRBP',
     trigger: '入职满 4.5 个月，且试用期目标已确认',
     action: '登录系统，为该员工开启试用期评价',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       hrbp_name: '刘建国',
       employee_name: '王明辉',
@@ -305,6 +324,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往开启试用期评价</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -314,6 +334,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: '员工',
     trigger: 'HRBP 开启试用期评价后，系统实时生成自评待办',
     action: '登录系统，完成试用期自评并提交',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       employee_name: '王明辉',
       deadline_date: '2025-07-01',
@@ -326,6 +347,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往填写自评</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -335,6 +357,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: '上级',
     trigger: 'HRBP 开启试用期评价后，系统实时通知上级（仅知晓，无待办）',
     action: '知悉评价已开启，待员工自评完成后将收到评价待办',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       manager_name: '陈思远',
       employee_name: '王明辉',
@@ -347,6 +370,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
 
@@ -360,6 +384,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: '上级',
     trigger: '员工完成自评提交后，系统实时生成上级评价待办',
     action: '请给出试用期评价',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       manager_name: '陈思远',
       employee_name: '王明辉',
@@ -372,6 +397,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往评价</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -381,6 +407,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: 'HRBP',
     trigger: '员工自评完成后，系统通知 HRBP 跟进上级评价',
     action: '跟进直属上级完成评价，保障转正流程按时推进',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       hrbp_name: '刘建国',
       employee_name: '王明辉',
@@ -394,6 +421,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -403,6 +431,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: '上级',
     trigger: '入职满 5.5 个月，尚未发起转正审批流程',
     action: '如尚未给出试用期评价，请先完成评价；如已完成，请配合 HRBP 推进发起转正审批流程',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       manager_name: '陈思远',
       employee_name: '王明辉',
@@ -416,6 +445,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往评价</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -425,6 +455,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: 'HRBP',
     trigger: '入职满 5.5 个月，尚未发起转正审批流程',
     action: '发起转正审批流程；如自评或上级评价尚未完成，请同步推动前序环节完成',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       hrbp_name: '刘建国',
       employee_name: '王明辉',
@@ -438,6 +469,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往发起流程</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -447,6 +479,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: 'HRBP',
     trigger: '上级提交通过类试用期评价后',
     action: '登录系统，发起转正审批流程',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       hrbp_name: '刘建国',
       employee_name: '王明辉',
@@ -461,6 +494,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">发起转正审批流程</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   // ============================================================
@@ -473,6 +507,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: 'HRBP',
     trigger: '上级提交评价为"不通过（不符合转正条件）"时',
     action: '跟进后续人事处理',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       hrbp_name: '刘建国',
       employee_name: '王明辉',
@@ -486,6 +521,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往跟进处理</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   // ============================================================
@@ -498,6 +534,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: 'HRD, HRBP head',
     trigger: '员工入职满 5.5 个月且仍未发起转正流程',
     action: '推动 HRBP 发起转正流程',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       recipient_name: '张总',
       employee_name: '王明辉',
@@ -512,6 +549,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往推动流程</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   // ============================================================
@@ -524,6 +562,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: '审批人',
     trigger: 'HRBP 发起转正流程后，系统实时生成审批待办',
     action: '登录系统，查看审批单并给出审批意见',
+    channels: ['邮件', 'OTP', 'OTP待处理', 'OA消息中心'],
     defaultVars: {
       approver_name: '赵总',
       employee_name: '王明辉',
@@ -537,6 +576,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往审批</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📱 审批支持移动端处理</p>
     `
   },
   {
@@ -544,8 +584,9 @@ export const emailTemplates: EmailTemplate[] = [
     phase: '转正审批流程',
     title: '【通知】转正审批已通过',
     role: 'HRBP',
-    trigger: '审批人通过转正审批后，系统实时通知 HRBP',
-    action: '登录系统，发布转正结果',
+    trigger: '审批人通过转正审批后，系统实时通知 HRBP（结果自动发布）',
+    action: '知悉审批结果，系统已自动发布',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       hrbp_name: '刘建国',
       employee_name: '王明辉',
@@ -553,11 +594,12 @@ export const emailTemplates: EmailTemplate[] = [
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
-      <p>员工 <strong>${vars.employee_name}</strong> 的转正审批已通过。</p>
-      <p>请及时登录系统发布转正结果。</p>
+      <p>员工 <strong>${vars.employee_name}</strong> 的转正审批已通过，系统已自动发布转正结果。</p>
+      <p>详情请登录系统查看。</p>
       <div style="text-align: center;">
-        <a href="${vars.login_url}" target="_blank" class="email-button">前往发布结果</a>
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -567,6 +609,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: 'HRBP',
     trigger: '审批人驳回转正审批后，系统实时通知 HRBP',
     action: '登录系统，查看驳回原因并跟进处理',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       hrbp_name: '刘建国',
       employee_name: '王明辉',
@@ -580,6 +623,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -589,6 +633,7 @@ export const emailTemplates: EmailTemplate[] = [
     role: '上级',
     trigger: '审批完成后，系统实时通知直属上级审批结果',
     action: '知悉审批结果',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       manager_name: '陈思远',
       employee_name: '王明辉',
@@ -602,28 +647,7 @@ export const emailTemplates: EmailTemplate[] = [
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>
       </div>
-    `
-  },
-  {
-    id: '19_publish_remind_hrbp',
-    phase: '转正审批流程',
-    title: '【催办】请尽快发布转正结果',
-    role: 'HRBP',
-    trigger: '试用期结束前 3 个工作日仍未发布结果',
-    action: '登录系统，发布转正结果',
-    defaultVars: {
-      hrbp_name: '刘建国',
-      employee_name: '王明辉',
-      deadline: '2026-06-30',
-      login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
-    },
-    renderBody: (vars) => `
-      <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
-      <p>员工 <strong>${vars.employee_name}</strong> 的试用期即将结束（截止日期：${vars.deadline}），但转正结果尚未发布。</p>
-      <p>请尽快登录系统发布转正结果。员工的试用期结束日期超过 3 天后，系统将自动通知员工结果。</p>
-      <div style="text-align: center;">
-        <a href="${vars.login_url}" target="_blank" class="email-button">前往发布结果</a>
-      </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   },
   {
@@ -631,19 +655,21 @@ export const emailTemplates: EmailTemplate[] = [
     phase: '转正审批流程',
     title: '【通知】您的转正结果已发布',
     role: '员工',
-    trigger: 'HRBP 发布转正结果后，系统实时通知员工',
+    trigger: '审批通过后，系统自动发布结果并实时通知员工',
     action: '登录系统，查看试用期结果',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       employee_name: '王明辉',
       login_url: `${baseUrl}/auth/token?token=mock_token_emp&redirect=/employee/dashboard`
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.employee_name}</strong>，</p>
-      <p>您的试用期已通过。</p>
-      <p>详情请登录系统查看。</p>
+      <p>恭喜您！您的试用期转正审批已通过，系统已自动发布转正结果。</p>
+      <p>您可以登录系统查看上级评价详情。</p>
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">查看转正结果</a>
       </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
     `
   }
 ];

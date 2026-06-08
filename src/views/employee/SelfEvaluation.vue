@@ -11,72 +11,76 @@
     />
 
     <!-- 逐目标自评 -->
-    <a-card
-      v-for="(goal, index) in record?.goals || []"
-      :key="goal.goal_id"
-      :title="`目标 ${index + 1}：${goal.content}`"
-      style="margin-bottom: 16px"
-    >
-      <a-descriptions :column="1" size="small" bordered style="margin-bottom: 16px">
-        <a-descriptions-item label="预期结果">{{ goal.measure }}</a-descriptions-item>
-      </a-descriptions>
-
-      <!-- 目标回顾（必填） -->
-      <a-form-item
-        label="目标回顾"
-        required
+    <PrdAnnotation id="7">
+      <a-card
+        v-for="(goal, index) in record?.goals || []"
+        :key="goal.goal_id"
+        :title="`目标 ${index + 1}：${goal.content}`"
         style="margin-bottom: 16px"
       >
-        <a-textarea
-          v-model:value="goalReviews[index]"
-          :rows="3"
-          placeholder="请回顾该项目标的完成情况，如实际产出、关键成果等..."
-          :disabled="record?.probation_status !== '05'"
-        />
-      </a-form-item>
+        <a-descriptions :column="1" size="small" bordered style="margin-bottom: 16px">
+          <a-descriptions-item label="预期结果">{{ goal.measure }}</a-descriptions-item>
+        </a-descriptions>
 
-    </a-card>
-
-    <!-- 总体评价 -->
-    <a-card title="总体评价" style="margin-bottom: 16px">
-      <a-form layout="vertical">
-        <a-form-item label="请对试用期整体表现进行总结评价" required>
+        <!-- 目标回顾（必填） -->
+        <a-form-item
+          label="目标回顾"
+          required
+          style="margin-bottom: 16px"
+        >
           <a-textarea
-            v-model:value="overallEval"
-            :rows="6"
-            placeholder="请从工作产出、能力成长、团队协作等方面进行总体自评..."
+            v-model:value="goalReviews[index]"
+            :rows="3"
+            placeholder="请回顾该项目标的完成情况，如实际产出、关键成果等..."
             :disabled="record?.probation_status !== '05'"
           />
-          <div style="color: #999; font-size: 12px; margin-top: 4px">注：如有工作成果需要展示，可将WOA文档、飞书文档等链接粘贴至总结内。</div>
         </a-form-item>
-      </a-form>
-    </a-card>
 
-    <!-- 操作按钮 -->
-    <div style="text-align: right" v-if="record?.probation_status === '05'">
-      <a-space>
-        <a-button @click="router.back()">取消</a-button>
-        <a-button type="primary" @click="handleSubmit" :loading="saving">提交自评</a-button>
-      </a-space>
-    </div>
+      </a-card>
+    </PrdAnnotation>
 
-    <!-- 历史评价记录 -->
-    <a-card v-if="historyEvals.length > 0" title="已提交的评价记录" style="margin-top: 16px">
-      <a-list item-layout="vertical" :data-source="historyEvals">
-        <template #renderItem="{ item }">
-          <a-list-item>
-            <a-list-item-meta :description="item.create_time">
-              <template #title>
-                <a-tag :color="evalTypeColor(item.eval_type)">{{ evalTypeLabel(item.eval_type) }}</a-tag>
-                {{ item.evaluator_name }}
-              </template>
-              <template #avatar><a-avatar><user-outlined /></a-avatar></template>
-            </a-list-item-meta>
-            <div style="white-space: pre-wrap; background: #fafafa; padding: 12px; border-radius: 4px;">{{ item.content }}</div>
-          </a-list-item>
-        </template>
-      </a-list>
-    </a-card>
+    <!-- 总体评价 -->
+    <PrdAnnotation id="8">
+      <a-card title="总体评价" style="margin-bottom: 16px">
+        <a-form layout="vertical">
+          <a-form-item label="请对试用期整体表现进行总结评价" required>
+            <a-textarea
+              v-model:value="overallEval"
+              :rows="6"
+              placeholder="请从工作产出、能力成长、团队协作等方面进行总体自评..."
+              :disabled="record?.probation_status !== '05'"
+            />
+            <div style="color: #999; font-size: 12px; margin-top: 4px">注：如有工作成果需要展示，可将WOA文档、飞书文档等链接粘贴至总结内。</div>
+          </a-form-item>
+        </a-form>
+      </a-card>
+
+      <!-- 操作按钮 -->
+      <div style="text-align: right" v-if="record?.probation_status === '05'">
+        <a-space>
+          <a-button @click="router.back()">取消</a-button>
+          <a-button type="primary" @click="handleSubmit" :loading="saving">提交自评</a-button>
+        </a-space>
+      </div>
+
+      <!-- 历史评价记录 -->
+      <a-card v-if="historyEvals.length > 0" title="已提交的评价记录" style="margin-top: 16px">
+        <a-list item-layout="vertical" :data-source="historyEvals">
+          <template #renderItem="{ item }">
+            <a-list-item>
+              <a-list-item-meta :description="item.create_time">
+                <template #title>
+                  <a-tag :color="evalTypeColor(item.eval_type)">{{ evalTypeLabel(item.eval_type) }}</a-tag>
+                  {{ item.evaluator_name }}
+                </template>
+                <template #avatar><a-avatar><user-outlined /></a-avatar></template>
+              </a-list-item-meta>
+              <div style="white-space: pre-wrap; background: #fafafa; padding: 12px; border-radius: 4px;">{{ item.content }}</div>
+            </a-list-item>
+          </template>
+        </a-list>
+      </a-card>
+    </PrdAnnotation>
   </div>
 </template>
 
@@ -86,6 +90,7 @@ import { useRouter } from 'vue-router';
 import { useProbationStore } from '@/store/probation';
 import { message } from 'ant-design-vue';
 import { UserOutlined } from '@ant-design/icons-vue';
+import PrdAnnotation from '@/components/prd/PrdAnnotation.vue';
 
 const router = useRouter();
 const store = useProbationStore();

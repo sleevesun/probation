@@ -90,7 +90,7 @@ const handleTriggerApproval = (id: string) => {
 const handleTerminate = (id: string) => {
   Modal.confirm({
     title: '确认终止转正',
-    content: '确认后该员工将进入「暂不发起/终止」状态，不再继续当前转正流程。是否继续？',
+    content: '确认后该员工将进入「终止转正」状态，不再继续当前转正流程。是否继续？',
     okText: '确认终止',
     okType: 'danger',
     cancelText: '取消',

@@ -331,7 +331,7 @@ const comment = ref('')
 const isMobile = ref(false)
 
 const todoList = computed(() => store.records.filter(item => item.probation_status === '08'))
-const doneList = computed(() => store.records.filter(item => ['09', '10'].includes(item.probation_status) && item.approval_logs.length > 0))
+const doneList = computed(() => store.records.filter(item => ['10'].includes(item.probation_status) && item.approval_logs.length > 0))
 const list = computed(() => activeTab.value === 'todo' ? todoList.value : doneList.value)
 const todoCount = computed(() => todoList.value.length)
 const doneCount = computed(() => doneList.value.length)

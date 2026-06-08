@@ -7,6 +7,13 @@
       </div>
     </div>
 
+    <a-alert
+      message="请填写试用期内的目标"
+      type="info"
+      show-icon
+      style="margin-bottom: 16px"
+    />
+
     <section class="ps-panel">
       <div class="ps-toolbar">
         <a-button size="small" @click="addGoal" :disabled="locked || formState.goals.length >= 5">新增目标</a-button>

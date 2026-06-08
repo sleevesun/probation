@@ -1,60 +1,71 @@
 <template>
   <div>
-    <a-page-header title="试用期目标设定" @back="() => router.back()" />
+    <PrdAnnotation id="5">
+      <a-page-header title="试用期目标设定" @back="() => router.back()" />
 
-    <a-alert
-      v-if="record?.probation_status === '03' || parseInt(record?.probation_status || '0', 10) >= 4"
-      message="目标已锁定"
-      description="您的试用期目标已被确认或流程已往后流转，目前只能查阅不可修改。"
-      type="info"
-      show-icon
-      style="margin-bottom: 16px"
-    />
+      <a-alert
+        message="请填写试用期内的目标"
+        type="info"
+        show-icon
+        style="margin-bottom: 16px"
+      />
 
-    <a-card>
-      <a-form :model="formState" layout="vertical">
-        <a-table 
-          :dataSource="formState.goals" 
-          :columns="columns" 
-          :pagination="false"
-          rowKey="goal_id"
-          bordered
-        >
-          <template #bodyCell="{ column, record: row, index }">
-             <template v-if="column.dataIndex === 'seq'">
-                {{ index + 1 }}
-             </template>
-             <template v-if="column.dataIndex === 'content'">
-                <a-textarea v-model:value="row.content" :rows="2" :disabled="isLock" placeholder="请输入具体目标内容及衡量标准" />
-             </template>
-             <template v-if="column.dataIndex === 'measure'">
-                <a-textarea v-model:value="row.measure" :rows="2" :disabled="isLock" placeholder="请输入预期结果" />
-             </template>
-             <template v-if="column.dataIndex === 'weight'">
-                <a-input-number v-model:value="row.weight" :min="1" :max="100" :disabled="isLock" placeholder="%" style="width: 80px" addonAfter="%" />
-             </template>
-             <template v-if="column.key === 'action'">
-                <a-button type="link" danger @click="removeGoal(index)" :disabled="isLock">删除</a-button>
-             </template>
-          </template>
-        </a-table>
+      <a-alert
+        v-if="record?.probation_status === '03' || parseInt(record?.probation_status || '0', 10) >= 4"
+        message="目标已锁定"
+        description="您的试用期目标已被确认或流程已往后流转，目前只能查阅不可修改。"
+        type="info"
+        show-icon
+        style="margin-bottom: 16px"
+      />
 
-        <div style="margin-top: 16px">
-          <a-button type="dashed" @click="addGoal" style="width: 200px" :disabled="formState.goals.length >= 5 || isLock">
-            + 添加目标 (上限 5 条)
-          </a-button>
-        </div>
+      <a-card>
+        <a-form :model="formState" layout="vertical">
+          <a-table
+            :dataSource="formState.goals"
+            :columns="columns"
+            :pagination="false"
+            rowKey="goal_id"
+            bordered
+          >
+            <template #bodyCell="{ column, record: row, index }">
+               <template v-if="column.dataIndex === 'seq'">
+                  {{ index + 1 }}
+               </template>
+               <template v-if="column.dataIndex === 'content'">
+                  <a-textarea v-model:value="row.content" :rows="2" :disabled="isLock" placeholder="请输入具体目标内容及衡量标准" />
+               </template>
+               <template v-if="column.dataIndex === 'measure'">
+                  <a-textarea v-model:value="row.measure" :rows="2" :disabled="isLock" placeholder="请输入预期结果" />
+               </template>
+               <template v-if="column.dataIndex === 'weight'">
+                  <a-input-number v-model:value="row.weight" :min="1" :max="100" :disabled="isLock" placeholder="%" style="width: 80px" addonAfter="%" />
+               </template>
+               <template v-if="column.key === 'action'">
+                  <a-button type="link" danger @click="removeGoal(index)" :disabled="isLock">删除</a-button>
+               </template>
+            </template>
+          </a-table>
 
-        <a-divider />
+          <div style="margin-top: 16px">
+            <a-button type="dashed" @click="addGoal" style="width: 200px" :disabled="formState.goals.length >= 5 || isLock">
+              + 添加目标 (上限 5 条)
+            </a-button>
+          </div>
 
-        <div style="text-align: right" v-if="!isLock">
-          <a-space>
-            <a-button @click="handleSave" :loading="saving">保存草稿</a-button>
-            <a-button type="primary" @click="handleSubmit" :loading="saving">提交确认</a-button>
-          </a-space>
-        </div>
-      </a-form>
-    </a-card>
+          <a-divider />
+
+          <PrdAnnotation id="6">
+            <div style="text-align: right" v-if="!isLock">
+              <a-space>
+                <a-button @click="handleSave" :loading="saving">保存草稿</a-button>
+                <a-button type="primary" @click="handleSubmit" :loading="saving">提交确认</a-button>
+              </a-space>
+            </div>
+          </PrdAnnotation>
+        </a-form>
+      </a-card>
+    </PrdAnnotation>
   </div>
 </template>
 
@@ -63,6 +74,7 @@ import { ref, computed, reactive, onMounted, watch, h } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProbationStore, GoalItem } from '@/store/probation';
 import { message, Modal } from 'ant-design-vue';
+import PrdAnnotation from '@/components/prd/PrdAnnotation.vue';
 
 const router = useRouter();
 const store = useProbationStore();

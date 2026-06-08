@@ -1,7 +1,9 @@
 <template>
   <div style="padding: 24px; text-align: center">
-    <a-typography-title :level="2">欢迎来到试用期管理及转正审批系统 Demo</a-typography-title>
-    <p>请选择左侧菜单栏或右上角切换角色进行体验。</p>
+    <PrdAnnotation id="20">
+      <a-typography-title :level="2">欢迎来到试用期管理及转正审批系统 Demo</a-typography-title>
+      <p>请选择左侧菜单栏或右上角切换角色进行体验。</p>
+    </PrdAnnotation>
 
     <!-- [UI/UX 修复] 使用响应式断点替代固定 span，适配移动端/平板/桌面 -->
     <a-row :gutter="[16, 16]" style="margin-top: 32px">
@@ -31,6 +33,7 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import PrdAnnotation from '@/components/prd/PrdAnnotation.vue'
 
 const router = useRouter()
 </script>

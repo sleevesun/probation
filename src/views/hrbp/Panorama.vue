@@ -1,10 +1,13 @@
 <template>
   <div class="workbench-page">
-    <a-page-header title="试用期管理" />
+    <PrdAnnotation id="14">
+      <a-page-header title="试用期管理" />
+    </PrdAnnotation>
 
     <!-- Tabs -->
-    <a-card class="workbench-card">
-      <a-tabs v-model:activeKey="activeTab" class="workbench-tabs">
+    <PrdAnnotation id="13">
+      <a-card class="workbench-card">
+        <a-tabs v-model:activeKey="activeTab" class="workbench-tabs">
         <a-tab-pane key="unfinished" tab="未转正">
           <!-- 流程轴过滤 -->
           <div style="margin-bottom: 12px; padding: 6px 12px; background: #fafafa; border-radius: 8px;">
@@ -43,20 +46,21 @@
               <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
               <template v-if="column.dataIndex === 'tenure'"><span :style="parseFloat(getMonthsSinceHire(record.hire_date)) > 6 ? 'color: #ff4d4f; font-weight: 500' : ''">{{ getMonthsSinceHire(record.hire_date) }} 个月</span></template>
               <template v-if="column.dataIndex === 'probation_status'">
-                <a-tag :color="STATUS_COLOR[record.probation_status]">{{ getDetailedStatusText(record) }}</a-tag>
+                <a-tag :color="getStatusColor(record)">{{ getDetailedStatusText(record) }}</a-tag>
               </template>
               <template v-if="column.dataIndex === 'current_handler'">
                 {{ getCurrentHandler(record) }}
               </template>
               <template v-if="column.key === 'action'">
                 <a-space>
-                  <a-button v-if="canTriggerProbation(record)" type="primary" size="small" @click="handleTrigger(record.master_id)">开启试用期评价</a-button>
-                  <a-button v-if="['01','02','03','04'].includes(record.probation_status)" danger size="small" @click="handleHold(record.master_id)">终止转正</a-button>
-                  <a-button v-if="['02','03','04'].includes(record.probation_status)" size="small" @click="openStageEvalModal(record)">阶段性反馈</a-button>
-                  <a-button v-if="['05','06'].includes(record.probation_status)" danger size="small" @click="handleTerminate(record.master_id)">终止转正</a-button>
-                  <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="openApprovalPreview(record)">发起转正审批流程</a-button>
-                  <a-button v-if="record.probation_status === '07'" danger size="small" @click="handleTerminate(record.master_id)">终止转正</a-button>
-                  <a-button v-if="record.probation_status === '09'" type="primary" size="small" @click="confirmPublish(record)">发布结果</a-button>
+                  <template v-if="!record.terminated">
+                    <a-button v-if="canTriggerProbation(record)" type="primary" size="small" @click="handleTrigger(record.master_id)">开启评价</a-button>
+                    <a-button v-if="['01','02','03','04'].includes(record.probation_status)" danger size="small" @click="handleHold(record.master_id)">终止转正</a-button>
+                    <a-button v-if="['05','06'].includes(record.probation_status)" danger size="small" @click="handleTerminate(record.master_id)">终止转正</a-button>
+                    <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="openApprovalPreview(record)">发起转正</a-button>
+                    <a-button v-if="record.probation_status === '07'" danger size="small" @click="handleTerminate(record.master_id)">终止转正</a-button>
+                  </template>
+                  <span v-else style="color: #999; font-size: 12px">已终止</span>
                 </a-space>
               </template>
               <template v-if="column.key === 'detail'">
@@ -67,118 +71,39 @@
         </a-tab-pane>
 
         <a-tab-pane key="finished" tab="已结束">
-          <a-table :dataSource="finishedList" :columns="finishedColumns" rowKey="master_id" bordered size="middle">
-            <template #bodyCell="{ column, record }">
-              <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
-              <template v-if="column.dataIndex === 'tenure'"><span :style="parseFloat(getMonthsSinceHire(record.hire_date)) > 6 ? 'color: #ff4d4f; font-weight: 500' : ''">{{ getMonthsSinceHire(record.hire_date) }} 个月</span></template>
-              <template v-if="column.dataIndex === 'final_decision'">
-                <a-tag :color="isFailedDecision(record.final_decision) || record.final_decision === '离职' ? 'error' : 'success'">{{ formatDecisionLabel(record.final_decision) }}</a-tag>
+          <PrdAnnotation id="16">
+            <a-table :dataSource="finishedList" :columns="finishedColumns" rowKey="master_id" bordered size="middle">
+              <template #bodyCell="{ column, record }">
+                <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
+                <template v-if="column.dataIndex === 'tenure'"><span :style="parseFloat(getMonthsSinceHire(record.hire_date)) > 6 ? 'color: #ff4d4f; font-weight: 500' : ''">{{ getMonthsSinceHire(record.hire_date) }} 个月</span></template>
+                <template v-if="column.dataIndex === 'final_decision'">
+                  <a-tag :color="isFailedDecision(record.final_decision) || record.final_decision === '离职' ? 'error' : 'success'">{{ formatDecisionLabel(record.final_decision) }}</a-tag>
+                </template>
+                <template v-if="column.key === 'detail'"><a-button type="link" size="small" @click="openDetailModal(record)">查看档案</a-button></template>
               </template>
-              <template v-if="column.key === 'detail'"><a-button type="link" size="small" @click="openDetailModal(record)">查看档案</a-button></template>
-            </template>
-          </a-table>
+            </a-table>
+          </PrdAnnotation>
         </a-tab-pane>
-      </a-tabs>
-    </a-card>
-
-    <!-- 发布结果 Modal -->
-    <a-modal v-model:open="publishModalVisible" title="发布转正结果" width="800px" :footer="null">
-      <div v-if="currentRecord">
-        <!-- 超期提醒（置顶） -->
-        <a-alert
-          v-if="isOverSixMonths"
-          type="warning" show-icon class="compact-overdue-alert"
-          message="超期提醒：该员工试用期已超过 6 个月，如不发布，系统将在 3 个工作日后自动发布结果。"
-        />
-
-        <!-- 员工信息 -->
-        <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
-          <a-descriptions-item label="员工">{{ currentRecord.emp_name }} ({{ currentRecord.emp_id }})</a-descriptions-item>
-          <a-descriptions-item label="岗位">{{ currentRecord.position }}</a-descriptions-item>
-          <a-descriptions-item label="部门">{{ currentRecord.parent_dept }}\{{ currentRecord.dept_name }}</a-descriptions-item>
-          <a-descriptions-item label="入职日期">{{ currentRecord.hire_date }}</a-descriptions-item>
-          <a-descriptions-item label="直属上级">{{ currentRecord.manager_name }}</a-descriptions-item>
-          <a-descriptions-item label="上级评价结果">
-            <a-tag :color="isFailedDecision(currentRecord.final_decision) || currentRecord.final_decision === '离职' ? 'error' : 'success'">{{ formatDecisionLabel(currentRecord.final_decision) }}</a-tag>
-          </a-descriptions-item>
-        </a-descriptions>
-
-        <!-- 试用期目标 -->
-        <div style="font-weight: 600; margin-bottom: 8px">试用期目标</div>
-        <div v-if="currentRecord.goals.length > 0" class="stacked-list" style="margin-bottom: 16px">
-          <div v-for="(goal, index) in currentRecord.goals" :key="goal.goal_id" class="stacked-item">
-            <div class="stacked-goal-title">
-              {{ index + 1 }}. {{ goal.content }}
-            </div>
-            <div class="stacked-row">
-              <span class="stacked-label">预期结果</span>
-              <span class="stacked-value">{{ goal.measure }}</span>
-            </div>
-            <div class="stacked-row">
-              <span class="stacked-label">目标回顾</span>
-              <span class="stacked-value">{{ goal.goal_review || '暂无目标回顾' }}</span>
-            </div>
-          </div>
-        </div>
-        <a-empty v-else description="暂无目标" :image-style="{ height: '40px' }" style="margin-bottom: 16px" />
-
-        <!-- 阶段性反馈 -->
-        <div style="font-weight: 600; margin-bottom: 8px">阶段性反馈</div>
-        <div v-if="(currentRecord.stage_evaluations || []).length > 0" class="stacked-list" style="margin-bottom: 16px">
-          <div v-for="item in currentRecord.stage_evaluations || []" :key="item.stage_eval_id" class="stacked-item">
-            <div class="stacked-meta-line">{{ item.evaluator_name }}-{{ item.evaluator_role }} <span>{{ item.create_time }}</span></div>
-            <div class="stacked-content">{{ item.content }}</div>
-          </div>
-        </div>
-        <a-empty v-else description="暂无阶段性反馈记录" :image-style="{ height: '40px' }" style="margin-bottom: 16px" />
-
-        <!-- 员工自评 -->
-        <div style="font-weight: 600; margin-bottom: 8px">员工自评</div>
-        <div v-if="currentSelfEval" class="eval-text-block" style="margin-bottom: 16px">{{ currentSelfEval.content }}</div>
-        <a-empty v-else description="暂无员工自评" :image-style="{ height: '40px' }" style="margin-bottom: 16px" />
-
-        <!-- 上级评价 -->
-        <div style="font-weight: 600; margin-bottom: 8px">上级评价</div>
-        <div class="eval-text-block" style="margin-bottom: 16px">
-          <div v-if="currentManagerEval" class="manager-eval-block">
-            <div class="manager-eval-block__result">
-              <span>评价结果</span>
-              <div>{{ formatDecisionLabel(currentRecord.final_decision) }}</div>
-            </div>
-            <div class="manager-eval-block__content">
-              <span>评价内容</span>
-              <div>{{ normalizeEvalContent(currentManagerEval.content, currentRecord.final_decision) }}</div>
-            </div>
-          </div>
-          <a-empty v-else description="暂无上级评价" />
-        </div>
-
-        <a-form layout="vertical">
-          <a-form-item>
-            <a-checkbox v-model:checked="allowViewEval">允许员工查看上级评价内容</a-checkbox>
-          </a-form-item>
-          <div style="text-align: right">
-            <a-space>
-              <a-button @click="publishModalVisible = false">返回</a-button>
-              <a-button type="primary" @click="handlePublish">确认发布结果</a-button>
-            </a-space>
-          </div>
-        </a-form>
-      </div>
-    </a-modal>
+        </a-tabs>
+      </a-card>
+    </PrdAnnotation>
 
     <!-- 查看详情 Modal -->
     <a-modal v-model:open="detailModalVisible" title="员工转正详情" width="800px" :footer="null">
       <div v-if="detailRecord">
         <!-- 员工信息 -->
         <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
-          <a-descriptions-item label="员工">{{ detailRecord.emp_name }} ({{ detailRecord.emp_id }})</a-descriptions-item>
-          <a-descriptions-item label="岗位">{{ detailRecord.position }}</a-descriptions-item>
-          <a-descriptions-item label="部门">{{ detailRecord.parent_dept }}\{{ detailRecord.dept_name }}</a-descriptions-item>
+          <a-descriptions-item label="员工">{{ detailRecord.emp_name }}/{{ detailRecord.emp_id }}</a-descriptions-item>
           <a-descriptions-item label="入职日期">{{ detailRecord.hire_date }}</a-descriptions-item>
+          <a-descriptions-item label="部门">{{ detailRecord.parent_dept }}\{{ detailRecord.dept_name }}</a-descriptions-item>
+          <a-descriptions-item label="岗位">{{ detailRecord.position }}</a-descriptions-item>
           <a-descriptions-item label="直属上级">{{ detailRecord.manager_name }}</a-descriptions-item>
-          <a-descriptions-item label="上级评价结果">
-            <a-tag :color="isFailedDecision(detailRecord.final_decision) || detailRecord.final_decision === '离职' ? 'error' : 'success'">{{ formatDecisionLabel(detailRecord.final_decision) }}</a-tag>
+          <a-descriptions-item label="HRBP">{{ detailRecord.hrbp_name }}</a-descriptions-item>
+          <a-descriptions-item label="试用期评价结果" :span="2">
+            <b v-if="detailRecord.final_decision" :style="{ color: isFailedDecision(detailRecord.final_decision) ? '#f5222d' : '#1890ff' }">
+              {{ formatDecisionLabel(detailRecord.final_decision) }}
+            </b>
+            <span v-else style="color: #999">-</span>
           </a-descriptions-item>
         </a-descriptions>
 
@@ -255,15 +180,19 @@
 
     <!-- 审批单预览 Modal -->
     <a-modal v-model:open="approvalPreviewVisible" title="转正审批单预览" width="750px" :footer="null">
-      <div v-if="approvalPreviewRecord">
+      <PrdAnnotation v-if="approvalPreviewRecord" id="15">
         <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
-          <a-descriptions-item label="员工">{{ approvalPreviewRecord.emp_name }} ({{ approvalPreviewRecord.emp_id }})</a-descriptions-item>
-          <a-descriptions-item label="岗位">{{ approvalPreviewRecord.position }}</a-descriptions-item>
-          <a-descriptions-item label="部门">{{ approvalPreviewRecord.parent_dept }}\{{ approvalPreviewRecord.dept_name }}</a-descriptions-item>
+          <a-descriptions-item label="员工">{{ approvalPreviewRecord.emp_name }}/{{ approvalPreviewRecord.emp_id }}</a-descriptions-item>
           <a-descriptions-item label="入职日期">{{ approvalPreviewRecord.hire_date }}</a-descriptions-item>
+          <a-descriptions-item label="部门">{{ approvalPreviewRecord.parent_dept }}\{{ approvalPreviewRecord.dept_name }}</a-descriptions-item>
+          <a-descriptions-item label="岗位">{{ approvalPreviewRecord.position }}</a-descriptions-item>
           <a-descriptions-item label="直属上级">{{ approvalPreviewRecord.manager_name }}</a-descriptions-item>
-          <a-descriptions-item label="上级评价结果">
-            <a-tag :color="isFailedDecision(approvalPreviewRecord.final_decision) ? 'error' : 'success'">{{ formatDecisionLabel(approvalPreviewRecord.final_decision) }}</a-tag>
+          <a-descriptions-item label="HRBP">{{ approvalPreviewRecord.hrbp_name }}</a-descriptions-item>
+          <a-descriptions-item label="试用期评价结果" :span="2">
+            <b v-if="approvalPreviewRecord.final_decision" :style="{ color: isFailedDecision(approvalPreviewRecord.final_decision) ? '#f5222d' : '#1890ff' }">
+              {{ formatDecisionLabel(approvalPreviewRecord.final_decision) }}
+            </b>
+            <span v-else style="color: #999">-</span>
           </a-descriptions-item>
         </a-descriptions>
 
@@ -320,19 +249,20 @@
             </a-space>
           </div>
         </a-form>
-      </div>
+      </PrdAnnotation>
     </a-modal>
 
     <!-- 阶段性反馈弹窗 -->
     <a-modal v-model:open="stageEvalModalVisible" title="填写阶段性反馈" width="700px" :footer="null">
       <div v-if="stageEvalRecord">
         <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
-          <a-descriptions-item label="员工">{{ stageEvalRecord.emp_name }} ({{ stageEvalRecord.emp_id }})</a-descriptions-item>
-          <a-descriptions-item label="岗位">{{ stageEvalRecord.position }}</a-descriptions-item>
-          <a-descriptions-item label="部门">{{ stageEvalRecord.parent_dept }}\{{ stageEvalRecord.dept_name }}</a-descriptions-item>
-          <a-descriptions-item label="直属上级">{{ stageEvalRecord.manager_name }}</a-descriptions-item>
+          <a-descriptions-item label="员工">{{ stageEvalRecord.emp_name }}/{{ stageEvalRecord.emp_id }}</a-descriptions-item>
           <a-descriptions-item label="入职日期">{{ stageEvalRecord.hire_date }}</a-descriptions-item>
-          <a-descriptions-item label="当前状态">{{ getDetailedStatusText(stageEvalRecord) }}</a-descriptions-item>
+          <a-descriptions-item label="部门">{{ stageEvalRecord.parent_dept }}\{{ stageEvalRecord.dept_name }}</a-descriptions-item>
+          <a-descriptions-item label="岗位">{{ stageEvalRecord.position }}</a-descriptions-item>
+          <a-descriptions-item label="直属上级">{{ stageEvalRecord.manager_name }}</a-descriptions-item>
+          <a-descriptions-item label="HRBP">{{ stageEvalRecord.hrbp_name }}</a-descriptions-item>
+          <a-descriptions-item label="当前状态" :span="2">{{ getDetailedStatusText(stageEvalRecord) }}</a-descriptions-item>
         </a-descriptions>
 
         <div style="font-weight: 600; margin-bottom: 8px">目标信息</div>
@@ -361,8 +291,9 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { useProbationStore, ProbationMaster, STATUS_COLOR, getDetailedStatusText, getMonthsSinceHire, getCurrentHandler, canTriggerProbation, formatDecisionLabel, isFailedDecision } from '@/store/probation';
+import { useProbationStore, ProbationMaster, getStatusColor, getDetailedStatusText, getMonthsSinceHire, getCurrentHandler, canTriggerProbation, formatDecisionLabel, isFailedDecision } from '@/store/probation';
 import { message, Modal, TreeSelect } from 'ant-design-vue';
+import PrdAnnotation from '@/components/prd/PrdAnnotation.vue';
 
 const store = useProbationStore();
 const activeTab = ref('unfinished');
@@ -374,10 +305,10 @@ const onlyMyTodo = ref(false);
 const currentStepIndex = ref<number>(0);
 const activeStepFilter = ref<string>('all');
 
-// 未转正：排除已结束状态(10/88/99)
-const unfinishedRecords = computed(() => store.records.filter(r => !['10', '88', '99'].includes(r.probation_status)));
-// 已结束：结果已发布(10) + 未转正离职(88) + 暂不发起/终止(99)
-const finishedList = computed(() => store.records.filter(r => ['10', '88', '99'].includes(r.probation_status)));
+// 未转正：排除已结束状态(10/88/99)、排除业务头衔=残疾人（自动纳入口径）
+const unfinishedRecords = computed(() => store.records.filter(r => !['10', '88'].includes(r.probation_status) && r.business_title !== '残疾人'));
+// 已结束：结果已发布(10) + 未转正离职(88)，排除业务头衔=残疾人
+const finishedList = computed(() => store.records.filter(r => ['10', '88'].includes(r.probation_status) && r.business_title !== '残疾人'));
 
 const formatCount = (count: number) => count > 0 ? count : '-';
 
@@ -431,7 +362,7 @@ const filteredUnfinished = computed(() => {
 
   // 待我处理筛选
   if (onlyMyTodo.value) {
-    list = list.filter(r => ['04', '07', '09'].includes(r.probation_status));
+    list = list.filter(r => ['03', '04', '07'].includes(r.probation_status));
   }
 
   // 1. 流程概览过滤
@@ -496,13 +427,6 @@ const finishedColumns = [
   { title: '详情', key: 'detail', width: 80 }
 ];
 
-// Publish result modal
-const currentRecord = ref<ProbationMaster | null>(null);
-const currentManagerEval = computed(() => currentRecord.value?.evaluations.find(e => e.eval_type === 'manager'));
-const currentSelfEval = computed(() => currentRecord.value?.evaluations.find(e => e.eval_type === 'self'));
-const publishModalVisible = ref(false);
-const allowViewEval = ref(false);
-
 // Detail modal
 const detailModalVisible = ref(false);
 const detailRecord = ref<ProbationMaster | null>(null);
@@ -528,26 +452,6 @@ const normalizeEvalContent = (content?: string, decision?: string) => {
   return normalized.replace(/^(超出预期|符合预期|不符合转正条件|不通过)\s*[-－—]\s*/, '');
 };
 
-const isOverSixMonths = computed(() => {
-  if (!currentRecord.value) return false;
-  const months = parseFloat(getMonthsSinceHire(currentRecord.value.hire_date));
-  return months >= 6;
-});
-
-const handlePublish = () => {
-  if (currentRecord.value) {
-    Modal.confirm({
-      title: '确认发布结果',
-      content: '确认后将发布该员工的转正结果，发布后员工可查看。是否继续？',
-      onOk: () => {
-        store.publishResult(currentRecord.value!.master_id, allowViewEval.value);
-        message.success('结果已发布！' + (allowViewEval.value ? '员工可查看上级评价。' : '员工不可查看上级评价。'));
-        publishModalVisible.value = false;
-      }
-    });
-  }
-};
-
 const handleTrigger = (id: string) => {
   Modal.confirm({
     title: '确认开启试用期评价',
@@ -559,7 +463,7 @@ const handleTrigger = (id: string) => {
 const handleHold = (id: string) => {
   Modal.confirm({
     title: '确认终止转正',
-    content: '该员工将进入「终止转正/终止」状态，不再继续转正流程。',
+    content: '该员工将进入「终止转正」状态，不再继续转正流程。',
     okType: 'danger',
     onOk: () => { store.holdProbation(id); message.warning('已终止转正'); }
   });
@@ -568,7 +472,7 @@ const handleHold = (id: string) => {
 const handleTerminate = (id: string) => {
   Modal.confirm({
     title: '确认终止转正',
-    content: '该员工将进入「终止转正/终止」状态，不再继续转正流程。',
+    content: '该员工将进入「终止转正」状态，不再继续转正流程。',
     width: 560,
     class: 'terminate-confirm-modal',
     okText: '确认终止',
@@ -590,12 +494,6 @@ const submitApproval = () => {
     message.success('已发起转正审批流程');
     approvalPreviewVisible.value = false;
   }
-};
-
-const confirmPublish = (record: ProbationMaster) => {
-  currentRecord.value = record;
-  allowViewEval.value = false;
-  publishModalVisible.value = true;
 };
 
 const openDetailModal = (record: ProbationMaster) => {
@@ -621,15 +519,9 @@ const stageEvalHistoryColumns = [
   { title: '时间', dataIndex: 'create_time', width: 150 }
 ];
 
-const openStageEvalModal = (record: ProbationMaster) => {
-  stageEvalRecord.value = record;
-  stageEvalContent.value = '';
-  stageEvalModalVisible.value = true;
-};
-
 const handleStageEvalSubmit = () => {
   if (!stageEvalRecord.value || !stageEvalContent.value.trim()) return;
-  store.addStageEvaluation(stageEvalRecord.value.master_id, '刘建国', 'HRBP', stageEvalContent.value);
+  store.addStageEvaluation(stageEvalRecord.value.master_id, '刘建国', stageEvalContent.value);
   message.success('阶段性反馈已提交');
   stageEvalModalVisible.value = false;
   stageEvalContent.value = '';

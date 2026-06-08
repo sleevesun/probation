@@ -72,13 +72,14 @@
               <a-button size="small" @click="openDetailModal(item)">查看详情</a-button>
             </td>
             <td class="ps-table__actions">
-              <a-button v-if="canTriggerProbation(item)" size="small" type="primary" @click="handleTriggerConfirm(item)">开启试用期评价</a-button>
-              <a-button v-if="['01','02','03','04'].includes(item.probation_status)" size="small" danger @click="openActionModal(item, 'hrbp-hold')">终止转正</a-button>
-              <a-button v-if="['02','03','04'].includes(item.probation_status)" size="small" @click="openStageEvalModal(item)">阶段性反馈</a-button>
-              <a-button v-if="['05','06'].includes(item.probation_status)" size="small" danger @click="handleTerminate(item.master_id)">终止转正</a-button>
-              <a-button v-if="item.probation_status === '07'" size="small" type="primary" @click="openApprovalPreview(item)">发起转正审批流程</a-button>
-              <a-button v-if="item.probation_status === '07'" size="small" danger @click="handleTerminate(item.master_id)">终止转正</a-button>
-              <a-button v-if="item.probation_status === '09'" size="small" type="primary" @click="confirmPublish(item)">发布结果</a-button>
+              <template v-if="!item.terminated">
+                <a-button v-if="canTriggerProbation(item)" size="small" type="primary" @click="handleTriggerConfirm(item)">开启评价</a-button>
+                <a-button v-if="['01','02','03','04'].includes(item.probation_status)" size="small" danger @click="openActionModal(item, 'hrbp-hold')">终止转正</a-button>
+                <a-button v-if="['05','06'].includes(item.probation_status)" size="small" danger @click="handleTerminate(item.master_id)">终止转正</a-button>
+                <a-button v-if="item.probation_status === '07'" size="small" type="primary" @click="openApprovalPreview(item)">发起转正</a-button>
+                <a-button v-if="item.probation_status === '07'" size="small" danger @click="handleTerminate(item.master_id)">终止转正</a-button>
+              </template>
+              <span v-else style="color: #999; font-size: 12px">已终止</span>
             </td>
           </tr>
         </tbody>
@@ -169,39 +170,11 @@
         </template>
 
         <template v-if="actionModalType === 'hrbp-hold'">
-          <div class="ps-alert ps-alert--warning" style="margin-top: 16px">该员工将进入「终止转正/终止」状态，不再继续转正流程。</div>
+          <div class="ps-alert ps-alert--warning" style="margin-top: 16px">该员工将进入「终止转正」状态，不再继续转正流程。</div>
           <div class="ps-toolbar" style="margin-top: 16px">
             <div class="ps-toolbar__spacer"></div>
             <a-button size="small" @click="closeActionModal">取消</a-button>
             <a-button size="small" danger @click="handleHold">确认挂起</a-button>
-          </div>
-        </template>
-
-        <template v-if="actionModalType === 'hrbp-publish'">
-          <div class="ps-alert ps-alert--warning" style="margin-top: 16px" v-if="actionRecordOverSixMonths">该员工试用期已超过 6 个月，请尽快发布结果。</div>
-          <div class="ps-section-title" style="margin-top: 16px">现有评价记录</div>
-          <table class="ps-table">
-            <thead><tr><th>类型</th><th>评价人</th><th>内容</th><th>时间</th></tr></thead>
-            <tbody>
-              <tr v-if="!actionModalRecord.evaluations.length">
-                <td colspan="4">暂无评价记录</td>
-              </tr>
-              <tr v-for="item in actionModalRecord.evaluations" :key="item.eval_id">
-                <td>{{ evalTypeText(item.eval_type) }}</td>
-                <td>{{ item.evaluator_name }}</td>
-                <td>{{ item.content }}</td>
-                <td>{{ item.create_time }}</td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="ps-filter-bar" style="margin-top: 16px">
-            <label>发布选项</label>
-            <a-checkbox v-model:checked="allowEmployeeView">允许员工查看上级评价内容</a-checkbox>
-          </div>
-          <div class="ps-toolbar" style="margin-top: 16px">
-            <div class="ps-toolbar__spacer"></div>
-            <a-button size="small" @click="closeActionModal">取消</a-button>
-            <a-button size="small" type="primary" @click="handlePublish">发布结果</a-button>
           </div>
         </template>
       </div>
@@ -269,7 +242,7 @@
         <div class="ps-toolbar" style="margin-top: 16px">
           <div class="ps-toolbar__spacer"></div>
           <a-button size="small" @click="approvalPreviewVisible = false">取消</a-button>
-          <a-button size="small" type="primary" @click="submitApproval">发起转正审批流程</a-button>
+          <a-button size="small" type="primary" @click="submitApproval">发起转正</a-button>
         </div>
       </div>
     </a-modal>
@@ -389,16 +362,16 @@ const rows = computed(() => {
   let list = store.records
 
   if (activeTab.value === 'unfinished') {
-    list = list.filter(item => !['10', '88', '99'].includes(item.probation_status))
+    list = list.filter(item => !['10', '88'].includes(item.probation_status) && item.business_title !== '残疾人')
     // 待我处理筛选
     if (onlyMyTodo.value) {
-      list = list.filter(item => ['04', '07', '09'].includes(item.probation_status))
+      list = list.filter(item => ['03', '04', '07'].includes(item.probation_status))
     }
     if (activeStageFilters.value.length > 0) {
       list = list.filter(item => matchesStage(item, activeStageFilters.value))
     }
   } else {
-    list = list.filter(item => ['10', '88', '99'].includes(item.probation_status))
+    list = list.filter(item => ['10', '88'].includes(item.probation_status) && item.business_title !== '残疾人')
   }
 
   if (searchText.value) {
@@ -418,7 +391,7 @@ const rows = computed(() => {
 })
 
 const actionModalTitle = computed(() => {
-  if (actionModalType.value === 'hrbp-trigger') return '开启试用期评价'
+  if (actionModalType.value === 'hrbp-trigger') return '开启评价'
   if (actionModalType.value === 'hrbp-hold') return '终止转正'
   return '发布结果'
 })
@@ -484,17 +457,17 @@ function closeActionModal() {
 function handleTrigger() {
   if (!actionModalRecord.value) return
   store.triggerProbation(actionModalRecord.value.master_id)
-  message.success('已开启试用期评价')
+  message.success('已开启评价')
   closeActionModal()
 }
 
 function handleTriggerConfirm(record: ProbationMaster) {
   Modal.confirm({
-    title: '确认开启试用期评价',
+    title: '确认开启评价',
     content: '确认后将通知该员工开始填写试用期自评。',
     onOk: () => {
       store.triggerProbation(record.master_id)
-      message.success('已开启试用期评价')
+      message.success('已开启评价')
     }
   })
 }
@@ -506,19 +479,6 @@ function handleHold() {
   closeActionModal()
 }
 
-function handlePublish() {
-  if (!actionModalRecord.value) return
-  Modal.confirm({
-    title: '确认发布结果',
-    content: '确认后将发布该员工的转正结果，发布后员工可查看。是否继续？',
-    onOk: () => {
-      store.publishResult(actionModalRecord.value!.master_id, allowEmployeeView.value)
-      message.success('结果已发布')
-      closeActionModal()
-    }
-  })
-}
-
 function openApprovalPreview(record: ProbationMaster) {
   approvalPreviewRecord.value = record
   approvalRemark.value = ''
@@ -528,21 +488,14 @@ function openApprovalPreview(record: ProbationMaster) {
 function submitApproval() {
   if (!approvalPreviewRecord.value) return
   store.triggerApproval(approvalPreviewRecord.value.master_id)
-  message.success('已发起转正审批流程')
+  message.success('已发起转正')
   approvalPreviewVisible.value = false
-}
-
-function confirmPublish(record: ProbationMaster) {
-  actionModalRecord.value = record
-  actionModalType.value = 'hrbp-publish'
-  actionModalVisible.value = true
-  allowEmployeeView.value = false
 }
 
 function handleTerminate(masterId: string) {
   Modal.confirm({
     title: '确认终止转正',
-    content: '该员工将进入「终止转正/终止」状态，不再继续转正流程。',
+    content: '该员工将进入「终止转正」状态，不再继续转正流程。',
     width: 560,
     class: 'terminate-confirm-modal',
     okText: '确认终止',
@@ -565,7 +518,7 @@ function openStageEvalModal(record: any) {
 
 function handleStageEvalSubmit() {
   if (!stageEvalRecord.value || !stageEvalContent.value.trim()) return
-  store.addStageEvaluation(stageEvalRecord.value.master_id, '刘建国', 'HRBP', stageEvalContent.value)
+  store.addStageEvaluation(stageEvalRecord.value.master_id, '刘建国', stageEvalContent.value)
   message.success('阶段性反馈已提交')
   stageEvalModalVisible.value = false
   stageEvalContent.value = ''

@@ -1,0 +1,182 @@
+[
+  {
+    "id": 1,
+    "moduleName": "员工端 / 我的试用期 / 状态概览",
+    "target": "employee-dashboard-status-overview",
+    "sourcePrdHeading": "3.1 员工端 - 我的试用期",
+    "sourcePrdExcerpt": "员工进入系统后默认查看自己的试用期状态、基础信息、流程进度和当前待办。",
+    "tooltipMarkdown": "### PRD [1] 员工端状态概览\n\n- 默认进入「我的试用期」查看本人试用期状态。\n- 页面展示入职时长、当前状态标签和流程进度。\n- 只标注 Modern Demo，PS 风格不纳入本轮调整。",
+    "status": "mapped"
+  },
+  {
+    "id": 2,
+    "moduleName": "员工端 / 我的试用期 / 当前进展",
+    "target": "employee-dashboard-current-progress",
+    "sourcePrdHeading": "3.1 员工端 - 我的试用期",
+    "sourcePrdExcerpt": "当前进展根据流程状态展示待办、进行中或结果信息，并给出可跳转操作。",
+    "tooltipMarkdown": "### PRD [2] 当前进展\n\n- 根据试用期状态展示员工当前待办或流程进展。\n- 有可处理事项时展示「去填写 / 去修改」等 Demo 文案。\n- 结果发布后员工默认可查看转正结果和上级评价结果。",
+    "status": "mapped"
+  },
+  {
+    "id": 3,
+    "moduleName": "员工端 / 我的试用期 / 我的信息",
+    "target": "employee-dashboard-profile",
+    "sourcePrdHeading": "3.1 员工端 - 我的试用期",
+    "sourcePrdExcerpt": "页面展示员工本人姓名、工号、岗位、部门、直属上级、入职日期等基础信息。",
+    "tooltipMarkdown": "### PRD [3] 我的信息\n\n- 展示员工基础档案信息。\n- 信息来源于试用期主数据，用于帮助员工确认当前转正对象和组织关系。",
+    "status": "mapped"
+  },
+  {
+    "id": 4,
+    "moduleName": "员工端 / 阶段性反馈记录",
+    "target": "employee-dashboard-stage-feedback",
+    "sourcePrdHeading": "3.3 员工端 - 阶段性反馈记录",
+    "sourcePrdExcerpt": "员工可查看直属上级填写的阶段性反馈记录。",
+    "tooltipMarkdown": "### PRD [4] 阶段性反馈记录\n\n- 员工端展示直属上级提交的阶段性反馈。\n- 无记录时显示空状态。\n- HRBP 阶段性反馈本期不支持。",
+    "status": "mapped"
+  },
+  {
+    "id": 5,
+    "moduleName": "员工端 / 目标制定 / 目标表格",
+    "target": "employee-goals-table",
+    "sourcePrdHeading": "3.2 员工端 - 目标制定",
+    "sourcePrdExcerpt": "员工填写试用期目标，目标内容和预期结果必填，目标最多 5 条。",
+    "tooltipMarkdown": "### PRD [5] 目标制定\n\n- 员工填写目标内容、预期结果和可选权重。\n- 支持新增、删除目标，目标上限 5 条。\n- 目标被确认或流程后移后进入只读状态。",
+    "status": "mapped"
+  },
+  {
+    "id": 6,
+    "moduleName": "员工端 / 目标制定 / 提交校验",
+    "target": "employee-goals-validation",
+    "sourcePrdHeading": "3.2 员工端 - 目标制定",
+    "sourcePrdExcerpt": "提交确认前校验目标内容、预期结果和权重合计，保存草稿不强制提交。",
+    "tooltipMarkdown": "### PRD [6] 目标提交校验\n\n- 「保存草稿」保存当前内容。\n- 「提交确认」校验目标内容和预期结果必填。\n- 若填写权重，需所有目标均填写且合计为 100%。",
+    "status": "mapped"
+  },
+  {
+    "id": 7,
+    "moduleName": "员工端 / 试用期评价 / 逐目标回顾",
+    "target": "employee-self-eval-goal-review",
+    "sourcePrdHeading": "3.4 员工端 - 试用期评价",
+    "sourcePrdExcerpt": "员工在自评阶段逐项目标填写目标回顾。",
+    "tooltipMarkdown": "### PRD [7] 逐目标回顾\n\n- 自评阶段展示已确认的试用期目标。\n- 员工需逐项目标填写回顾内容。\n- 非自评阶段仅供查阅。",
+    "status": "mapped"
+  },
+  {
+    "id": 8,
+    "moduleName": "员工端 / 试用期评价 / 总体评价与提交",
+    "target": "employee-self-eval-overall",
+    "sourcePrdHeading": "3.4 员工端 - 试用期评价",
+    "sourcePrdExcerpt": "员工填写总体评价，可在文本中粘贴工作成果链接，提交后进入上级评价流程。",
+    "tooltipMarkdown": "### PRD [8] 总体评价与提交\n\n- 总体评价必填。\n- 成果链接可直接写入评价文本。\n- 提交自评后进入上级评价阶段。",
+    "status": "mapped"
+  },
+  {
+    "id": 9,
+    "moduleName": "直属上级端 / 试用期管理列表",
+    "target": "manager-dashboard-list",
+    "sourcePrdHeading": "3.5 直属上级端 - 试用期管理",
+    "sourcePrdExcerpt": "直属上级查看下属试用期员工列表，支持未转正/已结束、待我处理、搜索、部门和流程阶段筛选。",
+    "tooltipMarkdown": "### PRD [9] 上级管理列表\n\n- 按未转正、已结束组织数据。\n- 支持待我处理、搜索、部门和流程阶段筛选。\n- 操作文案以 Demo 为准，例如「目标确认」「试用期评价」「阶段性反馈」。",
+    "status": "mapped"
+  },
+  {
+    "id": 10,
+    "moduleName": "直属上级端 / 目标确认",
+    "target": "manager-goal-confirm-modal",
+    "sourcePrdHeading": "3.6 直属上级端 - 目标确认",
+    "sourcePrdExcerpt": "直属上级可确认目标或退回修改，退回时必须填写原因。",
+    "tooltipMarkdown": "### PRD [10] 目标确认\n\n- 上级查看员工目标后可确认目标。\n- 退回修改时必须填写退回意见。\n- Demo 文案为「目标确认」「退回修改」「确认目标」。",
+    "status": "mapped"
+  },
+  {
+    "id": 11,
+    "moduleName": "直属上级端 / 阶段性反馈",
+    "target": "manager-stage-feedback-modal",
+    "sourcePrdHeading": "3.7 直属上级端 - 阶段性反馈",
+    "sourcePrdExcerpt": "直属上级在目标设定阶段可填写阶段性反馈，并查看历史反馈。",
+    "tooltipMarkdown": "### PRD [11] 阶段性反馈\n\n- 上级可查看员工目标信息和历史阶段性反馈。\n- 评价内容必填。\n- Demo 按钮文案为「提交评价」。",
+    "status": "mapped"
+  },
+  {
+    "id": 12,
+    "moduleName": "直属上级端 / 试用期评价",
+    "target": "manager-evaluation-modal",
+    "sourcePrdHeading": "3.8 直属上级端 - 试用期评价",
+    "sourcePrdExcerpt": "直属上级查看目标、阶段反馈、员工自评后填写评价结论和评价意见。",
+    "tooltipMarkdown": "### PRD [12] 上级试用期评价\n\n- 上级查看员工目标、阶段性反馈和员工自评。\n- 评价结论包括超出预期、符合预期、不符合转正条件。\n- Demo 提交按钮文案为「提交评价」。",
+    "status": "mapped"
+  },
+  {
+    "id": 13,
+    "moduleName": "HRBP 端 / 试用期管理列表",
+    "target": "hrbp-panorama-list",
+    "sourcePrdHeading": "3.9 HRBP 端 - 试用期管理",
+    "sourcePrdExcerpt": "HRBP 查看管辖范围员工试用期列表，支持未转正/已结束、待我处理、部门、搜索和流程阶段筛选。",
+    "tooltipMarkdown": "### PRD [13] HRBP 管理列表\n\n- HRBP 以员工转正状态为主线查看全景列表。\n- 支持待我处理、搜索、部门树和阶段筛选。\n- 「残疾人」自动纳入员工排除展示范围。",
+    "status": "mapped"
+  },
+  {
+    "id": 14,
+    "moduleName": "HRBP 端 / 开启评价与终止转正",
+    "target": "hrbp-trigger-terminate-actions",
+    "sourcePrdHeading": "3.11 HRBP 端 - 开启评价 / 终止转正",
+    "sourcePrdExcerpt": "HRBP 可开启评价、终止转正，并在上级评价完成后发起转正审批。",
+    "tooltipMarkdown": "### PRD [14] HRBP 操作\n\n- Demo 文案以页面为准：开启评价、发起转正、终止转正、查看详情。\n- 开启评价后通知员工进入自评。\n- 终止转正不继续后续审批流程。",
+    "status": "mapped"
+  },
+  {
+    "id": 15,
+    "moduleName": "HRBP 端 / 发起转正审批",
+    "target": "hrbp-approval-preview",
+    "sourcePrdHeading": "3.12 HRBP 端 - 发起转正审批",
+    "sourcePrdExcerpt": "HRBP 发起转正前预览审批单，审批单包含员工信息、目标、自评、上级评价和备注。",
+    "tooltipMarkdown": "### PRD [15] 发起转正审批\n\n- HRBP 在上级评价完成后预览审批单。\n- 审批单包含员工信息、试用期目标、阶段性反馈、员工自评、上级评价和备注。\n- Demo 按钮文案为「发起转正审批流程」。",
+    "status": "mapped"
+  },
+  {
+    "id": 16,
+    "moduleName": "HRBP 端 / 发布结果取消",
+    "target": "hrbp-auto-publish-result",
+    "sourcePrdHeading": "3.13 HRBP 端 - 发布结果（已取消）",
+    "sourcePrdExcerpt": "审批通过后不再需要 HRBP 发布结果，员工身份从试用员工变为正式员工时自动发布结果，员工默认可查看上级评价结果。",
+    "tooltipMarkdown": "### PRD [16] 发布结果已取消\n\n- 审批通过后不再要求 HRBP 点击「发布结果」。\n- 员工身份从试用员工变为正式员工时自动发布结果。\n- 员工默认可查看上级评价结果。\n- 与 HRBP「发布结果」相关的功能和通知取消。",
+    "status": "mapped"
+  },
+  {
+    "id": 17,
+    "moduleName": "审批端 / 审批列表",
+    "target": "approver-list",
+    "sourcePrdHeading": "3.14 审批端 - 转正审批",
+    "sourcePrdExcerpt": "审批人查看待我审批和我已审批列表，PC 端表格、移动端卡片均支持进入审批单。",
+    "tooltipMarkdown": "### PRD [17] 审批列表\n\n- 审批端区分「待我审批」和「我已审批」。\n- PC 端使用表格列表，移动端使用卡片列表。\n- Demo 操作文案为「审批」。",
+    "status": "mapped"
+  },
+  {
+    "id": 18,
+    "moduleName": "审批端 / 审批单详情",
+    "target": "approver-detail-actions",
+    "sourcePrdHeading": "3.14 审批端 - 转正审批",
+    "sourcePrdExcerpt": "审批单详情展示员工信息、目标、自评、上级评价、审批历史和审批意见，支持通过或驳回。",
+    "tooltipMarkdown": "### PRD [18] 审批单详情\n\n- 审批单展示员工信息、目标、评价详情和审批历史。\n- 待办审批时可填写审批意见。\n- 支持「通过」和「驳回」，驳回意见必填。",
+    "status": "mapped"
+  },
+  {
+    "id": 19,
+    "moduleName": "通知与待办 / 模板预览",
+    "target": "email-template-preview",
+    "sourcePrdHeading": "3.15 通知与待办",
+    "sourcePrdExcerpt": "系统待办是流程主驱动，邮件、WOA、OTP 作为触达渠道；取消 HRBP 发布结果相关通知。",
+    "tooltipMarkdown": "### PRD [19] 通知与待办\n\n- 系统待办是主驱动。\n- 邮件、WOA、OTP 作为触达渠道。\n- HRBP 发布结果相关通知已取消；结果发布由身份变更自动触发。",
+    "status": "mapped"
+  },
+  {
+    "id": 20,
+    "moduleName": "Demo 总览 / Modern Demo 文案口径",
+    "target": "demo-home-modern-copy-scope",
+    "sourcePrdHeading": "3.16 Modern Demo 文案口径",
+    "sourcePrdExcerpt": "本轮所有调整以 Modern Demo 为准，忽略 PS 风格；按钮文案按 Demo 现状更新 PRD。",
+    "tooltipMarkdown": "### PRD [20] Modern Demo 口径\n\n- 本轮调整只面向 Modern Demo。\n- PS 风格页面不作为校验或标注对象。\n- 上级、HRBP、审批端按钮文案以 Demo 为准。",
+    "status": "mapped"
+  }
+]

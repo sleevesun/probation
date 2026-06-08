@@ -1,118 +1,127 @@
 <template>
   <div class="approval-page" :class="{ 'approval-page--mobile': isMobile }">
-    <a-page-header title="试用期转正审批" :sub-title="isMobile ? '' : '您的待办与已办审批单据'">
-      <template #extra>
-        <a-space>
-          <span style="font-size: 13px; color: #666;">{{ isMobile ? '移动端视图' : 'PC端视图' }}</span>
-          <a-switch v-model:checked="isMobile" checked-children="移动" un-checked-children="PC" />
-        </a-space>
+    <PrdAnnotation id="17">
+      <a-page-header title="试用期转正审批" :sub-title="isMobile ? '' : '您的待办与已办审批单据'">
+        <template #extra>
+          <a-space>
+            <span style="font-size: 13px; color: #666;">{{ isMobile ? '移动端视图' : 'PC端视图' }}</span>
+            <a-switch v-model:checked="isMobile" checked-children="移动" un-checked-children="PC" />
+          </a-space>
+        </template>
+      </a-page-header>
+
+      <!-- ====== PC 端：表格列表 ====== -->
+      <template v-if="!isMobile">
+        <a-tabs v-model:activeKey="activeTab">
+          <a-tab-pane key="todo" tab="待我审批">
+            <a-table :dataSource="todoList" :columns="columns" rowKey="master_id" bordered>
+              <template #bodyCell="{ column, record }">
+                <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
+                <template v-if="column.key === 'action'">
+                  <a-button type="primary" size="small" @click="openModal(record)">审批</a-button>
+                </template>
+              </template>
+            </a-table>
+          </a-tab-pane>
+
+          <a-tab-pane key="done" tab="我已审批">
+            <a-table :dataSource="doneList" :columns="doneColumns" rowKey="master_id" bordered>
+              <template #bodyCell="{ column, record }">
+                <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
+                <template v-if="column.dataIndex === 'final_decision'">
+                  <a-tag :color="isFailedDecision(record.final_decision) || record.final_decision === '离职' ? 'error' : 'success'">{{ formatDecisionLabel(record.final_decision) }}</a-tag>
+                </template>
+                <template v-if="column.key === 'action'">
+                  <a-button size="small" @click="openModal(record)">审批</a-button>
+                </template>
+              </template>
+            </a-table>
+          </a-tab-pane>
+        </a-tabs>
       </template>
-    </a-page-header>
 
-    <!-- ====== PC 端：表格列表 ====== -->
-    <template v-if="!isMobile">
-      <a-tabs v-model:activeKey="activeTab">
-        <a-tab-pane key="todo" tab="待我审批">
-          <a-table :dataSource="todoList" :columns="columns" rowKey="master_id" bordered>
-            <template #bodyCell="{ column, record }">
-              <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
-              <template v-if="column.key === 'action'">
-                <a-button type="primary" size="small" @click="openModal(record)">审批</a-button>
-              </template>
-            </template>
-          </a-table>
-        </a-tab-pane>
-
-        <a-tab-pane key="done" tab="我已审批">
-          <a-table :dataSource="doneList" :columns="doneColumns" rowKey="master_id" bordered>
-            <template #bodyCell="{ column, record }">
-              <template v-if="column.dataIndex === 'dept_display'">{{ record.parent_dept }}\{{ record.dept_name }}</template>
-              <template v-if="column.dataIndex === 'final_decision'">
-                <a-tag :color="isFailedDecision(record.final_decision) || record.final_decision === '离职' ? 'error' : 'success'">{{ formatDecisionLabel(record.final_decision) }}</a-tag>
-              </template>
-              <template v-if="column.key === 'action'">
-                <a-button size="small" @click="openModal(record)">审批</a-button>
-              </template>
-            </template>
-          </a-table>
-        </a-tab-pane>
-      </a-tabs>
-    </template>
-
-    <!-- ====== 移动端：卡片列表 ====== -->
-    <template v-else>
-      <div class="mobile-tabs">
-        <div class="mobile-tab" :class="{ 'mobile-tab--active': activeTab === 'todo' }" @click="activeTab = 'todo'">
-          待我审批 <span v-if="todoList.length" class="mobile-tab__badge">{{ todoList.length }}</span>
+      <!-- ====== 移动端：卡片列表 ====== -->
+      <template v-else>
+        <div class="mobile-tabs">
+          <div class="mobile-tab" :class="{ 'mobile-tab--active': activeTab === 'todo' }" @click="activeTab = 'todo'">
+            待我审批 <span v-if="todoList.length" class="mobile-tab__badge">{{ todoList.length }}</span>
+          </div>
+          <div class="mobile-tab" :class="{ 'mobile-tab--active': activeTab === 'done' }" @click="activeTab = 'done'">
+            我已审批 <span v-if="doneList.length" class="mobile-tab__badge">{{ doneList.length }}</span>
+          </div>
         </div>
-        <div class="mobile-tab" :class="{ 'mobile-tab--active': activeTab === 'done' }" @click="activeTab = 'done'">
-          我已审批 <span v-if="doneList.length" class="mobile-tab__badge">{{ doneList.length }}</span>
-        </div>
-      </div>
 
-      <div class="mobile-list">
-        <!-- 待办卡片 -->
-        <template v-if="activeTab === 'todo'">
-          <div v-if="!todoList.length" class="mobile-empty">暂无待审批单据</div>
-          <div v-for="record in todoList" :key="record.master_id" class="mobile-card" @click="openModal(record)">
-            <div class="mobile-card__header">
-              <span class="mobile-card__title">{{ record.emp_name }} 的试用期转正审批流程</span>
-            </div>
-            <div class="mobile-card__body">
-              <div class="mobile-card__meta">
-                <span>员工：{{ record.emp_name }}（{{ record.emp_id }}）</span>
-                <span>部门：{{ record.parent_dept }}\{{ record.dept_name }}</span>
-                <span>发起人：{{ record.hrbp_name }}</span>
+        <div class="mobile-list">
+          <!-- 待办卡片 -->
+          <template v-if="activeTab === 'todo'">
+            <div v-if="!todoList.length" class="mobile-empty">暂无待审批单据</div>
+            <div v-for="record in todoList" :key="record.master_id" class="mobile-card" @click="openModal(record)">
+              <div class="mobile-card__header">
+                <span class="mobile-card__title">{{ record.emp_name }} 的试用期转正审批流程</span>
+              </div>
+              <div class="mobile-card__body">
+                <div class="mobile-card__meta">
+                  <span>员工：{{ record.emp_name }}（{{ record.emp_id }}）</span>
+                  <span>部门：{{ record.parent_dept }}\{{ record.dept_name }}</span>
+                  <span>发起人：{{ record.hrbp_name }}</span>
+                </div>
+              </div>
+              <div class="mobile-card__footer">
+                <a-button type="primary" block @click.stop="openModal(record)">审批</a-button>
               </div>
             </div>
-            <div class="mobile-card__footer">
-              <a-button type="primary" block @click.stop="openModal(record)">审批</a-button>
-            </div>
-          </div>
-        </template>
+          </template>
 
-        <!-- 已办卡片 -->
-        <template v-if="activeTab === 'done'">
-          <div v-if="!doneList.length" class="mobile-empty">暂无已审批单据</div>
-          <div v-for="record in doneList" :key="record.master_id" class="mobile-card" @click="openModal(record)">
-            <div class="mobile-card__header">
-              <span class="mobile-card__title">{{ record.emp_name }} 的试用期转正审批流程</span>
-              <a-tag :color="isFailedDecision(record.final_decision) ? 'error' : 'success'" size="small">{{ formatDecisionLabel(record.final_decision) }}</a-tag>
-            </div>
-            <div class="mobile-card__body">
-              <div class="mobile-card__meta">
-                <span>员工：{{ record.emp_name }}（{{ record.emp_id }}）</span>
-                <span>部门：{{ record.parent_dept }}\{{ record.dept_name }}</span>
-                <span>发起人：{{ record.hrbp_name }}</span>
+          <!-- 已办卡片 -->
+          <template v-if="activeTab === 'done'">
+            <div v-if="!doneList.length" class="mobile-empty">暂无已审批单据</div>
+            <div v-for="record in doneList" :key="record.master_id" class="mobile-card" @click="openModal(record)">
+              <div class="mobile-card__header">
+                <span class="mobile-card__title">{{ record.emp_name }} 的试用期转正审批流程</span>
+                <a-tag :color="isFailedDecision(record.final_decision) ? 'error' : 'success'" size="small">{{ formatDecisionLabel(record.final_decision) }}</a-tag>
+              </div>
+              <div class="mobile-card__body">
+                <div class="mobile-card__meta">
+                  <span>员工：{{ record.emp_name }}（{{ record.emp_id }}）</span>
+                  <span>部门：{{ record.parent_dept }}\{{ record.dept_name }}</span>
+                  <span>发起人：{{ record.hrbp_name }}</span>
+                </div>
+              </div>
+              <div class="mobile-card__footer">
+                <a-button block @click.stop="openModal(record)">审批</a-button>
               </div>
             </div>
-            <div class="mobile-card__footer">
-              <a-button block @click.stop="openModal(record)">审批</a-button>
-            </div>
-          </div>
-        </template>
-      </div>
-    </template>
+          </template>
+        </div>
+      </template>
+    </PrdAnnotation>
 
     <!-- ====== PC 端：弹窗详情 ====== -->
     <a-modal v-if="!isMobile" v-model:open="modalVisible" title="试用期转正审批单" width="900px" :footer="null" :body-style="{ maxHeight: '70vh', overflowY: 'auto' }" class="approval-modal">
-      <div v-if="currentRecord" class="approval-sheet">
+      <PrdAnnotation v-if="currentRecord" id="18">
+      <div class="approval-sheet">
         <section class="approval-sheet__section">
-          <div class="approval-sheet__title">单据概览</div>
+          <div class="approval-sheet__title">单据信息</div>
           <a-descriptions size="small" :column="2" class="approval-summary">
             <a-descriptions-item label="流程名称" :span="2">{{ currentRecord.emp_name }} 的试用期转正审批流程</a-descriptions-item>
             <a-descriptions-item label="发起人">{{ currentRecord.hrbp_name }}（HRBP）</a-descriptions-item>
-            <a-descriptions-item label="姓名">{{ currentRecord.emp_name }}</a-descriptions-item>
-            <a-descriptions-item label="工号">{{ currentRecord.emp_id }}</a-descriptions-item>
-            <a-descriptions-item label="岗位">{{ currentRecord.position }}</a-descriptions-item>
+          </a-descriptions>
+        </section>
+
+        <section class="approval-sheet__section">
+          <div class="approval-sheet__title">员工信息</div>
+          <a-descriptions size="small" :column="2" class="approval-summary">
+            <a-descriptions-item label="员工">{{ currentRecord.emp_name }}/{{ currentRecord.emp_id }}</a-descriptions-item>
+            <a-descriptions-item label="入职日期">{{ currentRecord.hire_date }}</a-descriptions-item>
             <a-descriptions-item label="部门">{{ currentRecord.parent_dept }}\{{ currentRecord.dept_name }}</a-descriptions-item>
-            <a-descriptions-item label="直属主管">{{ currentRecord.manager_name }}</a-descriptions-item>
+            <a-descriptions-item label="岗位">{{ currentRecord.position }}</a-descriptions-item>
+            <a-descriptions-item label="直属上级">{{ currentRecord.manager_name }}</a-descriptions-item>
             <a-descriptions-item label="HRBP">{{ currentRecord.hrbp_name }}</a-descriptions-item>
-            <a-descriptions-item label="入职时间">{{ currentRecord.hire_date }}</a-descriptions-item>
-            <a-descriptions-item label="上级评价结果">
-              <b :style="{ color: isFailedDecision(currentRecord.final_decision) ? '#f5222d' : '#1890ff' }">
+            <a-descriptions-item label="试用期评价结果" :span="2">
+              <b v-if="currentRecord.final_decision" :style="{ color: isFailedDecision(currentRecord.final_decision) ? '#f5222d' : '#1890ff' }">
                 {{ formatDecisionLabel(currentRecord.final_decision) }}
               </b>
+              <span v-else style="color: #999">-</span>
             </a-descriptions-item>
           </a-descriptions>
         </section>
@@ -192,11 +201,13 @@
           </a-form>
         </section>
       </div>
+      </PrdAnnotation>
     </a-modal>
 
     <!-- ====== 移动端：iPhone 模拟容器审批详情 ====== -->
     <template v-if="isMobile">
       <a-modal v-model:open="modalVisible" :footer="null" :closable="false" :title="null" wrap-class-name="iphone-sim-modal" width="474px" :body-style="{ padding: 0 }" centered>
+        <PrdAnnotation id="18">
         <div class="iphone-container">
           <div class="iphone-screen">
             <!-- 状态栏 -->
@@ -224,9 +235,9 @@
             <!-- 可滚动内容区 -->
             <div class="iphone-content" v-if="currentRecord">
               <div class="mobile-detail">
-                <!-- 基本信息卡片 -->
+                <!-- 单据信息卡片 -->
                 <div class="mobile-detail-card">
-                  <div class="mobile-detail-card__title">单据概览</div>
+                  <div class="mobile-detail-card__title">单据信息</div>
                   <div class="mobile-field">
                     <span class="mobile-field__label">流程名称</span>
                     <span class="mobile-field__value">{{ currentRecord.emp_name }} 的试用期转正审批流程</span>
@@ -235,21 +246,26 @@
                     <span class="mobile-field__label">发起人</span>
                     <span class="mobile-field__value">{{ currentRecord.hrbp_name }}（HRBP）</span>
                   </div>
+                </div>
+
+                <!-- 员工信息卡片 -->
+                <div class="mobile-detail-card">
+                  <div class="mobile-detail-card__title">员工信息</div>
                   <div class="mobile-field">
-                    <span class="mobile-field__label">姓名</span>
-                    <span class="mobile-field__value">{{ currentRecord.emp_name }}</span>
+                    <span class="mobile-field__label">员工</span>
+                    <span class="mobile-field__value">{{ currentRecord.emp_name }}/{{ currentRecord.emp_id }}</span>
                   </div>
                   <div class="mobile-field">
-                    <span class="mobile-field__label">工号</span>
-                    <span class="mobile-field__value">{{ currentRecord.emp_id }}</span>
+                    <span class="mobile-field__label">部门</span>
+                    <span class="mobile-field__value">{{ currentRecord.parent_dept }}\{{ currentRecord.dept_name }}</span>
                   </div>
                   <div class="mobile-field">
                     <span class="mobile-field__label">岗位</span>
                     <span class="mobile-field__value">{{ currentRecord.position }}</span>
                   </div>
                   <div class="mobile-field">
-                    <span class="mobile-field__label">部门</span>
-                    <span class="mobile-field__value">{{ currentRecord.parent_dept }}\{{ currentRecord.dept_name }}</span>
+                    <span class="mobile-field__label">入职时间</span>
+                    <span class="mobile-field__value">{{ currentRecord.hire_date }}</span>
                   </div>
                   <div class="mobile-field">
                     <span class="mobile-field__label">直属上级</span>
@@ -259,19 +275,14 @@
                     <span class="mobile-field__label">HRBP</span>
                     <span class="mobile-field__value">{{ currentRecord.hrbp_name }}</span>
                   </div>
-                  <div class="mobile-field">
-                    <span class="mobile-field__label">入职时间</span>
-                    <span class="mobile-field__value">{{ currentRecord.hire_date }}</span>
-                  </div>
                 </div>
 
                 <!-- 目标摘要卡片 -->
                 <div class="mobile-detail-card">
                   <div class="mobile-detail-card__title">试用期目标</div>
                   <div v-if="currentRecord.goals.length === 0" class="mobile-empty-inline">暂无目标数据</div>
-                  <div v-for="(goal, idx) in currentRecord.goals" :key="goal.goal_id" class="mobile-goal-item">
-                    <div class="mobile-goal-item__tag">目标 {{ idx + 1 }}</div>
-                    <div class="mobile-goal-item__content">{{ goal.content }}</div>
+                  <div v-for="goal in currentRecord.goals" :key="goal.goal_id" class="mobile-goal-item">
+                          <div class="mobile-goal-item__content">{{ goal.content }}</div>
                     <div class="mobile-goal-item__measure">
                       <span class="mobile-field__label">预期结果：</span>{{ goal.measure }}
                     </div>
@@ -336,6 +347,7 @@
             <div class="iphone-home-indicator"></div>
           </div>
         </div>
+        </PrdAnnotation>
       </a-modal>
     </template>
   </div>
@@ -345,13 +357,14 @@
 import { computed, ref } from 'vue'
 import { useProbationStore, type ProbationMaster, formatDecisionLabel, isFailedDecision } from '@/store/probation'
 import { message } from 'ant-design-vue'
+import PrdAnnotation from '@/components/prd/PrdAnnotation.vue'
 
 const store = useProbationStore()
 const activeTab = ref('todo')
 const isMobile = ref(false)
 
 const todoList = computed(() => store.records.filter(r => r.probation_status === '08'))
-const doneList = computed(() => store.records.filter(r => ['09', '10'].includes(r.probation_status) && r.approval_logs.length > 0))
+const doneList = computed(() => store.records.filter(r => ['10'].includes(r.probation_status) && r.approval_logs.length > 0))
 
 const columns = [
   { title: '流程名称', customRender: ({ record }: any) => `${record.emp_name} 的试用期转正审批流程`, width: 200 },
@@ -476,6 +489,7 @@ function handleReject() {
   width: 96px;
   color: #6b7280;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .stacked-list {

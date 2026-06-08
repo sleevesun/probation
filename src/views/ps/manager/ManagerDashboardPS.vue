@@ -65,10 +65,13 @@
               <a-button size="small" @click="openDetailModal(item)">查看详情</a-button>
             </td>
             <td class="ps-table__actions">
-              <a-button v-if="item.probation_status === '02'" size="small" type="primary" @click="openActionModal(item, 'manager-goal-review')">确认目标</a-button>
-              <a-button v-if="item.probation_status === '03'" size="small" danger @click="openActionModal(item, 'manager-force-adjust')">目标退回调整</a-button>
-              <a-button v-if="item.probation_status === '06' && !item.manager_eval_done" size="small" type="primary" @click="openActionModal(item, 'manager-evaluation')">试用期评价</a-button>
-              <a-button v-if="['02','03','04'].includes(item.probation_status)" size="small" @click="openStageEvalModal(item)">阶段性反馈</a-button>
+              <template v-if="!item.terminated">
+                <a-button v-if="item.probation_status === '02'" size="small" type="primary" @click="openActionModal(item, 'manager-goal-review')">确认目标</a-button>
+                <a-button v-if="item.probation_status === '03'" size="small" danger @click="openActionModal(item, 'manager-force-adjust')">目标退回调整</a-button>
+                <a-button v-if="item.probation_status === '06' && !item.manager_eval_done" size="small" type="primary" @click="openActionModal(item, 'manager-evaluation')">试用期评价</a-button>
+                <a-button v-if="['02','03','04'].includes(item.probation_status)" size="small" @click="openStageEvalModal(item)">阶段性反馈</a-button>
+              </template>
+              <span v-else style="color: #999; font-size: 12px">已终止</span>
             </td>
           </tr>
         </tbody>
@@ -333,12 +336,12 @@ const tableData = computed(() => {
   let list = store.records
 
   if (activeTab.value === 'unfinished') {
-    list = list.filter(item => !['10', '88', '99'].includes(item.probation_status))
+    list = list.filter(item => !['10', '88'].includes(item.probation_status))
     if (activeStageFilters.value.length > 0) {
       list = list.filter(item => matchesStage(item, activeStageFilters.value))
     }
   } else {
-    list = list.filter(item => ['10', '88', '99'].includes(item.probation_status))
+    list = list.filter(item => ['10', '88'].includes(item.probation_status))
   }
 
   if (searchText.value) {

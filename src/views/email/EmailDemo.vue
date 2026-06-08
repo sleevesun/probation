@@ -1,4 +1,5 @@
 <template>
+  <PrdAnnotation id="19">
   <div class="email-demo-container">
     <!-- 左侧列表 -->
     <div class="sidebar">
@@ -52,6 +53,12 @@
           <span class="meta-label">期望动作</span>
           <span class="meta-value">{{ currentTemplate.action }}</span>
         </div>
+        <div class="meta-item">
+          <span class="meta-label">触达渠道</span>
+          <span class="meta-value">
+            <a-tag v-for="ch in currentTemplate.channels" :key="ch" :color="getChannelColor(ch)" size="small">{{ ch }}</a-tag>
+          </span>
+        </div>
       </div>
       <!-- 邮件正文预览 -->
       <div class="preview-content">
@@ -59,11 +66,13 @@
       </div>
     </div>
   </div>
+  </PrdAnnotation>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { emailTemplates, renderEmailSkin, phaseGroups } from './templates';
+import PrdAnnotation from '@/components/prd/PrdAnnotation.vue';
 
 const templates = ref(emailTemplates);
 const selectedKeys = ref<string[]>([]);
@@ -100,6 +109,17 @@ const getRoleColor = (role: string) => {
     case '上级': return 'orange';
     case 'HRBP': return 'purple';
     case '审批人': return 'green';
+    default: return 'default';
+  }
+};
+
+const getChannelColor = (channel: string) => {
+  switch (channel) {
+    case '邮件': return 'cyan';
+    case 'WOA': return 'geekblue';
+    case 'OTP': return 'green';
+    case 'OTP待处理': return 'lime';
+    case 'OA消息中心': return 'gold';
     default: return 'default';
   }
 };
