@@ -126,7 +126,7 @@
     </a-modal>
 
     <!-- Evaluation Modal -->
-    <a-modal v-model:open="evalModalVisible" title="试用期评价" width="900px" :footer="null" :bodyStyle="{ maxHeight: '75vh', overflowY: 'auto' }">
+    <a-modal v-model:open="evalModalVisible" title="查看详情" width="1000px" :footer="null" :bodyStyle="{ maxHeight: '75vh', overflowY: 'auto' }">
       <PrdAnnotation v-if="evalModalRecord" id="12">
         <!-- 员工信息 -->
         <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
@@ -565,8 +565,8 @@ const stageEvalContent = ref('');
 
 const stageGoalColumns = [
   { title: '序号', dataIndex: 'seq', width: 60, customRender: ({ index }: any) => index + 1 },
-  { title: '目标内容', dataIndex: 'content' },
-  { title: '预期结果', dataIndex: 'measure', width: 200 },
+  { title: '目标内容', dataIndex: 'content', width: 200 },
+  { title: '预期结果', dataIndex: 'measure' },
   { title: '权重', dataIndex: 'weight', width: 80, customRender: ({ text }: any) => text != null ? `${text}%` : '-' }
 ];
 

@@ -89,7 +89,7 @@
     </PrdAnnotation>
 
     <!-- 查看详情 Modal -->
-    <a-modal v-model:open="detailModalVisible" title="员工转正详情" width="800px" :footer="null">
+    <a-modal v-model:open="detailModalVisible" title="员工转正详情" width="1000px" :footer="null" :bodyStyle="{ maxHeight: '75vh', overflowY: 'auto' }">
       <div v-if="detailRecord">
         <!-- 员工信息 -->
         <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
@@ -183,7 +183,7 @@
     </a-modal>
 
     <!-- 审批单预览 Modal -->
-    <a-modal v-model:open="approvalPreviewVisible" title="转正审批单预览" width="750px" :footer="null">
+    <a-modal v-model:open="approvalPreviewVisible" title="转正审批单预览" width="900px" :footer="null">
       <PrdAnnotation v-if="approvalPreviewRecord" id="15">
         <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
           <a-descriptions-item label="员工">{{ approvalPreviewRecord.emp_name }}/{{ approvalPreviewRecord.emp_id }}</a-descriptions-item>
