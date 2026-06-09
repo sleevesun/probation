@@ -145,10 +145,15 @@ export function getDetailedStatusText(record: ProbationMaster): string {
 
 /**
  * 判断是否满足开启试用期评价的条件
- * HRBP 视角下员工目标已确认即可开启，不再展示“待开启试用期评价”状态门槛。
+ * HRBP 视角下员工目标已确认且入职满 4.5 个月即可开启试用期评价。
  */
 export function canTriggerProbation(record: ProbationMaster): boolean {
-    return record.probation_status === '03' || record.probation_status === '04';
+    if (record.probation_status !== '03' && record.probation_status !== '04') {
+        return false;
+    }
+    // 校验入职时长是否满 4.5 个月
+    const months = parseFloat(getMonthsSinceHire(record.hire_date));
+    return months >= 4.5;
 }
 
 export function getMonthsSinceHire(hireDate: string): string {

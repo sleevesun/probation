@@ -208,7 +208,7 @@
 
     <!-- 试用期评价弹窗（填写评价） -->
     <a-modal v-model:open="reviewModalVisible" title="试用期评价" width="900px" :footer="null" :bodyStyle="{ maxHeight: '75vh', overflowY: 'auto' }">
-      <PrdAnnotation v-if="reviewModalRecord" id="12b">
+      <PrdAnnotation v-if="reviewModalRecord" id="121">
         <!-- 员工信息 -->
         <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
           <a-descriptions-item label="员工">{{ reviewModalRecord.emp_name }}/{{ reviewModalRecord.emp_id }}</a-descriptions-item>
@@ -597,6 +597,9 @@ function syncPrdRoute(prdQuery: unknown) {
   } else if (prdId === 12) {
     const record = sortedUnfinished.value.find(r => r.probation_status === '06') ?? sortedUnfinished.value[0];
     if (record) openEvalModal(record);
+  } else if (prdId === 121) {
+    const record = sortedUnfinished.value.find(r => r.probation_status === '06' && !r.manager_eval_done) ?? sortedUnfinished.value[0];
+    if (record) openReviewModal(record);
   }
 }
 

@@ -327,9 +327,9 @@ const currentStepIndex = ref<number>(0);
 const activeStepFilter = ref<string>('all');
 
 // 未转正：排除已结束状态(10/88/99)、排除业务头衔=残疾人（自动纳入口径）
-const unfinishedRecords = computed(() => store.records.filter(r => !['10', '88'].includes(r.probation_status) && r.business_title !== '残疾人'));
-// 已结束：结果已发布(10) + 未转正离职(88)，排除业务头衔=残疾人
-const finishedList = computed(() => store.records.filter(r => ['10', '88'].includes(r.probation_status) && r.business_title !== '残疾人'));
+const unfinishedRecords = computed(() => store.records.filter(r => !['10', '88', '99'].includes(r.probation_status) && r.business_title !== '残疾人'));
+// 已结束：结果已发布(10) + 未转正离职(88) + 不通过终止(99)，排除业务头衔=残疾人
+const finishedList = computed(() => store.records.filter(r => ['10', '88', '99'].includes(r.probation_status) && r.business_title !== '残疾人'));
 
 const formatCount = (count: number) => count > 0 ? count : '-';
 

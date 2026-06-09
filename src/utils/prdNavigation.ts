@@ -20,7 +20,7 @@ export function getAnnotationPagePath(id: number) {
   if ([1, 2, 3, 4].includes(id)) return '/employee/dashboard'
   if ([5, 6].includes(id)) return '/employee/goals'
   if ([7, 8].includes(id)) return '/employee/self-eval'
-  if ([9, 10, 11, 12].includes(id)) return '/manager/team'
+  if ([9, 10, 11, 12, 121].includes(id)) return '/manager/team'
   if ([13, 14, 15, 16].includes(id)) return '/hrbp/panorama'
   if ([17, 18].includes(id)) return '/approver/center'
   if (id === 19) return '/email-demo'
