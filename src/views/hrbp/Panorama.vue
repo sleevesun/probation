@@ -163,21 +163,9 @@
 
         <!-- 审批记录 -->
         <div v-if="['08', '09', '10'].includes(detailRecord.probation_status)" class="approval-records-section">
-          <div class="approval-records-title">审批记录</div>
-          <div v-if="detailRecord.approval_logs && detailRecord.approval_logs.length > 0">
-            <div v-for="log in detailRecord.approval_logs" :key="log.log_id" class="approval-record-item">
-              <div class="approval-record-item__header">
-                <span class="approval-record-item__node">{{ log.node_name }}</span>
-                <span class="approval-record-item__action" :class="{ 'approval-record-item__action--agree': log.action === '同意', 'approval-record-item__action--reject': log.action === '拒绝' }">{{ log.action }}</span>
-              </div>
-              <div class="approval-record-item__info">
-                <span>{{ log.approver_name }}</span>
-                <span class="approval-record-item__time">{{ log.action_time }}</span>
-              </div>
-              <div v-if="log.comment && log.comment !== '-'" class="approval-record-item__comment">{{ log.comment }}</div>
-            </div>
+          <div style="color: var(--text-secondary); font-size: 14px;">
+            请登录 <a href="javascript:;" style="color: var(--accent); text-decoration: none; font-weight: 500;">HR便捷工作台</a> 查看转正审批记录
           </div>
-          <div v-else class="approval-record-empty">暂无审批记录</div>
         </div>
       </div>
     </a-modal>

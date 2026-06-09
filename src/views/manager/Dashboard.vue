@@ -203,25 +203,6 @@
         <div style="margin-top: 24px; text-align: right">
           <a-button @click="evalModalVisible = false">返回</a-button>
         </div>
-
-        <!-- 审批记录 -->
-        <div v-if="['08', '09', '10'].includes(evalModalRecord.probation_status)" class="approval-records-section">
-          <div class="approval-records-title">审批记录</div>
-          <div v-if="evalModalRecord.approval_logs && evalModalRecord.approval_logs.length > 0">
-            <div v-for="log in evalModalRecord.approval_logs" :key="log.log_id" class="approval-record-item">
-              <div class="approval-record-item__header">
-                <span class="approval-record-item__node">{{ log.node_name }}</span>
-                <span class="approval-record-item__action" :class="{ 'approval-record-item__action--agree': log.action === '同意', 'approval-record-item__action--reject': log.action === '拒绝' }">{{ log.action }}</span>
-              </div>
-              <div class="approval-record-item__info">
-                <span>{{ log.approver_name }}</span>
-                <span class="approval-record-item__time">{{ log.action_time }}</span>
-              </div>
-              <div v-if="log.comment && log.comment !== '-'" class="approval-record-item__comment">{{ log.comment }}</div>
-            </div>
-          </div>
-          <div v-else class="approval-record-empty">暂无审批记录</div>
-        </div>
       </PrdAnnotation>
     </a-modal>
 
