@@ -1318,6 +1318,30 @@ a:hover {
   padding: 0 !important;
 }
 
+.ant-btn-dangerous {
+  color: var(--status-danger) !important;
+  border-color: var(--status-danger) !important;
+  background: transparent !important;
+}
+
+.ant-btn-dangerous:hover {
+  color: #ff6b6b !important;
+  border-color: #ff6b6b !important;
+}
+
+.ant-btn-primary.ant-btn-dangerous,
+.ant-btn-danger.ant-btn-dangerous {
+  background: var(--status-danger) !important;
+  border-color: var(--status-danger) !important;
+  color: var(--text-on-accent) !important;
+}
+
+.ant-btn-primary.ant-btn-dangerous:hover,
+.ant-btn-danger.ant-btn-dangerous:hover {
+  background: #ff6b6b !important;
+  border-color: #ff6b6b !important;
+}
+
 /* --- Tables --- */
 .ant-table {
   border-radius: var(--radius-lg) !important;
@@ -1514,7 +1538,7 @@ a:hover {
 }
 
 /* --- Inputs --- */
-.ant-input,
+.ant-input:not(textarea),
 .ant-select-selector,
 .ant-picker {
   border-radius: var(--radius-md) !important;
@@ -1523,6 +1547,15 @@ a:hover {
   height: 36px !important;
   font-size: 14px !important;
   transition: all var(--duration-fast) var(--ease-default) !important;
+}
+
+textarea.ant-input {
+  border-radius: var(--radius-md) !important;
+  border-color: var(--border-primary) !important;
+  padding: 8px 12px !important;
+  font-size: 14px !important;
+  transition: all var(--duration-fast) var(--ease-default) !important;
+  min-height: 56px !important;
 }
 
 .ant-input:focus,

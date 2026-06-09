@@ -95,13 +95,6 @@
     <!-- Goal Approval Modal -->
     <a-modal v-model:open="goalModalVisible" title="试用期目标确认" width="800px" :footer="null">
       <PrdAnnotation v-if="currentReviewRecord" id="10">
-        <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
-          <a-descriptions-item label="员工姓名">{{ currentReviewRecord.emp_name }}</a-descriptions-item>
-          <a-descriptions-item label="岗位">{{ currentReviewRecord.position }}</a-descriptions-item>
-          <a-descriptions-item label="部门">{{ currentReviewRecord.parent_dept }}\{{ currentReviewRecord.dept_name }}</a-descriptions-item>
-          <a-descriptions-item label="入职时间">{{ currentReviewRecord.hire_date }}</a-descriptions-item>
-        </a-descriptions>
-
         <a-table :dataSource="currentReviewRecord.goals" :columns="goalConfirmColumns" :pagination="false" rowKey="goal_id" size="small" bordered />
 
         <div style="margin-top: 16px" v-if="showRejectInput">
@@ -193,48 +186,23 @@
 
         <!-- 上级评价 -->
         <div style="font-weight: 600; margin: 20px 0 8px; font-size: 14px">上级评价</div>
-        <div
-          v-if="evalModalRecord.probation_status !== '06'"
-          style="margin-bottom: 12px; color: #999; font-size: 12px"
-        >
-          当前状态「{{ getDetailedStatusText(evalModalRecord) }}」暂不可评价
-        </div>
-
-        <a-form layout="vertical">
-          <a-form-item label="结论" required>
-            <a-radio-group v-model:value="evalDecision" button-style="solid" :disabled="evalCannotEval">
-              <a-radio-button value="超出预期">通过（超出预期）</a-radio-button>
-              <a-radio-button value="符合预期">通过（符合预期）</a-radio-button>
-              <a-radio-button value="不符合转正条件">不通过</a-radio-button>
-            </a-radio-group>
-          </a-form-item>
-
-          <a-form-item label="评价意见" required>
-            <a-textarea
-              v-model:value="evalReason"
-              :rows="4"
-              placeholder="请填写评价意见。"
-              :disabled="evalCannotEval"
-            />
-          </a-form-item>
-
-          <div style="margin-top: 16px; text-align: right">
-            <a-space>
-              <a-button @click="evalModalVisible = false">返回</a-button>
-              <a-button
-                type="primary"
-                :disabled="evalCannotEval"
-                @click="handleEvalSubmit"
-                :loading="evalSaving"
-              >
-                提交评价
-              </a-button>
-            </a-space>
-            <div style="text-align: center; margin-top: 8px; color: #999; font-size: 12px" v-if="!evalCannotEval">
-              提交后将由 HRBP 发起转正审批流程
+        <div v-if="evalManagerEval" class="eval-text-block">
+          <div class="manager-eval-block">
+            <div class="manager-eval-block__result">
+              <span>评价结果</span>
+              <div>{{ formatDecisionLabel(evalModalRecord.final_decision) }}</div>
+            </div>
+            <div class="manager-eval-block__content">
+              <span>评价内容</span>
+              <div>{{ evalManagerEval.content }}</div>
             </div>
           </div>
-        </a-form>
+        </div>
+        <a-empty v-else description="暂无上级评价" :image-style="{ height: '40px' }" style="margin-bottom: 16px" />
+
+        <div style="margin-top: 24px; text-align: right">
+          <a-button @click="evalModalVisible = false">返回</a-button>
+        </div>
 
         <!-- 审批记录 -->
         <div v-if="['08', '09', '10'].includes(evalModalRecord.probation_status)" class="approval-records-section">
@@ -260,16 +228,6 @@
     <!-- 阶段性反馈弹窗 -->
     <a-modal v-model:open="stageEvalModalVisible" title="填写阶段性反馈" width="700px" :footer="null">
       <PrdAnnotation v-if="stageEvalRecord" id="11">
-        <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
-          <a-descriptions-item label="员工">{{ stageEvalRecord.emp_name }}/{{ stageEvalRecord.emp_id }}</a-descriptions-item>
-          <a-descriptions-item label="入职日期">{{ stageEvalRecord.hire_date }}</a-descriptions-item>
-          <a-descriptions-item label="部门">{{ stageEvalRecord.parent_dept }}\{{ stageEvalRecord.dept_name }}</a-descriptions-item>
-          <a-descriptions-item label="岗位">{{ stageEvalRecord.position }}</a-descriptions-item>
-          <a-descriptions-item label="直属上级">{{ stageEvalRecord.manager_name }}</a-descriptions-item>
-          <a-descriptions-item label="HRBP">{{ stageEvalRecord.hrbp_name }}</a-descriptions-item>
-          <a-descriptions-item label="当前状态" :span="2">{{ getDetailedStatusText(stageEvalRecord) }}</a-descriptions-item>
-        </a-descriptions>
-
         <div style="font-weight: 600; margin-bottom: 8px">目标信息</div>
         <a-table v-if="stageEvalRecord.goals.length > 0" :dataSource="stageEvalRecord.goals" :columns="stageGoalColumns" :pagination="false" rowKey="goal_id" size="small" bordered style="margin-bottom: 16px" />
         <a-alert v-else type="info" message="暂未完成试用期目标制定" style="margin-bottom: 16px" />
@@ -494,39 +452,19 @@ const handleForceReturn = () => {
 // 评价弹窗
 const evalModalVisible = ref(false);
 const evalModalRecord = ref<ProbationMaster | null>(null);
-const evalDecision = ref<'超出预期' | '符合预期' | '不符合转正条件'>('符合预期');
-const evalReason = ref('');
-const evalSaving = ref(false);
-
-const evalCannotEval = computed(() => {
-  if (!evalModalRecord.value) return true;
-  return evalModalRecord.value.probation_status !== '06' || evalModalRecord.value.manager_eval_done;
-});
-
 const evalSelfEval = computed(() => {
   if (!evalModalRecord.value) return null;
   return (evalModalRecord.value.evaluations || []).find((e: any) => e.eval_type === 'self') || null;
 });
 
+const evalManagerEval = computed(() => {
+  if (!evalModalRecord.value) return null;
+  return (evalModalRecord.value.evaluations || []).find((e: any) => e.eval_type === 'manager') || null;
+});
+
 const openEvalModal = (record: ProbationMaster) => {
   evalModalRecord.value = record;
-  evalDecision.value = '符合预期';
-  evalReason.value = '';
   evalModalVisible.value = true;
-};
-
-const handleEvalSubmit = () => {
-  if (!evalReason.value.trim()) {
-    message.error('请填写评价意见');
-    return;
-  }
-  evalSaving.value = true;
-  setTimeout(() => {
-    store.submitManagerEval(evalModalRecord.value!.master_id, evalReason.value, evalDecision.value);
-    message.success(isFailedDecision(evalDecision.value) ? '员工试用期评估结果为【不通过】，将进入试用期终止流程' : '员工试用期评估结果为【通过】，请关注后续流程进展');
-    evalSaving.value = false;
-    evalModalVisible.value = false;
-  }, 800);
 };
 
 // 阶段性反馈弹窗
@@ -794,6 +732,36 @@ watch(() => route.query.prd, syncPrdRoute);
   font-size: 13px;
   text-align: center;
   padding: var(--space-4);
+}
+
+/* Manager evaluation block */
+.manager-eval-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.manager-eval-block__result,
+.manager-eval-block__content {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+.manager-eval-block__result > span,
+.manager-eval-block__content > span {
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.manager-eval-block__result > div,
+.manager-eval-block__content > div {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-size: 14px;
+  color: var(--text-primary);
 }
 
 /* Responsive steps */
