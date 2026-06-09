@@ -58,7 +58,7 @@
                 <a-space>
                   <template v-if="!record.terminated">
                     <a-button v-if="record.probation_status === '02'" type="primary" size="small" @click="openGoalModal(record)">目标确认</a-button>
-                    <a-button v-if="record.probation_status === '06' && !record.manager_eval_done" type="primary" size="small" @click="openEvalModal(record)">试用期评价</a-button>
+                    <a-button v-if="record.probation_status === '06' && !record.manager_eval_done" type="primary" size="small" @click="openReviewModal(record)">试用期评价</a-button>
                     <a-button v-if="record.probation_status === '06' && record.manager_eval_done" type="text" size="small" @click="openEvalModal(record)">已完成评价</a-button>
                     <a-button v-if="['03'].includes(record.probation_status)" type="text" danger size="small" @click="forceReturn(record)">目标退回调整</a-button>
                     <a-button v-if="['02','03','04'].includes(record.probation_status)" size="small" @click="openStageEvalModal(record)">阶段性反馈</a-button>
@@ -93,7 +93,7 @@
     </PrdAnnotation>
 
     <!-- Goal Approval Modal -->
-    <a-modal v-model:open="goalModalVisible" title="试用期目标确认" width="800px" :footer="null">
+    <a-modal v-model:open="goalModalVisible" title="试用期目标确认" width="960px" :footer="null">
       <PrdAnnotation v-if="currentReviewRecord" id="10">
         <a-table :dataSource="currentReviewRecord.goals" :columns="goalConfirmColumns" :pagination="false" rowKey="goal_id" size="small" bordered />
 
@@ -117,7 +117,7 @@
     </a-modal>
 
     <!-- Force Return Modal -->
-    <a-modal v-model:open="forceReturnModalVisible" title="退回调整" @ok="handleForceReturn" okText="确认退回" cancelText="取消" okType="danger" :okButtonProps="{ disabled: !forceReturnComment.trim() }">
+    <a-modal v-model:open="forceReturnModalVisible" title="退回调整" width="640px" @ok="handleForceReturn" okText="确认退回" cancelText="取消" okType="danger" :okButtonProps="{ disabled: !forceReturnComment.trim() }">
       <p>确认要退回 <strong>{{ forceReturnRecord?.emp_name }}</strong> 的目标，要求其重新调整吗？</p>
       <p style="color: #999; font-size: 13px">退回后流程将打回至"待设定目标"步骤。</p>
       <a-form-item label="退回说明" required style="margin-top: 16px">
@@ -225,8 +225,66 @@
       </PrdAnnotation>
     </a-modal>
 
+    <!-- 试用期评价弹窗（填写评价） -->
+    <a-modal v-model:open="reviewModalVisible" title="试用期评价" width="900px" :footer="null" :bodyStyle="{ maxHeight: '75vh', overflowY: 'auto' }">
+      <PrdAnnotation v-if="reviewModalRecord" id="12b">
+        <!-- 试用期目标 -->
+        <div style="font-weight: 600; margin-bottom: 8px; font-size: 14px">试用期目标</div>
+        <div v-if="reviewModalRecord.goals.length > 0" class="stacked-list" style="margin-bottom: 16px">
+          <div v-for="(goal, index) in reviewModalRecord.goals" :key="goal.goal_id" class="stacked-item">
+            <div class="stacked-goal-title">{{ index + 1 }}. {{ goal.content }}</div>
+            <div class="stacked-row">
+              <span class="stacked-label">预期结果</span>
+              <span class="stacked-value">{{ goal.measure }}</span>
+            </div>
+            <div v-if="goal.weight != null" class="stacked-row">
+              <span class="stacked-label">权重</span>
+              <span class="stacked-value">{{ goal.weight }}%</span>
+            </div>
+            <div class="stacked-row">
+              <span class="stacked-label">目标回顾</span>
+              <span class="stacked-value">{{ goal.goal_review || '暂无目标回顾' }}</span>
+            </div>
+          </div>
+        </div>
+        <a-empty v-else description="暂无目标" :image-style="{ height: '40px' }" style="margin-bottom: 16px" />
+
+        <!-- 员工自评 -->
+        <div style="font-weight: 600; margin-bottom: 8px; font-size: 14px">员工自评</div>
+        <div v-if="reviewSelfEval" class="eval-text-block" style="margin-bottom: 16px">
+          {{ reviewSelfEval.content }}
+        </div>
+        <a-empty v-else description="员工暂未填写自评" :image-style="{ height: '40px' }" style="margin-bottom: 16px" />
+
+        <!-- 评价表单 -->
+        <a-form layout="vertical">
+          <a-form-item label="结论" required>
+            <a-radio-group v-model:value="reviewDecision" button-style="solid">
+              <a-radio-button value="超出预期">通过（超出预期）</a-radio-button>
+              <a-radio-button value="符合预期">通过（符合预期）</a-radio-button>
+              <a-radio-button value="不符合转正条件">不通过</a-radio-button>
+            </a-radio-group>
+          </a-form-item>
+
+          <a-form-item label="评价意见" required>
+            <a-textarea v-model:value="reviewReason" :rows="4" placeholder="请填写评价意见。" />
+          </a-form-item>
+
+          <div style="margin-top: 16px; text-align: right">
+            <a-space>
+              <a-button @click="reviewModalVisible = false">取消</a-button>
+              <a-button type="primary" @click="handleReviewSubmit" :loading="reviewSaving">提交评价</a-button>
+            </a-space>
+            <div style="text-align: center; margin-top: 8px; color: #999; font-size: 12px">
+              提交后将由 HRBP 发起转正审批流程
+            </div>
+          </div>
+        </a-form>
+      </PrdAnnotation>
+    </a-modal>
+
     <!-- 阶段性反馈弹窗 -->
-    <a-modal v-model:open="stageEvalModalVisible" title="填写阶段性反馈" width="700px" :footer="null">
+    <a-modal v-model:open="stageEvalModalVisible" title="填写阶段性反馈" width="900px" :footer="null">
       <PrdAnnotation v-if="stageEvalRecord" id="11">
         <div style="font-weight: 600; margin-bottom: 8px">目标信息</div>
         <a-table v-if="stageEvalRecord.goals.length > 0" :dataSource="stageEvalRecord.goals" :columns="stageGoalColumns" :pagination="false" rowKey="goal_id" size="small" bordered style="margin-bottom: 16px" />
@@ -465,6 +523,39 @@ const evalManagerEval = computed(() => {
 const openEvalModal = (record: ProbationMaster) => {
   evalModalRecord.value = record;
   evalModalVisible.value = true;
+};
+
+// 试用期评价弹窗（填写评价）
+const reviewModalVisible = ref(false);
+const reviewModalRecord = ref<ProbationMaster | null>(null);
+const reviewDecision = ref<'超出预期' | '符合预期' | '不符合转正条件'>('符合预期');
+const reviewReason = ref('');
+const reviewSaving = ref(false);
+
+const reviewSelfEval = computed(() => {
+  if (!reviewModalRecord.value) return null;
+  return (reviewModalRecord.value.evaluations || []).find((e: any) => e.eval_type === 'self') || null;
+});
+
+const openReviewModal = (record: ProbationMaster) => {
+  reviewModalRecord.value = record;
+  reviewDecision.value = '符合预期';
+  reviewReason.value = '';
+  reviewModalVisible.value = true;
+};
+
+const handleReviewSubmit = () => {
+  if (!reviewReason.value.trim()) {
+    message.error('请填写评价意见');
+    return;
+  }
+  reviewSaving.value = true;
+  setTimeout(() => {
+    store.submitManagerEval(reviewModalRecord.value!.master_id, reviewReason.value, reviewDecision.value);
+    message.success(isFailedDecision(reviewDecision.value) ? '员工试用期评估结果为【不通过】，将进入试用期终止流程' : '员工试用期评估结果为【通过】，请关注后续流程进展');
+    reviewSaving.value = false;
+    reviewModalVisible.value = false;
+  }, 800);
 };
 
 // 阶段性反馈弹窗
