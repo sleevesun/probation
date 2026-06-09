@@ -1,0 +1,89 @@
+<svg width="1480" height="920" viewBox="0 0 1480 920" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">试用期转正角色权限关系图</title>
+  <desc id="desc">展示员工、直属上级、HRBP、审批人的可见范围与可操作内容，以及关键权限边界。</desc>
+  <defs>
+    <style>
+      .title { font: 700 30px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #1f2937; }
+      .subtitle { font: 400 16px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #6b7280; }
+      .role { font: 700 20px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #111827; }
+      .body { font: 500 15px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #374151; }
+      .edge { stroke: #94a3b8; stroke-width: 2.5; fill: none; stroke-linecap: round; }
+      .panel { stroke-width: 2; rx: 18; }
+      .employee { fill: #dbeafe; stroke: #4a9eed; }
+      .manager { fill: #ffedd5; stroke: #f59e0b; }
+      .hrbp { fill: #dcfce7; stroke: #22c55e; }
+      .approval { fill: #ede9fe; stroke: #8b5cf6; }
+      .center { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 2; }
+      .badge { font: 600 14px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #0f172a; text-anchor: middle; dominant-baseline: middle; }
+      .center-text { font: 700 24px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #0f172a; text-anchor: middle; dominant-baseline: middle; }
+    </style>
+  </defs>
+
+  <text x="40" y="48" class="title">试用期转正角色权限关系图</text>
+  <text x="40" y="78" class="subtitle">按角色展示“能看到什么、能做什么”，并标出员工不可见、审批只读等关键权限边界。</text>
+
+  <path d="M410 260 C500 260, 520 360, 545 430" class="edge" />
+  <path d="M1070 260 C990 260, 970 360, 935 430" class="edge" />
+  <path d="M410 700 C500 700, 520 560, 545 500" class="edge" />
+  <path d="M1070 685 C990 685, 970 560, 935 500" class="edge" />
+
+  <rect x="545" y="365" width="390" height="170" rx="28" class="center" />
+  <text x="740" y="428" class="center-text">试用期管理</text>
+  <text x="740" y="468" class="center-text">权限与可见性</text>
+
+  <rect x="60" y="120" width="380" height="300" rx="24" class="panel employee" />
+  <text x="90" y="165" class="role">员工</text>
+  <text x="90" y="205" class="body">可见范围：</text>
+  <text x="90" y="234" class="body">本人试用期记录、目标</text>
+  <text x="90" y="258" class="body">阶段性反馈、结果</text>
+  <text x="90" y="298" class="body">可操作内容：</text>
+  <text x="90" y="327" class="body">填写目标、编辑目标</text>
+  <text x="90" y="351" class="body">提交自评、查看结果</text>
+  <text x="90" y="391" class="body">限制：</text>
+  <text x="90" y="420" class="body">结果发布前不可查看上级评价</text>
+  <text x="90" y="444" class="body">不可查看审批记录</text>
+
+  <rect x="1040" y="120" width="380" height="300" rx="24" class="panel manager" />
+  <text x="1070" y="165" class="role">直属上级</text>
+  <text x="1070" y="205" class="body">可见范围：</text>
+  <text x="1070" y="234" class="body">权限范围内员工的</text>
+  <text x="1070" y="258" class="body">未转正与已结束记录</text>
+  <text x="1070" y="298" class="body">可操作内容：</text>
+  <text x="1070" y="327" class="body">确认目标、退回目标</text>
+  <text x="1070" y="351" class="body">阶段性反馈、上级评价</text>
+  <text x="1070" y="391" class="body">限制：</text>
+  <text x="1070" y="420" class="body">不发起审批，不发布结果</text>
+  <text x="1070" y="444" class="body">不产生 HRBP 评价节点</text>
+
+  <rect x="60" y="560" width="380" height="300" rx="24" class="panel hrbp" />
+  <text x="90" y="605" class="role">HRBP</text>
+  <text x="90" y="645" class="body">可见范围：</text>
+  <text x="90" y="674" class="body">权限范围内员工试用期记录</text>
+  <text x="90" y="698" class="body">与完整流程材料</text>
+  <text x="90" y="738" class="body">可操作内容：</text>
+  <text x="90" y="767" class="body">开启评估、终止转正</text>
+  <text x="90" y="791" class="body">发起审批、流程跟进</text>
+  <text x="90" y="831" class="body">限制：</text>
+  <text x="90" y="860" class="body">不新增独立 HRBP 正式转正评价节点</text>
+
+  <rect x="1040" y="560" width="380" height="270" rx="24" class="panel approval" />
+  <text x="1070" y="605" class="role">审批人</text>
+  <text x="1070" y="645" class="body">可见范围：</text>
+  <text x="1070" y="674" class="body">待本人审批的转正审批单</text>
+  <text x="1070" y="698" class="body">及审批材料</text>
+  <text x="1070" y="738" class="body">可操作内容：</text>
+  <text x="1070" y="767" class="body">查看审批单、通过、驳回</text>
+  <text x="1070" y="807" class="body">限制：</text>
+  <text x="1070" y="836" class="body">不修改目标、自评、阶段性反馈原始内容</text>
+
+  <rect x="540" y="120" width="400" height="110" rx="18" class="center" />
+  <text x="740" y="165" class="role">关键边界</text>
+  <text x="570" y="198" class="body">1. 员工在结果发布前不可查看上级评价，始终不可查看审批记录</text>
+  <text x="570" y="223" class="body">2. 审批端以只读材料 + 审批动作为主</text>
+
+  <rect x="540" y="640" width="400" height="145" rx="18" class="center" />
+  <text x="740" y="685" class="role">共享规则</text>
+  <text x="570" y="718" class="body">1. 阶段性反馈仅直属上级可在正式评估开启前填写</text>
+  <text x="570" y="743" class="body">2. 正式评估开启后，目标锁定为只读</text>
+  <text x="570" y="768" class="body">3. 结果发布后员工可查看试用期评价结果</text>
+</svg>

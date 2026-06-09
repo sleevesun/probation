@@ -22,10 +22,12 @@
       :style="tooltipStyle"
       role="dialog"
       :aria-label="`PRD 需求 ${annotation.id}`"
+      @click.stop
+      @mousedown.stop
     >
-      <div class="prd-annotation-tooltip__bar" @mousedown.prevent="startDrag">
+      <div class="prd-annotation-tooltip__bar" @mousedown.prevent.stop="startDrag">
         <span class="prd-annotation-tooltip__badge">{{ annotation.id }}</span>
-        <span class="prd-annotation-tooltip__title">{{ annotation.moduleName }}</span>
+        <a class="prd-annotation-tooltip__title" :href="prdSectionHref">需求描述：{{ annotation.moduleName }}</a>
         <button class="prd-annotation-tooltip__close" type="button" aria-label="关闭 PRD 标注" @click="closeTooltip">×</button>
       </div>
       <div class="prd-annotation-tooltip__meta">
@@ -39,8 +41,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, watch, type CSSProperties } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, type CSSProperties } from 'vue';
+import { useRoute } from 'vue-router';
+import { marked } from 'marked';
 import annotations from '@/config/prd-annotations.json';
+import { getPrdSectionHref } from '@/utils/prdNavigation';
 
 interface PrdAnnotationItem {
   id: number;
@@ -59,8 +64,11 @@ const props = defineProps<{
 const annotationMap = new Map<number, PrdAnnotationItem>(
   (annotations as PrdAnnotationItem[]).map(item => [item.id, item])
 );
+const instanceToken = Symbol('prd-annotation-instance');
+const OPEN_EVENT = 'prd-annotation:open';
 
 const annotation = computed(() => annotationMap.get(Number(props.id)));
+const route = useRoute();
 const badgeRef = ref<HTMLElement | null>(null);
 const tooltipRef = ref<HTMLElement | null>(null);
 const isOpen = ref(false);
@@ -74,8 +82,14 @@ const tooltipStyle = computed<CSSProperties>(() => ({
 }));
 
 const renderedMarkdown = computed(() => renderMarkdown(annotation.value?.tooltipMarkdown || ''));
+const prdSectionHref = computed(() => getPrdSectionHref(annotation.value?.sourcePrdHeading || ''));
 
 function openTooltip() {
+  window.dispatchEvent(
+    new CustomEvent(OPEN_EVENT, {
+      detail: { id: annotation.value?.id, token: instanceToken }
+    })
+  );
   isOpen.value = true;
   nextTick(placeTooltip);
 }
@@ -139,63 +153,25 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), Math.max(min, max));
 }
 
-function escapeHtml(value: string) {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function inlineMarkdown(value: string) {
-  return escapeHtml(value)
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/`(.+?)`/g, '<code>$1</code>');
-}
-
 function renderMarkdown(markdown: string) {
-  const lines = markdown.trim().split(/\r?\n/);
-  const html: string[] = [];
-  let inList = false;
+  return marked.parse(markdown, { breaks: true }) as string;
+}
 
-  lines.forEach(line => {
-    const trimmed = line.trim();
-    if (!trimmed) {
-      if (inList) {
-        html.push('</ul>');
-        inList = false;
-      }
-      return;
-    }
+function handleOpenEvent(event: Event) {
+  const detail = (event as CustomEvent<{ id?: number; token: symbol }>).detail;
+  if (!annotation.value || !detail?.id) return;
+  if (detail.id === annotation.value.id && detail.token !== instanceToken) {
+    isOpen.value = false;
+  }
+}
 
-    if (trimmed.startsWith('### ')) {
-      if (inList) {
-        html.push('</ul>');
-        inList = false;
-      }
-      html.push(`<h3>${inlineMarkdown(trimmed.slice(4))}</h3>`);
-      return;
-    }
-
-    if (trimmed.startsWith('- ')) {
-      if (!inList) {
-        html.push('<ul>');
-        inList = true;
-      }
-      html.push(`<li>${inlineMarkdown(trimmed.slice(2))}</li>`);
-      return;
-    }
-
-    if (inList) {
-      html.push('</ul>');
-      inList = false;
-    }
-    html.push(`<p>${inlineMarkdown(trimmed)}</p>`);
+function syncWithRouteQuery(prdQuery: unknown) {
+  if (!annotation.value) return;
+  if (String(prdQuery || '') !== String(annotation.value.id)) return;
+  nextTick(() => {
+    badgeRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+    openTooltip();
   });
-
-  if (inList) html.push('</ul>');
-  return html.join('');
 }
 
 watch(isOpen, open => {
@@ -203,8 +179,16 @@ watch(isOpen, open => {
   else window.removeEventListener('resize', placeTooltip);
 });
 
+onMounted(() => {
+  window.addEventListener(OPEN_EVENT, handleOpenEvent as EventListener);
+  syncWithRouteQuery(route.query.prd);
+});
+
+watch(() => route.query.prd, syncWithRouteQuery);
+
 onBeforeUnmount(() => {
   window.removeEventListener('resize', placeTooltip);
+  window.removeEventListener(OPEN_EVENT, handleOpenEvent as EventListener);
   stopDrag();
 });
 </script>
@@ -216,22 +200,21 @@ onBeforeUnmount(() => {
 }
 
 .prd-annotation-badge {
+  display: inline-block;
+  vertical-align: top;
   position: absolute;
   top: -8px;
   right: -4px;
   z-index: 9998;
-  min-width: 16px;
-  height: 14px;
   padding: 0 4px;
   border: 0;
   border-radius: 2px;
   background: rgb(250, 173, 20);
-  color: #1f2937;
+  color: #fff;
   font-size: 10px;
   font-weight: 700;
   line-height: 14px;
-  cursor: help;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.16);
+  cursor: pointer;
 }
 
 .prd-annotation-tooltip {
@@ -244,7 +227,7 @@ onBeforeUnmount(() => {
   background: #f0efef;
   color: #1f2937;
   line-height: 1.6;
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.28);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
 }
 
 .prd-annotation-tooltip__bar {
@@ -263,7 +246,7 @@ onBeforeUnmount(() => {
   padding: 0 5px;
   border-radius: 2px;
   background: rgb(250, 173, 20);
-  color: #111827;
+  color: #fff;
   font-size: 12px;
   font-weight: 700;
   line-height: 18px;
@@ -277,6 +260,12 @@ onBeforeUnmount(() => {
   font-weight: 700;
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: inherit;
+  text-decoration: none;
+}
+
+.prd-annotation-tooltip__title:hover {
+  text-decoration: underline;
 }
 
 .prd-annotation-tooltip__close {
@@ -336,8 +325,20 @@ onBeforeUnmount(() => {
   padding-left: 18px;
 }
 
+.prd-annotation-tooltip__body :deep(ol) {
+  margin: 0 0 8px;
+  padding-left: 18px;
+}
+
 .prd-annotation-tooltip__body :deep(li) {
   margin-bottom: 4px;
+}
+
+.prd-annotation-tooltip__body :deep(blockquote) {
+  margin: 0 0 8px;
+  padding: 8px 12px;
+  border-left: 3px solid rgba(15, 23, 42, 0.18);
+  background: rgba(255, 255, 255, 0.4);
 }
 
 .prd-annotation-tooltip__body :deep(code) {

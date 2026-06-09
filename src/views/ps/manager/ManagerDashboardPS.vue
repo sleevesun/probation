@@ -441,7 +441,7 @@ function handleSubmitEvaluation() {
     return
   }
   store.submitManagerEval(actionModalRecord.value.master_id, reason.value, decision.value)
-  message.success(isFailedDecision(decision.value) ? '评价已提交，该员工已进入终止转正状态。' : '评价提交成功，等待 HRBP 发起转正审批流程。')
+  message.success(isFailedDecision(decision.value) ? '员工试用期评估结果为【不通过】，将进入试用期终止流程' : '员工试用期评估结果为【通过】，请关注后续流程进展')
   closeActionModal()
 }
 

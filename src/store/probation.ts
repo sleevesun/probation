@@ -79,6 +79,7 @@ export interface ProbationMaster {
     return_comment?: string;
     stage_evaluations?: StageEvaluationItem[]; // 阶段性评价记录
     terminated?: boolean; // 是否已终止转正（终止后保留在原阶段）
+    terminate_reason?: string; // 终止说明
     // 评价标志
     manager_eval_done: boolean;
     // 发布结果相关
@@ -127,10 +128,11 @@ export function getStatusColor(record: ProbationMaster): string {
 
 /**
  * 获取状态的详细展示文本（状态 06 仅显示"待上级评价"，状态 04 对 HRBP 视角显示"目标已确认"）
+ * 终止转正的员工：直接展示评价结果（如"不通过"），不再展示"终止转正"
  */
 export function getDetailedStatusText(record: ProbationMaster): string {
     if (record.terminated) {
-        return '终止转正';
+        return formatDecisionLabel(record.final_decision) || '不通过';
     }
     if (record.probation_status === '06') {
         return '待上级评价';
@@ -505,10 +507,31 @@ export const useProbationStore = defineStore('probation', () => {
         if (r) r.probation_status = '05';
     }
 
-    /** HRBP 终止转正 -> 标记 terminated，保留在原阶段 */
-    function holdProbation(masterId: string) {
+    /** HRBP 终止转正 -> 设置终止标记并发布不通过结果，员工出现在已结束列表 */
+    function holdProbation(masterId: string, terminateReason?: string) {
         const r = records.value.find(rec => rec.master_id === masterId);
-        if (r) r.terminated = true;
+        if (r) {
+            r.terminated = true;
+            r.terminate_reason = terminateReason;
+            r.final_decision = '不符合转正条件';
+            r.probation_status = '10';
+            r.result_published_time = new Date().toLocaleString();
+
+            // 自动生成上级评价内容：带入 HRBP 姓名、操作日期和终止原因
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const reasonPart = terminateReason ? ` 终止原因：${terminateReason}` : '';
+            const evalContent = `HRBP ${r.hrbp_name} 手动终止流程（${dateStr}）${reasonPart}`;
+            r.evaluations.push({
+                eval_id: 'EV' + Date.now(),
+                evaluator_name: r.hrbp_name,
+                evaluator_role: 'HRBP',
+                eval_type: 'hrbp',
+                content: evalContent,
+                create_time: new Date().toLocaleString()
+            });
+            r.manager_eval_done = true;
+        }
     }
 
     /** HRBP 发起转正审批流程 -> 08 审批中 */
@@ -552,6 +575,7 @@ export const useProbationStore = defineStore('probation', () => {
             });
             r.final_decision = decision as any;
             r.manager_eval_done = true;
+            // 不通过 -> 终止(99)；通过 -> 待发起审批(07)
             r.probation_status = failed ? '99' : '07';
         }
     }
@@ -622,6 +646,20 @@ export const useProbationStore = defineStore('probation', () => {
         if (r) r.probation_status = '88';
     }
 
+    /** Demo 辅助操作：将已终止记录重新拉回主流程 */
+    function restartProbation(masterId: string) {
+        const r = records.value.find(rec => rec.master_id === masterId);
+        if (!r) return;
+
+        r.terminated = false;
+        r.terminate_reason = undefined;
+        r.final_decision = undefined;
+        r.manager_eval_done = false;
+        r.allow_employee_view_eval = false;
+        r.result_published_time = undefined;
+        r.probation_status = r.goals.length > 0 ? '03' : '01';
+    }
+
     function setProbationStatus(masterId: string, status: string) {
         const r = records.value.find(rec => rec.master_id === masterId);
         if (r) r.probation_status = status;
@@ -638,6 +676,6 @@ export const useProbationStore = defineStore('probation', () => {
         submitSelfEval, submitManagerEval,
         approveRecord, rejectRecord,
         publishResult, setProbationStatus, setCurrentEmpId,
-        addStageEvaluation, terminateEmployee
+        addStageEvaluation, terminateEmployee, restartProbation
     };
 });

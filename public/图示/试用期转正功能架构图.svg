@@ -1,0 +1,70 @@
+<svg width="1440" height="920" viewBox="0 0 1440 920" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">试用期转正功能架构图</title>
+  <desc id="desc">展示员工端、直属上级端、HRBP 端、审批端、通知与待办五个一级模块及其核心能力。</desc>
+  <defs>
+    <style>
+      .title { font: 700 30px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #1f2937; }
+      .subtitle { font: 400 16px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #6b7280; }
+      .head { font: 700 22px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #111827; }
+      .item { font: 500 16px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #374151; }
+      .group { stroke-width: 2; rx: 20; }
+      .employee { fill: #dbeafe; stroke: #4a9eed; }
+      .manager { fill: #ffedd5; stroke: #f59e0b; }
+      .hrbp { fill: #dcfce7; stroke: #22c55e; }
+      .approval { fill: #ede9fe; stroke: #8b5cf6; }
+      .notify { fill: #ecfeff; stroke: #06b6d4; }
+      .center { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 2; }
+      .line { stroke: #94a3b8; stroke-width: 2.5; fill: none; stroke-dasharray: 8 8; stroke-linecap: round; }
+      .center-text { font: 700 24px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #1f2937; text-anchor: middle; dominant-baseline: middle; }
+    </style>
+  </defs>
+
+  <text x="40" y="48" class="title">试用期转正功能架构图</text>
+  <text x="40" y="78" class="subtitle">围绕试用期管理主流程，按角色端与流程触达能力拆解一级模块和核心功能。</text>
+
+  <path d="M390 275 C470 275, 500 360, 540 430" class="line" />
+  <path d="M1030 275 C960 275, 940 360, 900 430" class="line" />
+  <path d="M390 650 C470 650, 500 560, 540 500" class="line" />
+  <path d="M1030 650 C960 650, 940 560, 900 500" class="line" />
+  <path d="M720 260 V385" class="line" />
+
+  <rect x="540" y="385" width="360" height="150" rx="28" class="center" />
+  <text x="720" y="445" class="center-text">试用期管理及</text>
+  <text x="720" y="485" class="center-text">转正审批系统</text>
+
+  <rect x="70" y="160" width="320" height="230" rx="24" class="group employee" />
+  <text x="100" y="205" class="head">员工端</text>
+  <text x="100" y="245" class="item">1. 我的试用期</text>
+  <text x="100" y="278" class="item">2. 目标制定与编辑</text>
+  <text x="100" y="311" class="item">3. 阶段性反馈记录查看</text>
+  <text x="100" y="344" class="item">4. 试用期自评</text>
+  <text x="100" y="377" class="item">5. 结果查看</text>
+
+  <rect x="1030" y="160" width="320" height="230" rx="24" class="group manager" />
+  <text x="1060" y="205" class="head">直属上级端</text>
+  <text x="1060" y="245" class="item">1. 试用期管理列表</text>
+  <text x="1060" y="278" class="item">2. 目标确认 / 退回</text>
+  <text x="1060" y="311" class="item">3. 阶段性反馈</text>
+  <text x="1060" y="344" class="item">4. 试用期评价与转正建议</text>
+
+  <rect x="70" y="560" width="320" height="230" rx="24" class="group hrbp" />
+  <text x="100" y="605" class="head">HRBP 端</text>
+  <text x="100" y="645" class="item">1. 试用期管理列表</text>
+  <text x="100" y="678" class="item">2. 开启试用期评价 / 终止转正</text>
+  <text x="100" y="711" class="item">3. 发起转正审批流程</text>
+  <text x="100" y="744" class="item">4. 审批结果跟进</text>
+  <text x="100" y="777" class="item">5. 已结束记录查看</text>
+
+  <rect x="1030" y="560" width="320" height="190" rx="24" class="group approval" />
+  <text x="1060" y="605" class="head">审批端</text>
+  <text x="1060" y="645" class="item">1. 待我审批 / 我已审批</text>
+  <text x="1060" y="678" class="item">2. 审批详情材料查看</text>
+  <text x="1060" y="711" class="item">3. 通过 / 驳回</text>
+
+  <rect x="515" y="90" width="410" height="170" rx="24" class="group notify" />
+  <text x="545" y="135" class="head">通知与待办</text>
+  <text x="545" y="175" class="item">1. 节点待办生成</text>
+  <text x="545" y="208" class="item">2. 待办 / 待审批分渠道触达</text>
+  <text x="545" y="241" class="item">3. 关键时间点提醒与推进</text>
+
+</svg>

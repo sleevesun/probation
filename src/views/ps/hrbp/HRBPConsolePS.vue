@@ -77,7 +77,7 @@ function handleRun(id: string) {
 function handleHold(id: string) {
   store.holdProbation(id)
   selectedKeys.value = selectedKeys.value.filter(item => item !== id)
-  message.warning('已将该员工流程挂起')
+  message.warning('员工试用期评估结果为【不通过并终止试用期】，流程已结束')
 }
 
 function handleTriggerApproval(id: string) {

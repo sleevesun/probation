@@ -354,12 +354,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useProbationStore, type ProbationMaster, formatDecisionLabel, isFailedDecision } from '@/store/probation'
 import { message } from 'ant-design-vue'
 import PrdAnnotation from '@/components/prd/PrdAnnotation.vue'
 
 const store = useProbationStore()
+const route = useRoute()
 const activeTab = ref('todo')
 const isMobile = ref(false)
 
@@ -446,6 +448,23 @@ function handleReject() {
     modalVisible.value = false
   }, 600)
 }
+
+function syncPrdRoute(prdQuery: unknown) {
+  const prdId = Number(prdQuery)
+  if (!Number.isFinite(prdId)) return
+
+  if (prdId === 18) {
+    activeTab.value = 'todo'
+    const record = todoList.value[0] ?? doneList.value[0]
+    if (record) openModal(record)
+  }
+}
+
+onMounted(() => {
+  syncPrdRoute(route.query.prd)
+})
+
+watch(() => route.query.prd, syncPrdRoute)
 </script>
 
 <style scoped>

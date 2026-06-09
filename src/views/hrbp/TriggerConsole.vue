@@ -89,12 +89,12 @@ const handleTriggerApproval = (id: string) => {
 
 const handleTerminate = (id: string) => {
   Modal.confirm({
-    title: '确认终止转正',
-    content: '确认后该员工将进入「终止转正」状态，不再继续当前转正流程。是否继续？',
+    title: '确认终止试用期',
+    content: '该操作将直接关闭该员工的试用期流程，是否确认？',
     okText: '确认终止',
     okType: 'danger',
     cancelText: '取消',
-    onOk: () => { store.holdProbation(id); message.warning('已终止转正'); }
+    onOk: () => { store.holdProbation(id); message.warning('员工试用期评估结果为【不通过并终止试用期】，流程已结束'); }
   });
 };
 

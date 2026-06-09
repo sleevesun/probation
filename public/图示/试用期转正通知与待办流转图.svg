@@ -1,0 +1,98 @@
+<svg width="1660" height="980" viewBox="0 0 1660 980" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">试用期转正通知与待办流转图</title>
+  <desc id="desc">展示主要业务节点触发哪些待办与通知，以及目标、评估、审批、结果发布四个阶段的触达链路。</desc>
+  <defs>
+    <style>
+      .title { font: 700 30px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #1f2937; }
+      .subtitle { font: 400 16px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #6b7280; }
+      .phase { font: 700 20px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #0f172a; }
+      .label { font: 600 17px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #111827; text-anchor: middle; dominant-baseline: middle; }
+      .small { font: 500 14px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #475569; text-anchor: middle; dominant-baseline: middle; }
+      .event { fill: #dbeafe; stroke: #4a9eed; stroke-width: 2; }
+      .todo { fill: #dcfce7; stroke: #22c55e; stroke-width: 2; }
+      .notice { fill: #ecfeff; stroke: #06b6d4; stroke-width: 2; }
+      .risk { fill: #fef3c7; stroke: #f59e0b; stroke-width: 2; }
+      .end { fill: #ede9fe; stroke: #8b5cf6; stroke-width: 2; }
+      .zone { fill: #f8fafc; stroke: #e2e8f0; stroke-width: 1.5; }
+      .edge { stroke: #334155; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+    <marker id="arrow" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#334155" />
+    </marker>
+  </defs>
+
+  <text x="40" y="48" class="title">试用期转正通知与待办流转图</text>
+  <text x="40" y="78" class="subtitle">待办与待审批分渠道触达：普通待办走邮件 + WOA，审批待处理走邮件 + OTP。</text>
+
+  <rect x="40" y="120" width="360" height="760" rx="24" class="zone" />
+  <text x="70" y="165" class="phase">阶段一：目标设定</text>
+  <rect x="90" y="220" width="200" height="78" rx="16" class="event" />
+  <text x="190" y="248" class="label">员工入职满 1 周</text>
+  <text x="190" y="273" class="small">通知填写目标</text>
+  <rect x="90" y="350" width="200" height="78" rx="16" class="todo" />
+  <text x="190" y="383" class="label">目标设定待办</text>
+  <text x="190" y="406" class="small">对象：员工</text>
+  <rect x="90" y="480" width="200" height="78" rx="16" class="notice" />
+  <text x="190" y="513" class="label">目标确认待办</text>
+  <text x="190" y="536" class="small">对象：直属上级</text>
+  <rect x="90" y="610" width="240" height="92" rx="16" class="risk" />
+  <text x="210" y="645" class="label">3 个月目标跟进提醒</text>
+  <text x="210" y="670" class="small">对象：直属上级、HRBP</text>
+  <path d="M190 298 V350" class="edge" marker-end="url(#arrow)" />
+  <path d="M190 428 V480" class="edge" marker-end="url(#arrow)" />
+  <path d="M210 558 V610" class="edge" marker-end="url(#arrow)" />
+
+  <rect x="440" y="120" width="360" height="760" rx="24" class="zone" />
+  <text x="470" y="165" class="phase">阶段二：正式评估</text>
+  <rect x="490" y="220" width="240" height="78" rx="16" class="event" />
+  <text x="610" y="258" class="label">HRBP 开启试用期评价</text>
+  <rect x="490" y="350" width="200" height="78" rx="16" class="todo" />
+  <text x="590" y="383" class="label">员工自评待办</text>
+  <text x="590" y="406" class="small">对象：员工</text>
+  <rect x="490" y="480" width="220" height="78" rx="16" class="notice" />
+  <text x="600" y="513" class="label">自评进行通知</text>
+  <text x="600" y="536" class="small">对象：直属上级</text>
+  <rect x="490" y="610" width="220" height="78" rx="16" class="todo" />
+  <text x="600" y="643" class="label">上级评价待办</text>
+  <text x="600" y="666" class="small">对象：直属上级</text>
+  <rect x="490" y="740" width="260" height="92" rx="16" class="risk" />
+  <text x="620" y="775" class="label">5.5 个月评估推进提醒</text>
+  <text x="620" y="800" class="small">对象：直属上级、HRBP</text>
+  <path d="M610 298 V350" class="edge" marker-end="url(#arrow)" />
+  <path d="M680 298 V324 H735 V519 H710" class="edge" marker-end="url(#arrow)" />
+  <path d="M600 558 V610" class="edge" marker-end="url(#arrow)" />
+  <path d="M620 688 V740" class="edge" marker-end="url(#arrow)" />
+
+  <rect x="840" y="120" width="360" height="760" rx="24" class="zone" />
+  <text x="870" y="165" class="phase">阶段三：审批推进</text>
+  <rect x="890" y="220" width="220" height="78" rx="16" class="event" />
+  <text x="1000" y="258" class="label">上级评价完成</text>
+  <rect x="890" y="350" width="240" height="78" rx="16" class="todo" />
+  <text x="1010" y="383" class="label">发起转正审批流程待办</text>
+  <text x="1010" y="406" class="small">对象：HRBP</text>
+  <rect x="890" y="480" width="200" height="78" rx="16" class="todo" />
+  <text x="990" y="513" class="label">审批待审批</text>
+  <text x="990" y="536" class="small">邮件 + OTP + OA</text>
+  <rect x="890" y="610" width="220" height="78" rx="16" class="notice" />
+  <text x="1000" y="643" class="label">评估跟进通知</text>
+  <text x="1000" y="666" class="small">对象：HRBP</text>
+  <path d="M1000 298 V350" class="edge" marker-end="url(#arrow)" />
+  <path d="M1010 428 V480" class="edge" marker-end="url(#arrow)" />
+  <path d="M1080 298 V324 H1160 V649 H1110" class="edge" marker-end="url(#arrow)" />
+
+  <rect x="1240" y="120" width="360" height="760" rx="24" class="zone" />
+  <text x="1270" y="165" class="phase">阶段四：结果发布</text>
+  <rect x="1290" y="220" width="220" height="78" rx="16" class="event" />
+  <text x="1400" y="258" class="label">审批完成</text>
+  <rect x="1290" y="350" width="220" height="78" rx="16" class="notice" />
+  <text x="1400" y="383" class="label">系统自动发布结果</text>
+  <text x="1400" y="406" class="small">身份变更时触发</text>
+  <rect x="1290" y="500" width="220" height="78" rx="16" class="end" />
+  <text x="1400" y="533" class="label">员工查看结果</text>
+  <text x="1400" y="556" class="small">对象：员工</text>
+  <path d="M1400 298 V350" class="edge" marker-end="url(#arrow)" />
+  <path d="M1400 428 V500" class="edge" marker-end="url(#arrow)" />
+
+  <rect x="460" y="890" width="740" height="56" rx="18" class="zone" />
+  <text x="830" y="925" class="small">说明：WOA 待办需注明仅限 PC 端打开；审批支持移动端，其他待办本期暂不支持移动端处理。</text>
+</svg>

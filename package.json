@@ -4,8 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vue-tsc -b && vite build",
+    "sync:docs": "node ./scripts/sync-prd-assets.mjs",
+    "dev": "npm run sync:docs && vite",
+    "build": "npm run sync:docs && vue-tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

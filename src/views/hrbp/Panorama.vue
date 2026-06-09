@@ -60,7 +60,7 @@
                     <a-button v-if="record.probation_status === '07'" type="primary" size="small" @click="openApprovalPreview(record)">发起转正</a-button>
                     <a-button v-if="record.probation_status === '07'" danger size="small" @click="handleTerminate(record.master_id)">终止转正</a-button>
                   </template>
-                  <span v-else style="color: #999; font-size: 12px">已终止</span>
+                  <a-button v-if="record.terminated" type="primary" size="small" @click="handleRestart(record.master_id)">重新发起试用期流程</a-button>
                 </a-space>
               </template>
               <template v-if="column.key === 'detail'">
@@ -252,6 +252,33 @@
       </PrdAnnotation>
     </a-modal>
 
+    <!-- 终止转正确认弹窗 -->
+    <a-modal v-model:open="terminateModalVisible" title="确认终止试用期" width="520px" :footer="null" :maskClosable="false">
+      <div v-if="terminateRecord">
+        <a-alert type="warning" show-icon style="margin-bottom: 16px">
+          <template #message>
+            <template v-if="['01','02','03','04'].includes(terminateRecord.probation_status)">
+              该操作将直接关闭 <b>{{ terminateRecord.emp_name }}</b> 的试用期流程，是否确认？
+            </template>
+            <template v-else>
+              该操作将终止 <b>{{ terminateRecord.emp_name }}</b> 当前试用期评估流程，是否确认？
+            </template>
+          </template>
+        </a-alert>
+        <a-form layout="vertical">
+          <a-form-item label="终止说明" required>
+            <a-textarea v-model:value="terminateReason" :rows="4" placeholder="请填写终止原因，如：试用期表现不达标、岗位不匹配等" allow-clear />
+          </a-form-item>
+          <div style="text-align: right">
+            <a-space>
+              <a-button @click="terminateModalVisible = false">取消</a-button>
+              <a-button type="primary" danger :disabled="!terminateReason.trim()" @click="confirmTerminate">确认终止</a-button>
+            </a-space>
+          </div>
+        </a-form>
+      </div>
+    </a-modal>
+
     <!-- 阶段性反馈弹窗 -->
     <a-modal v-model:open="stageEvalModalVisible" title="填写阶段性反馈" width="700px" :footer="null">
       <div v-if="stageEvalRecord">
@@ -290,12 +317,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { useProbationStore, ProbationMaster, getStatusColor, getDetailedStatusText, getMonthsSinceHire, getCurrentHandler, canTriggerProbation, formatDecisionLabel, isFailedDecision } from '@/store/probation';
 import { message, Modal, TreeSelect } from 'ant-design-vue';
 import PrdAnnotation from '@/components/prd/PrdAnnotation.vue';
 
 const store = useProbationStore();
+const route = useRoute();
 const activeTab = ref('unfinished');
 const searchText = ref('');
 const filterDept = ref<string[]>([]);
@@ -424,13 +453,14 @@ const finishedColumns = [
   { title: '直属部门', dataIndex: 'dept_display', width: 160 },
   { title: '入职日期', dataIndex: 'hire_date', width: 110 },
   { title: '评价结果', dataIndex: 'final_decision', width: 160 },
+  { title: '操作', key: 'action', width: 180 },
   { title: '详情', key: 'detail', width: 80 }
 ];
 
 // Detail modal
 const detailModalVisible = ref(false);
 const detailRecord = ref<ProbationMaster | null>(null);
-const detailManagerEval = computed(() => detailRecord.value?.evaluations.find(e => e.eval_type === 'manager'));
+const detailManagerEval = computed(() => detailRecord.value?.evaluations.find(e => e.eval_type === 'manager' || e.eval_type === 'hrbp'));
 const detailSelfEval = computed(() => detailRecord.value?.evaluations.find(e => e.eval_type === 'self'));
 
 // Approval preview
@@ -438,7 +468,7 @@ const approvalPreviewVisible = ref(false);
 const approvalPreviewRecord = ref<ProbationMaster | null>(null);
 const approvalRemark = ref('');
 const selfEval = computed(() => approvalPreviewRecord.value?.evaluations.find(e => e.eval_type === 'self'));
-const managerEval = computed(() => approvalPreviewRecord.value?.evaluations.find(e => e.eval_type === 'manager'));
+const managerEval = computed(() => approvalPreviewRecord.value?.evaluations.find(e => e.eval_type === 'manager' || e.eval_type === 'hrbp'));
 const managerEvalResultText = computed(() => formatDecisionLabel(approvalPreviewRecord.value?.final_decision));
 const managerEvalContentText = computed(() => normalizeEvalContent(managerEval.value?.content, approvalPreviewRecord.value?.final_decision));
 
@@ -460,25 +490,48 @@ const handleTrigger = (id: string) => {
   });
 };
 
+// 终止转正弹窗
+const terminateModalVisible = ref(false);
+const terminateRecord = ref<ProbationMaster | null>(null);
+const terminateReason = ref('');
+
 const handleHold = (id: string) => {
-  Modal.confirm({
-    title: '确认终止转正',
-    content: '该员工将进入「终止转正」状态，不再继续转正流程。',
-    okType: 'danger',
-    onOk: () => { store.holdProbation(id); message.warning('已终止转正'); }
-  });
+  const record = store.records.find(r => r.master_id === id);
+  if (record) {
+    terminateRecord.value = record;
+    terminateReason.value = '';
+    terminateModalVisible.value = true;
+  }
 };
 
 const handleTerminate = (id: string) => {
+  const record = store.records.find(r => r.master_id === id);
+  if (record) {
+    terminateRecord.value = record;
+    terminateReason.value = '';
+    terminateModalVisible.value = true;
+  }
+};
+
+const confirmTerminate = () => {
+  if (!terminateRecord.value || !terminateReason.value.trim()) return;
+  store.holdProbation(terminateRecord.value.master_id, terminateReason.value.trim());
+  message.warning('员工试用期评估结果为【不通过并终止试用期】，流程已结束');
+  terminateModalVisible.value = false;
+  terminateRecord.value = null;
+  terminateReason.value = '';
+};
+
+const handleRestart = (id: string) => {
   Modal.confirm({
-    title: '确认终止转正',
-    content: '该员工将进入「终止转正」状态，不再继续转正流程。',
-    width: 560,
-    class: 'terminate-confirm-modal',
-    okText: '确认终止',
-    okType: 'danger',
+    title: '重新发起试用期流程',
+    content: '您确认重新发起该员工的试用期评估流程吗？',
+    okText: '确认',
     cancelText: '取消',
-    onOk: () => { store.holdProbation(id); message.warning('已终止转正'); }
+    onOk: () => {
+      store.restartProbation(id);
+      message.success('已重新发起试用期流程');
+    }
   });
 };
 
@@ -526,43 +579,78 @@ const handleStageEvalSubmit = () => {
   stageEvalModalVisible.value = false;
   stageEvalContent.value = '';
 };
+
+function syncPrdRoute(prdQuery: unknown) {
+  const prdId = Number(prdQuery);
+  if (!Number.isFinite(prdId)) return;
+
+  if (prdId === 16) {
+    activeTab.value = 'finished';
+    return;
+  }
+
+  activeTab.value = 'unfinished';
+
+  if (prdId === 15) {
+    const record = sortedUnfinished.value.find(r => r.probation_status === '07') ?? sortedUnfinished.value[0];
+    if (record) openApprovalPreview(record);
+  }
+}
+
+onMounted(() => {
+  syncPrdRoute(route.query.prd);
+});
+
+watch(() => route.query.prd, syncPrdRoute);
 </script>
 
 <style scoped>
-/* [UI/UX 修复] todo-summary / todo-tag 公共样式已移至 style.css，此处仅保留组件特有样式 */
+/* Apple-style HRBP panorama */
 
-/* 自定义步骤条样式，使其更适合作为过滤栏 */
+/* Custom steps filter bar */
 .custom-steps {
   cursor: pointer;
 }
+
 .custom-steps :deep(.ant-steps-item) {
   cursor: pointer;
-  transition: opacity 0.3s;
+  transition: all var(--duration-fast) var(--ease-default);
   padding: 0 4px;
 }
+
 .custom-steps :deep(.ant-steps-item:hover) {
   opacity: 0.8;
 }
+
 .custom-steps :deep(.ant-steps-item-title) {
-  font-size: 12px;
+  font-size: 13px !important;
   line-height: 22px;
   padding: 0;
+  color: var(--text-secondary) !important;
 }
+
+.custom-steps :deep(.ant-steps-item-process .ant-steps-item-title) {
+  color: var(--text-primary) !important;
+  font-weight: 500 !important;
+}
+
 .custom-steps :deep(.ant-steps-item-description) {
-  font-weight: bold;
-  color: #1890ff;
+  font-weight: 600;
+  color: var(--accent) !important;
 }
-/* 隐藏默认序号圆圈 */
+
 .custom-steps :deep(.ant-steps-item-icon) {
   display: none;
 }
+
 .custom-steps :deep(.ant-steps-item-tail) {
   padding: 0;
   top: 11px;
 }
 
+/* Overdue alert */
 .compact-overdue-alert {
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .compact-overdue-alert :deep(.ant-alert-message) {
@@ -574,25 +662,26 @@ const handleStageEvalSubmit = () => {
   min-height: 22px;
 }
 
+/* Stacked list */
 .stacked-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .stacked-item {
-  padding: 10px 12px;
-  border: 1px solid #edf0f5;
-  border-radius: 8px;
-  background: #fbfcfe;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-tertiary);
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
 }
 
 .stacked-row {
   display: grid;
   grid-template-columns: 72px 1fr;
-  gap: 8px 12px;
-  padding: 6px 0;
-  border-top: 1px dashed #e7eaf0;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--border-tertiary);
 }
 
 .stacked-row:first-child {
@@ -605,87 +694,92 @@ const handleStageEvalSubmit = () => {
 }
 
 .stacked-label {
-  color: #6b7280;
-  font-weight: 600;
+  color: var(--text-secondary);
+  font-weight: 500;
   white-space: nowrap;
+  font-size: 13px;
 }
 
 .stacked-value {
-  color: #1f2937;
-  line-height: 1.7;
+  color: var(--text-primary);
+  line-height: 1.6;
   word-break: break-word;
+  font-size: 14px;
 }
 
 .stacked-value--index {
-  font-weight: 700;
-  color: #1677ff;
+  font-weight: 600;
+  color: var(--accent);
 }
 
 .stacked-goal-title {
-  padding-bottom: 6px;
-  color: #1f2937;
+  padding-bottom: var(--space-2);
+  color: var(--text-primary);
   font-size: 13px;
   font-weight: 600;
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .stacked-meta-line {
   display: flex;
-  gap: 24px;
-  padding-bottom: 6px;
-  color: #1f2937;
+  gap: var(--space-6);
+  padding-bottom: var(--space-2);
+  color: var(--text-primary);
   font-size: 13px;
   font-weight: 600;
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .stacked-meta-line > span {
-  color: #667085;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
 .stacked-content,
 .eval-text-block {
-  padding-top: 6px;
-  border-top: 1px dashed #e7eaf0;
-  color: #1f2937;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--border-tertiary);
+  color: var(--text-primary);
   font-size: 13px;
-  line-height: 1.7;
+  line-height: 1.6;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
 .eval-text-block {
-  padding: 10px 12px;
-  border: 1px solid #edf0f5;
-  border-radius: 8px;
-  background: #fbfcfe;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border-tertiary);
+  border-radius: var(--radius-md);
+  background: var(--bg-tertiary);
 }
 
 .manager-eval-block {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .manager-eval-block__result,
 .manager-eval-block__content {
   display: grid;
   grid-template-columns: 88px 1fr;
-  gap: 12px;
+  gap: var(--space-3);
   align-items: start;
 }
 
 .manager-eval-block__result > span,
 .manager-eval-block__content > span {
-  color: #667085;
-  font-weight: 600;
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 13px;
 }
 
 .manager-eval-block__result > div,
 .manager-eval-block__content > div {
   white-space: pre-wrap;
-  line-height: 1.7;
+  line-height: 1.6;
+  font-size: 14px;
+  color: var(--text-primary);
 }
 
 :global(.terminate-confirm-modal .ant-modal-content) {
@@ -696,117 +790,140 @@ const handleStageEvalSubmit = () => {
   white-space: nowrap;
 }
 
-/* 审批记录 */
+/* Approval records */
 .approval-records-section {
-  margin-top: 16px;
+  margin-top: var(--space-4);
 }
+
 .approval-records-title {
   font-weight: 600;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
   font-size: 14px;
+  color: var(--text-primary);
 }
+
 .approval-record-item {
-  padding: 12px;
-  background: #f8fafc;
-  border-radius: 8px;
-  margin-bottom: 8px;
+  padding: var(--space-3);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-2);
 }
+
 .approval-record-item__header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
-}
-.approval-record-item__node {
-  font-weight: 500;
-  color: #1f2329;
-}
-.approval-record-item__action {
-  font-weight: 500;
-}
-.approval-record-item__action--agree {
-  color: #52c41a;
-}
-.approval-record-item__action--reject {
-  color: #ff4d4f;
-}
-.approval-record-item__info {
-  font-size: 13px;
-  color: #646a73;
-  display: flex;
-  gap: 12px;
-}
-.approval-record-item__time {
-  color: #8f959e;
-}
-.approval-record-item__comment {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #333;
-  padding: 8px 12px;
-  background: #fff;
-  border-radius: 6px;
-  border: 1px solid #f0f1f3;
-}
-.approval-record-empty {
-  color: #8f959e;
-  font-size: 13px;
-  text-align: center;
-  padding: 16px;
+  margin-bottom: var(--space-1);
 }
 
-/* 审批预览明细样式 */
-.approval-detail-item {
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f1f3;
+.approval-record-item__node {
+  font-weight: 500;
+  color: var(--text-primary);
+  font-size: 14px;
 }
+
+.approval-record-item__action {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.approval-record-item__action--agree {
+  color: var(--status-success);
+}
+
+.approval-record-item__action--reject {
+  color: var(--status-danger);
+}
+
+.approval-record-item__info {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  gap: var(--space-3);
+}
+
+.approval-record-item__time {
+  color: var(--text-tertiary);
+}
+
+.approval-record-item__comment {
+  margin-top: var(--space-2);
+  font-size: 13px;
+  color: var(--text-primary);
+  padding: var(--space-2) var(--space-3);
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-tertiary);
+  line-height: 1.5;
+}
+
+.approval-record-empty {
+  color: var(--text-tertiary);
+  font-size: 13px;
+  text-align: center;
+  padding: var(--space-4);
+}
+
+/* Approval preview detail */
+.approval-detail-item {
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border-tertiary);
+}
+
 .approval-detail-item:last-child {
   border-bottom: none;
 }
+
 .approval-detail-item__title {
   font-size: 14px;
   font-weight: 500;
-  color: #1f2329;
-  margin-bottom: 4px;
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
 }
+
 .approval-detail-item__field {
   font-size: 13px;
-  color: #646a73;
-  margin-top: 4px;
+  color: var(--text-secondary);
+  margin-top: var(--space-1);
 }
+
 .approval-detail-item__content {
   font-size: 14px;
-  color: #1f2329;
-  line-height: 1.6;
-  white-space: pre-wrap;
-}
-.approval-detail-section {
-  margin-bottom: 16px;
-}
-.approval-detail-section__title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f2329;
-  margin-bottom: 8px;
-}
-.approval-detail-section__content {
-  font-size: 14px;
-  color: #333;
-  line-height: 1.6;
-  background: #f8fafc;
-  padding: 12px 16px;
-  border-radius: 8px;
+  color: var(--text-primary);
+  line-height: 1.5;
   white-space: pre-wrap;
 }
 
-/* 响应式步骤条 */
+.approval-detail-section {
+  margin-bottom: var(--space-4);
+}
+
+.approval-detail-section__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
+}
+
+.approval-detail-section__content {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  background: var(--bg-tertiary);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  white-space: pre-wrap;
+}
+
+/* Responsive steps */
 @media (max-width: 768px) {
   .custom-steps {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
+
   .custom-steps :deep(.ant-steps-item-title) {
-    font-size: 11px;
+    font-size: 11px !important;
   }
 }
 </style>

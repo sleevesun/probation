@@ -82,17 +82,18 @@ function openNotification() {
 </script>
 
 <style scoped>
-/* ====== 页面基础 - 飞书 People 风格 ====== */
+/* ====== Apple-Style Landing Page ====== */
 .home {
   min-height: 100vh;
-  background: #F7F8FA;
-  padding: 48px 24px;
+  background: var(--bg-secondary);
+  padding: 64px 24px;
+  font-family: var(--font-family);
 }
 
 /* ====== Hero ====== */
 .home__hero {
   text-align: center;
-  margin-bottom: 48px;
+  margin-bottom: 64px;
 }
 
 .home__hero-inner {
@@ -101,136 +102,144 @@ function openNotification() {
 }
 
 .home__title {
-  font-size: 32px;
-  line-height: 1.3;
-  font-weight: 700;
-  color: #1f2329;
+  font-size: 48px;
+  line-height: 1.08;
+  font-weight: 600;
+  color: var(--text-primary);
   margin: 0;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.03em;
 }
 
-/* ====== Section 通用 ====== */
+/* ====== Section ====== */
 .home__section {
-  max-width: 1200px;
-  margin: 0 auto 48px;
+  max-width: 980px;
+  margin: 0 auto 56px;
   padding: 0;
 }
 
 .home__section-header {
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .home__section-title {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 600;
-  color: #1f2329;
+  color: var(--text-primary);
   margin: 0;
+  letter-spacing: -0.02em;
 }
 
-/* ====== Demo 入口卡片 ====== */
+/* ====== Demo Cards ====== */
 .home__demo-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: 16px;
 }
 
 .home__demo-card {
-  background: #ffffff;
-  border: 1px solid #e5e6eb;
-  border-radius: 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--radius-lg);
   padding: 24px;
   text-align: left;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--duration-normal) var(--ease-default);
   font-family: inherit;
   color: inherit;
+  box-shadow: var(--shadow-xs);
 }
 
 .home__demo-card:hover {
-  border-color: #1677ff;
-  box-shadow: 0 2px 12px rgba(22, 119, 255, 0.08);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
 
+.home__demo-card:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
 .home__demo-card--modern {
-  border-left: 3px solid #1677ff;
+  border-left: 3px solid var(--accent);
 }
 
 .home__demo-card--email {
-  border-left: 3px solid #52c41a;
+  border-left: 3px solid var(--status-success);
 }
 
 .home__demo-card--prd {
-  border-left: 3px solid #722ed1;
+  border-left: 3px solid var(--color-purple);
 }
 
 .home__demo-card--notification {
-  border-left: 3px solid #fa8c16;
+  border-left: 3px solid var(--status-warning);
 }
 
 .home__demo-badge {
   display: inline-block;
-  margin-bottom: 14px;
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: #e8f3ff;
-  color: #1677ff;
+  margin-bottom: 12px;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--accent-bg);
+  color: var(--accent);
   font-size: 12px;
   font-weight: 500;
 }
 
 .home__demo-card--email .home__demo-badge {
-  background: #e8ffea;
-  color: #389e0d;
+  background: var(--status-success-bg);
+  color: #1b8a3e;
 }
 
 .home__demo-badge--prd {
-  background: #f0e6ff !important;
-  color: #722ed1 !important;
+  background: var(--color-purple-bg) !important;
+  color: var(--color-purple) !important;
 }
 
 .home__demo-badge--notification {
-  background: #fff7e6 !important;
-  color: #fa8c16 !important;
+  background: var(--status-warning-bg) !important;
+  color: #b36b00 !important;
 }
 
 .home__demo-card h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #1f2329;
-  margin: 0 0 8px;
+  color: var(--text-primary);
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
 }
 
 .home__demo-card p {
   font-size: 14px;
-  line-height: 1.5;
-  color: #646a73;
+  line-height: 1.43;
+  color: var(--text-secondary);
   margin: 0;
 }
 
 /* ====== Footer ====== */
 .home__footer {
-  max-width: 1200px;
+  max-width: 980px;
   margin: 0 auto;
   padding: 24px 0 48px;
   text-align: center;
-  color: #8f959e;
+  color: var(--text-tertiary);
   font-size: 12px;
-  border-top: 1px solid #e5e6eb;
+  border-top: 1px solid var(--border-tertiary);
 }
 
-/* ====== 响应式 ====== */
+/* ====== Responsive ====== */
 @media (max-width: 768px) {
   .home {
-    padding: 24px 16px;
+    padding: 32px 16px;
   }
 
   .home__title {
-    font-size: 24px;
+    font-size: 32px;
   }
 
   .home__section {
-    margin-bottom: 36px;
+    margin-bottom: 40px;
   }
 
   .home__demo-grid {
@@ -240,7 +249,7 @@ function openNotification() {
 
 @media (max-width: 480px) {
   .home__title {
-    font-size: 20px;
+    font-size: 28px;
   }
 }
 </style>

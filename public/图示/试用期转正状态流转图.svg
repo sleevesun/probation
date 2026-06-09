@@ -1,0 +1,118 @@
+<svg width="1680" height="980" viewBox="0 0 1680 980" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">试用期转正状态流转图</title>
+  <desc id="desc">展示从目标设定到结果发布的主状态机，以及不开启、终止转正、未转正离职等结束分支。</desc>
+  <defs>
+    <style>
+      .title { font: 700 30px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #1f2937; }
+      .subtitle { font: 400 16px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #6b7280; }
+      .node { stroke-width: 2.5; rx: 18; }
+      .main { fill: #e0f2fe; stroke: #0284c7; }
+      .success { fill: #dcfce7; stroke: #16a34a; }
+      .danger { fill: #fee2e2; stroke: #dc2626; }
+      .neutral { fill: #f8fafc; stroke: #94a3b8; }
+      .code { font: 700 18px "SFMono-Regular", Menlo, monospace; fill: #0f172a; }
+      .label { font: 600 18px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #111827; }
+      .owner { font: 500 14px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #475569; }
+      .edge { stroke: #334155; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .edge-dashed { stroke: #dc2626; stroke-width: 2.5; fill: none; stroke-dasharray: 9 7; stroke-linecap: round; stroke-linejoin: round; }
+      .note { font: 500 15px "PingFang SC", "Microsoft YaHei", sans-serif; fill: #475569; }
+    </style>
+    <marker id="arrow" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#334155" />
+    </marker>
+    <marker id="arrow-red" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#dc2626" />
+    </marker>
+  </defs>
+
+  <text x="40" y="48" class="title">试用期转正状态流转图</text>
+  <text x="40" y="78" class="subtitle">主状态机按编号展示，阶段性反馈不改变主状态；4.5 个月是提醒节点，不新增独立状态。</text>
+
+  <rect x="60" y="220" width="170" height="110" class="node main" />
+  <text x="85" y="255" class="code">01</text>
+  <text x="85" y="288" class="label">待设定目标</text>
+  <text x="85" y="315" class="owner">当前处理人：员工</text>
+
+  <rect x="280" y="220" width="170" height="110" class="node main" />
+  <text x="305" y="255" class="code">02</text>
+  <text x="305" y="288" class="label">目标待确认</text>
+  <text x="305" y="315" class="owner">当前处理人：直属上级</text>
+
+  <rect x="490" y="220" width="190" height="110" class="node main" />
+  <text x="515" y="255" class="code">03</text>
+  <text x="515" y="288" class="label">目标已确认</text>
+  <text x="515" y="315" class="owner">当前处理人：无固定处理人</text>
+
+  <rect x="720" y="220" width="190" height="110" class="node main" />
+  <text x="745" y="255" class="code">提醒</text>
+  <text x="745" y="288" class="label">4.5个月开启评价</text>
+  <text x="745" y="315" class="owner">目标已确认状态下触发</text>
+
+  <rect x="960" y="220" width="170" height="110" class="node main" />
+  <text x="985" y="255" class="code">05</text>
+  <text x="985" y="288" class="label">待员工自评</text>
+  <text x="985" y="315" class="owner">当前处理人：员工</text>
+
+  <rect x="1180" y="220" width="170" height="110" class="node main" />
+  <text x="1205" y="255" class="code">06</text>
+  <text x="1205" y="288" class="label">待上级评价</text>
+  <text x="1205" y="315" class="owner">当前处理人：直属上级</text>
+
+  <rect x="1400" y="220" width="210" height="110" class="node main" />
+  <text x="1425" y="255" class="code">07</text>
+  <text x="1425" y="288" class="label">上级已评价</text>
+  <text x="1425" y="315" class="owner">当前处理人：HRBP</text>
+
+  <rect x="560" y="470" width="170" height="110" class="node main" />
+  <text x="585" y="505" class="code">08</text>
+  <text x="585" y="538" class="label">审批中</text>
+  <text x="585" y="565" class="owner">当前处理人：审批人</text>
+
+  <rect x="810" y="470" width="170" height="110" class="node main" />
+  <text x="835" y="505" class="code">09</text>
+  <text x="835" y="538" class="label">待发布</text>
+  <text x="835" y="565" class="owner">当前处理人：系统</text>
+
+  <rect x="1060" y="470" width="170" height="110" class="node success" />
+  <text x="1085" y="505" class="code">10</text>
+  <text x="1085" y="538" class="label">结果已发布</text>
+  <text x="1085" y="565" class="owner">当前处理人：无</text>
+
+  <rect x="410" y="720" width="220" height="120" class="node danger" />
+  <text x="435" y="760" class="code">99</text>
+  <text x="435" y="793" class="label">终止转正</text>
+  <text x="435" y="820" class="owner">归入“已结束”</text>
+
+  <rect x="760" y="720" width="190" height="120" class="node neutral" />
+  <text x="785" y="760" class="code">11</text>
+  <text x="785" y="793" class="label">未转正离职</text>
+  <text x="785" y="820" class="owner">自动作废未完成表单</text>
+
+  <path d="M230 275 H280" class="edge" marker-end="url(#arrow)" />
+  <path d="M450 275 H500" class="edge" marker-end="url(#arrow)" />
+  <path d="M670 275 H720" class="edge" marker-end="url(#arrow)" />
+  <path d="M910 275 H960" class="edge" marker-end="url(#arrow)" />
+  <path d="M1130 275 H1180" class="edge" marker-end="url(#arrow)" />
+  <path d="M1350 275 H1400" class="edge" marker-end="url(#arrow)" />
+  <path d="M1505 330 V420 H645 V470" class="edge" marker-end="url(#arrow)" />
+  <path d="M730 525 H810" class="edge" marker-end="url(#arrow)" />
+  <path d="M980 525 H1060" class="edge" marker-end="url(#arrow)" />
+
+  <path d="M365 220 C330 180, 210 180, 170 220" class="edge" marker-end="url(#arrow)" />
+  <text x="270" y="165" class="note">退回调整</text>
+  <path d="M585 220 C560 160, 200 160, 170 220" class="edge" marker-end="url(#arrow)" />
+  <text x="380" y="145" class="note">评估开启前可退回目标</text>
+  <path d="M645 470 Q645 400 700 400 H1580 Q1640 400 1640 340 V275 H1610" class="edge" marker-end="url(#arrow)" />
+  <text x="1450" y="388" class="note">审批驳回后回到上级已评价</text>
+
+  <path d="M815 330 Q815 400 750 400 H560 Q500 400 500 720" class="edge-dashed" marker-end="url(#arrow-red)" />
+  <path d="M1505 330 Q1505 640 1440 640 H720 Q660 640 660 780 H630" class="edge-dashed" marker-end="url(#arrow-red)" />
+  <text x="665" y="388" class="note">不开启</text>
+  <text x="1120" y="648" class="note">HRBP 发起审批前可终止转正</text>
+
+  <path d="M1265 330 Q1265 600 1200 600 H920 Q860 600 860 720" class="edge-dashed" marker-end="url(#arrow-red)" />
+  <text x="1070" y="608" class="note">流程未完成前离职</text>
+
+  <rect x="70" y="860" width="1480" height="70" rx="18" class="neutral" />
+  <text x="100" y="903" class="note">补充规则：阶段性反馈仅直属上级可填且不改变主流程状态；HRBP 开启正式评估后目标锁定只读；员工视角会将 06-09 统一感知为“试用期评估中”。</text>
+</svg>

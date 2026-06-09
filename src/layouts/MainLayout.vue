@@ -13,8 +13,6 @@
         <a-menu-item-group key="group-employee" v-if="role === 'Employee'">
           <template #title><user-outlined /> 员工</template>
           <a-menu-item key="/employee/dashboard">我的试用期</a-menu-item>
-          <a-menu-item key="/employee/goals">目标设定</a-menu-item>
-          <a-menu-item key="/employee/self-eval">试用期评价</a-menu-item>
         </a-menu-item-group>
 
         <a-menu-item-group key="group-manager" v-if="role === 'Manager'">
@@ -161,125 +159,175 @@ const goHome = () => {
 
 <style scoped>
 .logo {
-  height: 36px;
-  background: var(--modern-bg-surface);
-  margin: var(--modern-spacing-md) var(--modern-spacing-md);
-  border-radius: var(--modern-radius-md);
+  height: 40px;
+  background: transparent;
+  margin: var(--space-4) var(--space-4) var(--space-2);
+  border-radius: var(--radius-md);
   overflow: hidden;
+  display: flex;
+  align-items: center;
 }
 
 .sidebar-employee-switcher {
-  padding: var(--modern-spacing-md);
-  border-top: 1px solid var(--modern-border-light);
-  margin-top: var(--modern-spacing-sm);
+  padding: var(--space-4);
+  border-top: 1px solid var(--border-tertiary);
+  margin-top: auto;
 }
 
 .sidebar-switcher-label {
   font-size: 12px;
-  color: var(--modern-text-muted);
-  margin-bottom: var(--modern-spacing-xs);
-  font-weight: 600;
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-1);
+  font-weight: 500;
 }
 
-/* [UI/UX 修复] 将内联样式抽取为 scoped 样式类 */
 .main-layout {
   min-height: 100vh;
-  background: var(--modern-bg-page);
+  background: var(--bg-secondary);
 }
 
 .main-layout :deep(.ant-layout-sider) {
-  background: var(--modern-bg-card);
-  border-right: 1px solid var(--modern-border-light);
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-tertiary);
   box-shadow: none;
+  transition: all var(--duration-normal) var(--ease-default);
 }
 
 .main-layout :deep(.ant-layout-sider-trigger) {
-  background: var(--modern-bg-card);
-  color: var(--modern-text-muted);
-  border-top: 1px solid var(--modern-border-light);
+  background: var(--bg-primary);
+  color: var(--text-tertiary);
+  border-top: 1px solid var(--border-tertiary);
+  transition: color var(--duration-fast) var(--ease-default);
+}
+
+.main-layout :deep(.ant-layout-sider-trigger:hover) {
+  color: var(--text-primary);
 }
 
 .main-layout :deep(.ant-menu-light) {
   border-inline-end: 0;
+  background: transparent;
 }
 
 .main-layout :deep(.ant-menu-item),
 .main-layout :deep(.ant-menu-submenu-title) {
-  border-radius: var(--modern-radius-md);
-  margin-inline: var(--modern-spacing-sm);
+  border-radius: var(--radius-md) !important;
+  margin-inline: var(--space-2);
   width: calc(100% - 16px);
-  padding-inline: var(--modern-spacing-md);
+  padding-inline: var(--space-3) !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  font-size: 14px !important;
+  color: var(--text-secondary) !important;
+  transition: all var(--duration-fast) var(--ease-default) !important;
+}
+
+.main-layout :deep(.ant-menu-item:hover),
+.main-layout :deep(.ant-menu-submenu-title:hover) {
+  background: var(--bg-grouped) !important;
+  color: var(--text-primary) !important;
 }
 
 .main-layout :deep(.ant-menu-item-selected) {
-  background: var(--color-primary-bg);
-  color: var(--color-primary);
+  background: var(--accent-bg) !important;
+  color: var(--accent) !important;
+  font-weight: 500 !important;
+}
+
+.main-layout :deep(.ant-menu-item-group-title) {
+  padding: var(--space-4) var(--space-3) var(--space-2) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: var(--text-tertiary) !important;
+  letter-spacing: 0.02em;
 }
 
 .logo-title {
-  color: var(--modern-text-primary);
+  color: var(--text-primary);
   margin: 0;
-  padding-left: var(--modern-spacing-md);
-  line-height: 36px;
-  font-size: 15px;
-  font-weight: 700;
+  padding-left: var(--space-3);
+  line-height: 40px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .app-header {
-  background: var(--modern-bg-card);
-  padding: 0 var(--modern-spacing-lg);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  padding: 0 var(--space-6);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--modern-border-light);
+  border-bottom: 1px solid var(--border-tertiary);
   box-shadow: none;
-  backdrop-filter: blur(12px);
+  height: var(--topbar-height);
+  min-height: var(--topbar-height);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .back-home-btn {
   font-size: 14px;
-  color: var(--modern-text-muted);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
 }
 
 .back-home-btn:hover {
-  color: var(--color-primary);
+  color: var(--accent);
 }
 
 .role-switcher {
-  margin-right: var(--modern-spacing-md);
-  color: var(--modern-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
 .role-name {
-  color: var(--color-primary);
+  color: var(--accent);
   font-size: 14px;
+  font-weight: 500;
 }
 
 .header-avatar {
-  background-color: var(--color-primary-bg);
-  color: var(--color-primary);
+  background-color: var(--accent-bg);
+  color: var(--accent);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
 }
 
 .app-content {
   margin: 0;
-  background: var(--modern-bg-page);
-  padding: var(--modern-spacing-lg);
+  background: var(--bg-secondary);
+  padding: var(--space-6);
   min-height: 280px;
   overflow: auto;
-  max-width: 1400px;
+  max-width: var(--content-max-width);
   width: 100%;
 }
 
 .app-footer {
   text-align: center;
-  background: var(--modern-bg-page);
-  color: var(--modern-text-muted);
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
+  font-size: 12px;
+  padding: var(--space-6) 0;
 }
 
+/* Apple-style fade transition */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity var(--duration-normal) var(--ease-default);
 }
 
 .fade-enter-from,
@@ -287,14 +335,14 @@ const goHome = () => {
   opacity: 0;
 }
 
-/* 响应式支持 */
+/* Responsive support */
 @media (max-width: 768px) {
   .main-layout :deep(.ant-layout-sider) {
     position: fixed;
     z-index: 1000;
     height: 100vh;
     transform: translateX(-100%);
-    transition: transform 0.3s ease;
+    transition: transform var(--duration-normal) var(--ease-default);
   }
 
   .main-layout :deep(.ant-layout-sider.ant-layout-sider-collapsed) {
@@ -302,7 +350,11 @@ const goHome = () => {
   }
 
   .app-content {
-    padding: var(--modern-spacing-md);
+    padding: var(--space-4);
+  }
+
+  .app-header {
+    padding: 0 var(--space-4);
   }
 }
 </style>

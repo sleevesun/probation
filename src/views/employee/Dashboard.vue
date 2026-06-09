@@ -658,3 +658,81 @@ function handleSelfEvalSubmit() {
   }, 800);
 }
 </script>
+
+<style scoped>
+/* Apple-style employee dashboard */
+:deep(.ant-page-header) {
+  padding: 0 0 var(--space-4);
+}
+
+:deep(.ant-page-header-heading-title) {
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  letter-spacing: -0.02em;
+}
+
+:deep(.ant-page-header-heading-sub-title) {
+  color: var(--text-secondary) !important;
+  font-size: 14px !important;
+}
+
+:deep(.ant-card) {
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--border-secondary) !important;
+  box-shadow: var(--shadow-xs) !important;
+}
+
+:deep(.ant-card-head) {
+  border-bottom: 1px solid var(--border-tertiary) !important;
+  min-height: 48px !important;
+}
+
+:deep(.ant-card-head-title) {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+}
+
+:deep(.ant-steps) {
+  padding: var(--space-2) 0;
+}
+
+:deep(.ant-steps-item-title) {
+  font-size: 13px !important;
+  color: var(--text-secondary) !important;
+}
+
+:deep(.ant-steps-item-process .ant-steps-item-title) {
+  color: var(--text-primary) !important;
+  font-weight: 500 !important;
+}
+
+:deep(.ant-descriptions-item-label) {
+  color: var(--text-secondary) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+:deep(.ant-descriptions-item-content) {
+  color: var(--text-primary) !important;
+  font-size: 14px !important;
+}
+
+:deep(.ant-list-item) {
+  padding: var(--space-4) 0 !important;
+  border-bottom: 1px solid var(--border-tertiary) !important;
+}
+
+:deep(.ant-list-item:last-child) {
+  border-bottom: none !important;
+}
+
+:deep(.ant-alert) {
+  border-radius: var(--radius-md) !important;
+}
+
+:deep(.ant-empty-description) {
+  color: var(--text-tertiary) !important;
+}
+</style>

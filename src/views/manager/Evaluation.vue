@@ -113,7 +113,7 @@
 import { ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useProbationStore, getDetailedStatusText, getMonthsSinceHire, EvaluationItem, isFailedDecision } from '@/store/probation';
-import { message } from 'ant-design-vue';
+import { message, Modal } from 'ant-design-vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -150,16 +150,35 @@ const evalTypeColor = (type: string) => {
 const decision = ref<'超出预期' | '符合预期' | '不符合转正条件'>('符合预期');
 const reason = ref('');
 
+const doSubmit = () => {
+  saving.value = true;
+  setTimeout(() => {
+    store.submitManagerEval(record.value!.master_id, reason.value, decision.value);
+    if (isFailedDecision(decision.value)) {
+      message.warning('员工试用期评估结果为【不通过】，将进入试用期终止流程');
+    } else {
+      message.success('员工试用期评估结果为【通过】，请关注后续流程进展');
+    }
+    saving.value = false;
+    router.push('/manager/team');
+  }, 800);
+};
+
 const handleSubmit = () => {
   if (!reason.value.trim()) {
     message.error('请填写评价意见'); return;
   }
-  saving.value = true;
-  setTimeout(() => {
-    store.submitManagerEval(record.value!.master_id, reason.value, decision.value);
-    message.success(isFailedDecision(decision.value) ? '评价已提交，该员工已进入终止转正状态。' : '评价提交成功！等待 HRBP 发起转正审批流程。');
-    saving.value = false;
-    router.push('/manager/team');
-  }, 800);
+  if (isFailedDecision(decision.value)) {
+    Modal.confirm({
+      title: '确认提交不通过评价',
+      content: '该操作将发起试用期终止流程，是否确认？',
+      okText: '确认提交',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk: () => doSubmit()
+    });
+    return;
+  }
+  doSubmit();
 };
 </script>

@@ -4,18 +4,19 @@
       <a-page-header title="试用期目标设定" @back="() => router.back()" />
 
       <a-alert
+        v-if="isLock"
+        message="目标已锁定：您的试用期目标已被确认或流程已往后流转，目前只能查阅不可修改。"
+        type="info"
+        show-icon
+        :banner="true"
+        style="margin-bottom: 16px"
+      />
+      <a-alert
+        v-else
         message="请填写试用期内的目标"
         type="info"
         show-icon
-        style="margin-bottom: 16px"
-      />
-
-      <a-alert
-        v-if="record?.probation_status === '03' || parseInt(record?.probation_status || '0', 10) >= 4"
-        message="目标已锁定"
-        description="您的试用期目标已被确认或流程已往后流转，目前只能查阅不可修改。"
-        type="info"
-        show-icon
+        :banner="true"
         style="margin-bottom: 16px"
       />
 

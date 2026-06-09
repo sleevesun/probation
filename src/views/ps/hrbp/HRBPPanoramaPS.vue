@@ -170,11 +170,11 @@
         </template>
 
         <template v-if="actionModalType === 'hrbp-hold'">
-          <div class="ps-alert ps-alert--warning" style="margin-top: 16px">该员工将进入「终止转正」状态，不再继续转正流程。</div>
+          <div class="ps-alert ps-alert--warning" style="margin-top: 16px">该操作将直接关闭该员工的试用期流程，是否确认？</div>
           <div class="ps-toolbar" style="margin-top: 16px">
             <div class="ps-toolbar__spacer"></div>
             <a-button size="small" @click="closeActionModal">取消</a-button>
-            <a-button size="small" danger @click="handleHold">确认挂起</a-button>
+            <a-button size="small" danger @click="handleHold">确认终止</a-button>
           </div>
         </template>
       </div>
@@ -474,7 +474,7 @@ function handleTriggerConfirm(record: ProbationMaster) {
 function handleHold() {
   if (!actionModalRecord.value) return
   store.holdProbation(actionModalRecord.value.master_id)
-  message.warning('记录已挂起')
+  message.warning('员工试用期评估结果为【不通过并终止试用期】，流程已结束')
   closeActionModal()
 }
 
@@ -493,14 +493,14 @@ function submitApproval() {
 
 function handleTerminate(masterId: string) {
   Modal.confirm({
-    title: '确认终止转正',
-    content: '该员工将进入「终止转正」状态，不再继续转正流程。',
+    title: '确认终止试用期',
+    content: '该操作将直接关闭该员工的试用期流程，是否确认？',
     width: 560,
     class: 'terminate-confirm-modal',
     okText: '确认终止',
     okType: 'danger',
     cancelText: '取消',
-    onOk: () => { store.holdProbation(masterId); message.warning('已终止转正') }
+    onOk: () => { store.holdProbation(masterId); message.warning('员工试用期评估结果为【不通过并终止试用期】，流程已结束') }
   })
 }
 

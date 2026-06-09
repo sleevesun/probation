@@ -328,6 +328,55 @@ export const emailTemplates: EmailTemplate[] = [
     `
   },
   {
+    id: '08b_goal_unconfirmed_4_5_manager',
+    phase: '开启试用期评价',
+    title: '【提醒】请尽快确认员工试用期目标',
+    role: '上级',
+    trigger: '入职满 4.5 个月，员工目标仍未确认',
+    action: '登录系统，尽快确认或退回员工目标',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
+    defaultVars: {
+      manager_name: '陈思远',
+      employee_name: '王明辉',
+      hire_date: '2025-02-01',
+      login_url: `${baseUrl}/auth/token?token=mock_token_mgr&redirect=/manager/dashboard`
+    },
+    renderBody: (vars) => `
+      <p>亲爱的 <strong>${vars.manager_name}</strong>，</p>
+      <p>您的团队成员 <strong>${vars.employee_name}</strong> 入职已满 4.5 个月（入职日期：${vars.hire_date}），但试用期目标尚未确认。</p>
+      <p>请及时登录试用期管理系统，确认目标或退回员工修改，以保障后续试用期评价流程正常推进。</p>
+      <div style="text-align: center;">
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往处理目标</a>
+      </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
+    `
+  },
+  {
+    id: '08c_goal_unconfirmed_4_5_hrbp',
+    phase: '开启试用期评价',
+    title: '【提醒】请推动试用期目标确认',
+    role: 'HRBP',
+    trigger: '入职满 4.5 个月，员工目标仍未确认',
+    action: '联系直属上级，推动其尽快确认员工目标',
+    channels: ['邮件', 'WOA', 'OA消息中心'],
+    defaultVars: {
+      hrbp_name: '刘建国',
+      employee_name: '王明辉',
+      manager_name: '陈思远',
+      hire_date: '2025-02-01',
+      login_url: `${baseUrl}/auth/token?token=mock_token_hr&redirect=/hrbp/panorama`
+    },
+    renderBody: (vars) => `
+      <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
+      <p>员工 <strong>${vars.employee_name}</strong> 入职已满 4.5 个月（入职日期：${vars.hire_date}），但试用期目标尚未由直属上级 <strong>${vars.manager_name}</strong> 确认。</p>
+      <p>请及时跟进目标确认进度，避免影响后续试用期评价和转正审批流程。</p>
+      <div style="text-align: center;">
+        <a href="${vars.login_url}" target="_blank" class="email-button">前往查看进度</a>
+      </div>
+      <p style="font-size: 12px; color: #999; margin-top: 16px;">📌 WOA 待办消息：仅限 PC 端打开</p>
+    `
+  },
+  {
     id: '09_eval_start_employee',
     phase: '开启试用期评价',
     title: '【待办】请完成试用期自评',
@@ -584,8 +633,8 @@ export const emailTemplates: EmailTemplate[] = [
     phase: '转正审批流程',
     title: '【通知】转正审批已通过',
     role: 'HRBP',
-    trigger: '审批人通过转正审批后，系统实时通知 HRBP（结果自动发布）',
-    action: '知悉审批结果，系统已自动发布',
+    trigger: '审批人通过转正审批后，系统实时通知 HRBP',
+    action: '知悉审批结果；如未到身份变更时间，记录进入待发布',
     channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
       hrbp_name: '刘建国',
@@ -594,8 +643,8 @@ export const emailTemplates: EmailTemplate[] = [
     },
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.hrbp_name}</strong>，</p>
-      <p>员工 <strong>${vars.employee_name}</strong> 的转正审批已通过，系统已自动发布转正结果。</p>
-      <p>详情请登录系统查看。</p>
+      <p>员工 <strong>${vars.employee_name}</strong> 的转正审批已通过。</p>
+      <p>如员工尚未到身份变更时间，记录将进入“待发布”；如已到或超过 6 个月试用期节点，系统将立即完成身份变更并自动发布转正结果。</p>
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">前往查看</a>
       </div>
@@ -655,7 +704,7 @@ export const emailTemplates: EmailTemplate[] = [
     phase: '转正审批流程',
     title: '【通知】您的转正结果已发布',
     role: '员工',
-    trigger: '审批通过后，系统自动发布结果并实时通知员工',
+    trigger: '员工身份由试用员工变更为正式员工后，系统自动发布结果并实时通知员工；若审批通过时已到或超过 6 个月则立即触发',
     action: '登录系统，查看试用期结果',
     channels: ['邮件', 'WOA', 'OA消息中心'],
     defaultVars: {
@@ -665,7 +714,7 @@ export const emailTemplates: EmailTemplate[] = [
     renderBody: (vars) => `
       <p>亲爱的 <strong>${vars.employee_name}</strong>，</p>
       <p>恭喜您！您的试用期转正审批已通过，系统已自动发布转正结果。</p>
-      <p>您可以登录系统查看上级评价详情。</p>
+      <p>您可以登录系统查看试用期结果和试用期评价结果。</p>
       <div style="text-align: center;">
         <a href="${vars.login_url}" target="_blank" class="email-button">查看转正结果</a>
       </div>
