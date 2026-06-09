@@ -118,6 +118,10 @@
               <span class="stacked-label">预期结果</span>
               <span class="stacked-value">{{ goal.measure }}</span>
             </div>
+            <div v-if="goal.weight != null" class="stacked-row">
+              <span class="stacked-label">权重</span>
+              <span class="stacked-value">{{ goal.weight }}%</span>
+            </div>
             <div class="stacked-row">
               <span class="stacked-label">目标回顾</span>
               <span class="stacked-value">{{ goal.goal_review || '暂无目标回顾' }}</span>
@@ -562,7 +566,8 @@ const stageEvalContent = ref('');
 const stageGoalColumns = [
   { title: '序号', dataIndex: 'seq', width: 60, customRender: ({ index }: any) => index + 1 },
   { title: '目标内容', dataIndex: 'content' },
-  { title: '预期结果', dataIndex: 'measure', width: 200 }
+  { title: '预期结果', dataIndex: 'measure', width: 200 },
+  { title: '权重', dataIndex: 'weight', width: 80, customRender: ({ text }: any) => text != null ? `${text}%` : '-' }
 ];
 
 const stageEvalHistoryColumns = [

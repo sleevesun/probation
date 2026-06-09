@@ -26,9 +26,16 @@
               <a-input v-model:value="searchText" placeholder="姓名 / 工号" allow-clear style="width: 180px" />
             </a-form-item>
             <a-form-item label="部门">
-              <a-select v-model:value="filterDept" placeholder="全部部门" allow-clear style="width: 180px">
-                <a-select-option v-for="d in deptOptions" :key="d" :value="d">{{ d }}</a-select-option>
-              </a-select>
+              <a-tree-select
+                v-model:value="filterDept"
+                :tree-data="deptTreeData"
+                tree-checkable
+                multiple
+                :show-checked-strategy="TreeSelect.SHOW_CHILD"
+                placeholder="全部部门"
+                allow-clear
+                style="width: 260px"
+              />
             </a-form-item>
             <a-form-item>
               <a-button @click="resetFilters">重置</a-button>
@@ -154,6 +161,10 @@
             <div class="stacked-row">
               <span class="stacked-label">预期结果</span>
               <span class="stacked-value">{{ goal.measure }}</span>
+            </div>
+            <div v-if="goal.weight != null" class="stacked-row">
+              <span class="stacked-label">权重</span>
+              <span class="stacked-value">{{ goal.weight }}%</span>
             </div>
             <div class="stacked-row">
               <span class="stacked-label">目标回顾</span>
@@ -287,14 +298,14 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useProbationStore, ProbationMaster, getStatusColor, getDetailedStatusText, getMonthsSinceHire, getCurrentHandler, formatDecisionLabel, isFailedDecision } from '@/store/probation';
-import { message } from 'ant-design-vue';
+import { message, TreeSelect } from 'ant-design-vue';
 import PrdAnnotation from '@/components/prd/PrdAnnotation.vue';
 const store = useProbationStore();
 const route = useRoute();
 
 const activeTab = ref('unfinished');
 const searchText = ref('');
-const filterDept = ref<string | undefined>(undefined);
+const filterDept = ref<string[]>([]);
 const activeTodoFilter = ref<string>('');
 
 const currentStepIndex = ref<number>(0);
@@ -330,14 +341,25 @@ const onStepChange = (current: number) => {
   activeTodoFilter.value = '';
 };
 
-const deptOptions = computed(() => {
-  const depts = new Set(store.records.map(r => `${r.parent_dept}\\${r.dept_name}`));
-  return Array.from(depts);
+const deptTreeData = computed(() => {
+  const treeMap = new Map<string, Set<string>>();
+  store.records.forEach(r => {
+    if (!treeMap.has(r.parent_dept)) treeMap.set(r.parent_dept, new Set());
+    treeMap.get(r.parent_dept)!.add(r.dept_name);
+  });
+  return Array.from(treeMap.entries()).map(([parent, children]) => ({
+    title: parent,
+    value: parent,
+    children: Array.from(children).map(child => ({
+      title: child,
+      value: `${parent}\\${child}`
+    }))
+  }));
 });
 
 const resetFilters = () => {
   searchText.value = '';
-  filterDept.value = undefined;
+  filterDept.value = [];
   activeTodoFilter.value = '';
   activeStepFilter.value = 'all';
   currentStepIndex.value = 0;
@@ -377,7 +399,9 @@ const filteredUnfinished = computed(() => {
     const kw = searchText.value.toLowerCase();
     list = list.filter(r => r.emp_name.toLowerCase().includes(kw) || r.emp_id.toLowerCase().includes(kw));
   }
-  if (filterDept.value) list = list.filter(r => `${r.parent_dept}\\${r.dept_name}` === filterDept.value);
+  if (filterDept.value.length > 0) {
+    list = list.filter(r => filterDept.value.includes(r.parent_dept) || filterDept.value.includes(`${r.parent_dept}\\${r.dept_name}`));
+  }
   return list;
 });
 
@@ -424,7 +448,8 @@ const finishedColumns = [
 const goalConfirmColumns = [
   { title: '序号', dataIndex: 'seq', width: 60, customRender: ({ index }: any) => index + 1 },
   { title: '目标内容', dataIndex: 'content' },
-  { title: '预期结果', dataIndex: 'measure' }
+  { title: '预期结果', dataIndex: 'measure' },
+  { title: '权重', dataIndex: 'weight', width: 80, customRender: ({ text }: any) => text != null ? `${text}%` : '-' }
 ];
 
 const goalModalVisible = ref(false);
@@ -512,7 +537,8 @@ const stageEvalContent = ref('');
 const stageGoalColumns = [
   { title: '序号', dataIndex: 'seq', width: 60, customRender: ({ index }: any) => index + 1 },
   { title: '目标内容', dataIndex: 'content' },
-  { title: '预期结果', dataIndex: 'measure', width: 200 }
+  { title: '预期结果', dataIndex: 'measure', width: 200 },
+  { title: '权重', dataIndex: 'weight', width: 80, customRender: ({ text }: any) => text != null ? `${text}%` : '-' }
 ];
 
 const stageEvalHistoryColumns = [

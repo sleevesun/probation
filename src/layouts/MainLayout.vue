@@ -312,7 +312,6 @@ const goHome = () => {
   padding: var(--space-6);
   min-height: 280px;
   overflow: auto;
-  max-width: var(--content-max-width);
   width: 100%;
 }
 

@@ -541,7 +541,7 @@ function addGoal() {
 function removeGoal(index: number) {
   Modal.confirm({
     title: '确认删除',
-    content: '确定要删除这条目标吗？删除后不可恢复。',
+    content: '确定要删除这条目标吗',
     okText: '确认删除',
     okType: 'danger',
     cancelText: '取消',

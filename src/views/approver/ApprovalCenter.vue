@@ -137,6 +137,10 @@
                 <span class="stacked-label">预期结果</span>
                 <span class="stacked-value">{{ goal.measure }}</span>
               </div>
+              <div v-if="goal.weight != null" class="stacked-row">
+                <span class="stacked-label">权重</span>
+                <span class="stacked-value">{{ goal.weight }}%</span>
+              </div>
               <div class="stacked-row">
                 <span class="stacked-label">目标回顾</span>
                 <span class="stacked-value">{{ goal.goal_review || '暂无目标回顾' }}</span>
@@ -285,6 +289,9 @@
                           <div class="mobile-goal-item__content">{{ goal.content }}</div>
                     <div class="mobile-goal-item__measure">
                       <span class="mobile-field__label">预期结果：</span>{{ goal.measure }}
+                    </div>
+                    <div v-if="goal.weight != null" class="mobile-goal-item__weight">
+                      <span class="mobile-field__label">权重：</span>{{ goal.weight }}%
                     </div>
                     <div class="mobile-goal-item__review">
                       <span class="mobile-field__label">目标回顾：</span>{{ goal.goal_review || '暂无目标回顾' }}
