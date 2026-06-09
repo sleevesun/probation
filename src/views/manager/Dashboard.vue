@@ -228,6 +228,16 @@
     <!-- 试用期评价弹窗（填写评价） -->
     <a-modal v-model:open="reviewModalVisible" title="试用期评价" width="900px" :footer="null" :bodyStyle="{ maxHeight: '75vh', overflowY: 'auto' }">
       <PrdAnnotation v-if="reviewModalRecord" id="12b">
+        <!-- 员工信息 -->
+        <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
+          <a-descriptions-item label="员工">{{ reviewModalRecord.emp_name }}/{{ reviewModalRecord.emp_id }}</a-descriptions-item>
+          <a-descriptions-item label="入职日期">{{ reviewModalRecord.hire_date }}</a-descriptions-item>
+          <a-descriptions-item label="部门">{{ reviewModalRecord.parent_dept }}\{{ reviewModalRecord.dept_name }}</a-descriptions-item>
+          <a-descriptions-item label="岗位">{{ reviewModalRecord.position }}</a-descriptions-item>
+          <a-descriptions-item label="直属上级">{{ reviewModalRecord.manager_name }}</a-descriptions-item>
+          <a-descriptions-item label="HRBP">{{ reviewModalRecord.hrbp_name }}</a-descriptions-item>
+        </a-descriptions>
+
         <!-- 试用期目标 -->
         <div style="font-weight: 600; margin-bottom: 8px; font-size: 14px">试用期目标</div>
         <div v-if="reviewModalRecord.goals.length > 0" class="stacked-list" style="margin-bottom: 16px">
