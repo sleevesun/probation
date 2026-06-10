@@ -1,11 +1,7 @@
 <template>
   <div>
     <PrdAnnotation id="1">
-      <a-page-header title="我的试用期" :sub-title="`已入职 ${daysSinceHire} 天`">
-        <template #tags>
-          <a-tag :color="statusTagColor">{{ currentStatusText }}</a-tag>
-        </template>
-      </a-page-header>
+      <a-page-header title="我的试用期" :sub-title="`已入职 ${daysSinceHire} 天`" />
 
       <a-card style="margin-top: 16px">
         <a-steps :current="currentStep" size="small" :status="stepStatus">
@@ -228,7 +224,7 @@
       <a-alert
         v-if="!isSelfEvalEditable"
         message="提示"
-        :description="null"
+        description="当前状态不允许编辑自评，仅可查看已提交内容。"
         type="warning"
         show-icon
         banner
@@ -270,24 +266,6 @@
         </a-form>
       </a-card>
 
-      <!-- 历史评价记录 -->
-      <a-card v-if="historySelfEvals.length > 0" title="已提交的评价记录" style="margin-top: 16px" size="small">
-        <a-list item-layout="vertical" :data-source="historySelfEvals" size="small">
-          <template #renderItem="{ item }">
-            <a-list-item>
-              <a-list-item-meta :description="item.create_time">
-                <template #title>
-                  <a-tag :color="evalTypeColor(item.eval_type)">{{ evalTypeLabel(item.eval_type) }}</a-tag>
-                  {{ item.evaluator_name }}
-                </template>
-                <template #avatar><a-avatar size="small"><user-outlined /></a-avatar></template>
-              </a-list-item-meta>
-              <div style="white-space: pre-wrap; background: #fafafa; padding: 8px; border-radius: 4px; font-size: 13px">{{ item.content }}</div>
-            </a-list-item>
-          </template>
-        </a-list>
-      </a-card>
-
       <template #footer v-if="isSelfEvalEditable">
         <a-space>
           <a-button @click="selfEvalModalVisible = false">取消</a-button>
@@ -301,8 +279,8 @@
 <script setup lang="ts">
 import { computed, ref, h } from 'vue';
 import { useRouter } from 'vue-router';
-import { useProbationStore, STATUS_COLOR, getDetailedStatusText, isFailedDecision, GoalItem } from '@/store/probation';
-import { ExceptionOutlined, FormOutlined, ClockCircleOutlined, LoadingOutlined, CheckOutlined, LeftOutlined, RightOutlined, UserOutlined } from '@ant-design/icons-vue';
+import { useProbationStore, isFailedDecision, GoalItem } from '@/store/probation';
+import { ExceptionOutlined, FormOutlined, ClockCircleOutlined, LoadingOutlined, CheckOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons-vue';
 import { message, Modal } from 'ant-design-vue';
 import PrdAnnotation from '@/components/prd/PrdAnnotation.vue';
 
@@ -310,16 +288,6 @@ const router = useRouter();
 const store = useProbationStore();
 
 const record = computed(() => store.records.find(r => r.emp_id === store.currentEmpId));
-const currentStatusText = computed(() => record.value ? getDetailedStatusText(record.value) : '');
-
-// 终止转正的员工显示红色，其余按状态码映射颜色
-const statusTagColor = computed(() => {
-  if (!record.value) return 'default';
-  if (record.value.terminated) return 'error';
-  // 结果已发布但不通过时也显示红色
-  if (record.value.probation_status === '10' && isFailedDecision(record.value.final_decision)) return 'error';
-  return STATUS_COLOR[record.value.probation_status] || 'default';
-});
 
 const stageEvalColumns = [
   { title: '填写人', dataIndex: 'evaluator_name', width: 80 },
@@ -609,19 +577,6 @@ const showSelfEvalBtn = computed(() => {
 const isSelfEvalEditable = computed(() => {
   return record.value?.probation_status === '05';
 });
-
-const historySelfEvals = computed(() =>
-  (record.value?.evaluations || []).filter(e => e.eval_type !== 'manager')
-);
-
-const evalTypeLabel = (type: string) => {
-  const map: Record<string, string> = { 'self': '自评', 'manager': '上级评价', 'hrbp': 'HRBP评价', 'invited': '受邀评价' };
-  return map[type] || type;
-};
-const evalTypeColor = (type: string) => {
-  const map: Record<string, string> = { 'self': 'blue', 'manager': 'green', 'hrbp': 'purple', 'invited': 'cyan' };
-  return map[type] || 'default';
-};
 
 function openSelfEvalModal() {
   const goals = record.value?.goals || [];

@@ -13,6 +13,8 @@
         <a-menu-item-group key="group-employee" v-if="role === 'Employee'">
           <template #title><user-outlined /> 员工</template>
           <a-menu-item key="/employee/dashboard">我的试用期</a-menu-item>
+          <a-menu-item key="/employee/goals">目标设定</a-menu-item>
+          <a-menu-item key="/employee/self-eval">自我评价</a-menu-item>
         </a-menu-item-group>
 
         <a-menu-item-group key="group-manager" v-if="role === 'Manager'">
