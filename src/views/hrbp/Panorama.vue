@@ -272,18 +272,8 @@
     </a-modal>
 
     <!-- 阶段性反馈弹窗 -->
-    <a-modal v-model:open="stageEvalModalVisible" title="填写阶段性反馈" width="700px" :footer="null">
+    <a-modal v-model:open="stageEvalModalVisible" title="填写阶段性反馈" width="900px" :footer="null">
       <div v-if="stageEvalRecord">
-        <a-descriptions bordered size="small" :column="2" style="margin-bottom: 16px">
-          <a-descriptions-item label="员工">{{ stageEvalRecord.emp_name }}/{{ stageEvalRecord.emp_id }}</a-descriptions-item>
-          <a-descriptions-item label="入职日期">{{ stageEvalRecord.hire_date }}</a-descriptions-item>
-          <a-descriptions-item label="部门">{{ stageEvalRecord.parent_dept }}\{{ stageEvalRecord.dept_name }}</a-descriptions-item>
-          <a-descriptions-item label="岗位">{{ stageEvalRecord.position }}</a-descriptions-item>
-          <a-descriptions-item label="直属上级">{{ stageEvalRecord.manager_name }}</a-descriptions-item>
-          <a-descriptions-item label="HRBP">{{ stageEvalRecord.hrbp_name }}</a-descriptions-item>
-          <a-descriptions-item label="当前状态" :span="2">{{ getDetailedStatusText(stageEvalRecord) }}</a-descriptions-item>
-        </a-descriptions>
-
         <div style="font-weight: 600; margin-bottom: 8px">目标信息</div>
         <a-table v-if="stageEvalRecord.goals.length > 0" :dataSource="stageEvalRecord.goals" :columns="stageGoalColumns" :pagination="false" rowKey="goal_id" size="small" bordered style="margin-bottom: 16px" />
         <a-alert v-else type="info" message="暂未完成试用期目标制定" style="margin-bottom: 16px" />
@@ -554,7 +544,7 @@ const stageEvalContent = ref('');
 const stageGoalColumns = [
   { title: '序号', dataIndex: 'seq', width: 60, customRender: ({ index }: any) => index + 1 },
   { title: '目标内容', dataIndex: 'content' },
-  { title: '预期结果', dataIndex: 'measure', width: 200 },
+  { title: '预期结果', dataIndex: 'measure' },
   { title: '权重', dataIndex: 'weight', width: 80, customRender: ({ text }: any) => text != null ? `${text}%` : '-' }
 ];
 

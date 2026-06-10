@@ -8,7 +8,6 @@
           <a-step title="提交目标" />
           <a-step title="上级确认" />
           <a-step title="试用期评价" />
-          <a-step title="试用期评估中" />
           <a-step title="完成" />
         </a-steps>
       </a-card>
@@ -223,8 +222,7 @@
     >
       <a-alert
         v-if="!isSelfEvalEditable"
-        message="提示"
-        description="当前状态不允许编辑自评，仅可查看已提交内容。"
+        message="当前状态不允许编辑自评，仅可查看已提交内容。"
         type="warning"
         show-icon
         banner
@@ -433,17 +431,15 @@ function handleTodoAction(todo: any) {
 }
 // ------------------------
 
-// 进度条: 提交目标(0) -> 上级确认(1) -> 试用期评价(2) -> 试用期评估中(3) -> 完成(4)
+// 进度条: 提交目标(0) -> 上级确认(1) -> 试用期评价(2) -> 完成(3)
 const currentStep = computed(() => {
   const s = record.value?.probation_status;
   switch (s) {
     case '01': return 0;
     case '02': return 1;
     case '03': case '04': return 1;
-    case '05': return 2;
-    case '06': return 2;
-    case '07': case '08': case '09': return 3;
-    case '10': return 4;
+    case '05': case '06': case '07': case '08': case '09': return 2;
+    case '10': return 3;
     default: return 0;
   }
 });
